@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Build a self-contained HTML preview and Blogger-compatible XML from shared sources."""
 from pathlib import Path
+import json
 import re
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / 'src'
@@ -51,7 +53,19 @@ FONTS = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;8
 FONT_HEAD = f'''<link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
 <link rel="stylesheet" href="{FONTS}"/>'''
-CATEGORIES = [('poetry','കവിതകൾ','ente%20kavithakal'),('stories','കഥകൾ','ente%20kathakal'),('essays','ലേഖനങ്ങൾ','Article'),('selected','തിരഞ്ഞെടുത്ത','My%20picks'),('video','വീഡിയോസ്','Video')]
+# Each chapter gathers several Blogger labels. The first label is the plain-HTML fallback page;
+# with JavaScript the page merges every label in the group.
+CATEGORY_LABELS = {
+    'poetry': ['ente kavithakal', 'My Poems', 'Poems', 'poem', 'poetry', 'Slam poetry'],
+    'stories': ['ente kathakal', 'Stories', 'The come out story'],
+    'essays': ['Article', 'My article', 'My experiences', 'My diary'],
+    'selected': ['My picks'],
+    'video': ['Video'],
+}
+CATEGORY_TITLES = {'poetry': 'Poems &amp; <em>fragments.</em>', 'stories': 'A place for <em>stories.</em>', 'essays': 'Notes &amp; <em>essays.</em>', 'selected': 'Selected <em>pages.</em>', 'video': 'The moving <em>image.</em>'}
+CATEGORIES = [(key, ml, quote(CATEGORY_LABELS[key][0]) + '?category=' + key) for key, ml in [('poetry','കവിതകൾ'),('stories','കഥകൾ'),('essays','ലേഖനങ്ങൾ'),('selected','തിരഞ്ഞെടുത്ത'),('video','വീഡിയോസ്')]]
+CATEGORY_JS = 'window.TYB_CATEGORIES = ' + json.dumps({key: {'ml': ml, 'labels': CATEGORY_LABELS[key], 'title': CATEGORY_TITLES[key], 'url': '/search/label/' + path} for key, ml, path in CATEGORIES}, ensure_ascii=False) + ';\n'
+
 
 def links(preview):
     mapping = {'MARK':MARK, 'SCULPTURE':read('sculpture.svg'), 'STUDY':read('study.svg'), 'TYPE_CONTROLS':TYPE_CONTROLS}
@@ -85,7 +99,7 @@ def preview():
     body = fill(read('frame.html'), values)
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><script>{THEME_INIT_JS}</script><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="The Yellow Bottle — a white and black editorial design preview. All article content is illustrative."/><title>The Yellow Bottle — Black &amp; White / Preview</title>{FONT_HEAD}<style>{read('theme.css')}</style></head>
-<body data-preview="true" class="is-index is-home">{body}<script>{read('sample-posts.js')}</script><script>{read('theme.js')}</script><script>{read('figures.js')}</script><script>{read('preview.js')}</script></body></html>'''
+<body data-preview="true" class="is-index is-home">{body}<script>{read('sample-posts.js')}</script><script>{CATEGORY_JS}{read('theme.js')}</script><script>{read('figures.js')}</script><script>{read('preview.js')}</script></body></html>'''
 
 def blogger():
     values = links(False)
@@ -102,7 +116,7 @@ def blogger():
 <b:skin version='1.0.0'><![CDATA[{read('theme.css')}]]></b:skin>
 <b:template-skin><![CDATA[body#layout .overlay,body#layout .hero,body#layout .about{{display:none}}body#layout #index-overlay{{display:block;position:static;clip-path:none}}body#layout .wrap{{margin:0}}]]></b:template-skin>
 </head><body expr:class='data:view.isSingleItem ? "is-reader" : (data:view.isHomepage ? "is-index is-home" : "is-index")'>{body}<script type='text/javascript'>//<![CDATA[
-{read('theme.js')}
+{CATEGORY_JS}{read('theme.js')}
 {read('figures.js')}
 //]]></script></body></html>'''
 
