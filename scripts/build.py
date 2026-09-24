@@ -14,7 +14,8 @@ def fill(source, mapping):
         source = source.replace('__' + name + '__', value)
     return source
 
-MARK = '''<svg viewBox="0 0 24 44" aria-hidden="true"><path d="M8 2h8v11c0 5 7 7 7 14v14H1V27c0-7 7-9 7-14V2Z" fill="currentColor"/><circle cx="12" cy="29" r="5" fill="#fff"/></svg>'''
+MARK = '''<svg viewBox="0 0 24 44" aria-hidden="true"><path d="M12.00,4.00 C12.78,4.00 13.58,4.05 14.33,4.15 C15.08,4.26 15.83,4.41 16.50,4.61 C17.17,4.82 17.81,5.07 18.36,5.37 C18.91,5.67 19.41,6.02 19.79,6.41 C20.18,6.80 20.49,7.24 20.69,7.72 C20.89,8.20 21.00,8.72 21.00,9.27 C21.00,9.83 20.89,10.42 20.69,11.04 C20.49,11.66 20.18,12.32 19.79,13.00 C19.41,13.68 18.91,14.39 18.36,15.11 C17.81,15.84 17.17,16.58 16.50,17.34 C15.83,18.10 15.08,18.87 14.33,19.65 C13.58,20.43 12.78,21.22 12.00,22.00 C11.22,22.78 10.42,23.57 9.67,24.35 C8.92,25.13 8.17,25.90 7.50,26.66 C6.83,27.42 6.19,28.16 5.64,28.89 C5.09,29.61 4.59,30.32 4.21,31.00 C3.82,31.68 3.51,32.34 3.31,32.96 C3.11,33.58 3.00,34.17 3.00,34.73 C3.00,35.28 3.11,35.80 3.31,36.28 C3.51,36.76 3.82,37.20 4.21,37.59 C4.59,37.98 5.09,38.33 5.64,38.63 C6.19,38.93 6.83,39.18 7.50,39.39 C8.17,39.59 8.92,39.74 9.67,39.85 C10.42,39.95 11.22,40.00 12.00,40.00 C12.78,40.00 13.58,39.95 14.33,39.85 C15.08,39.74 15.83,39.59 16.50,39.39 C17.17,39.18 17.81,38.93 18.36,38.63 C18.91,38.33 19.41,37.98 19.79,37.59 C20.18,37.20 20.49,36.76 20.69,36.28 C20.89,35.80 21.00,35.28 21.00,34.73 C21.00,34.17 20.89,33.58 20.69,32.96 C20.49,32.34 20.18,31.68 19.79,31.00 C19.41,30.32 18.91,29.61 18.36,28.89 C17.81,28.16 17.17,27.42 16.50,26.66 C15.83,25.90 15.08,25.13 14.33,24.35 C13.58,23.57 12.78,22.78 12.00,22.00 C11.22,21.22 10.42,20.43 9.67,19.65 C8.92,18.87 8.17,18.10 7.50,17.34 C6.83,16.58 6.19,15.84 5.64,15.11 C5.09,14.39 4.59,13.68 4.21,13.00 C3.82,12.32 3.51,11.66 3.31,11.04 C3.11,10.42 3.00,9.83 3.00,9.27 C3.00,8.72 3.11,8.20 3.31,7.72 C3.51,7.24 3.82,6.80 4.21,6.41 C4.59,6.02 5.09,5.67 5.64,5.37 C6.19,5.07 6.83,4.82 7.50,4.61 C8.17,4.41 8.92,4.26 9.67,4.15 C10.42,4.05 11.22,4.00 12.00,4.00 Z" fill="currentColor"/></svg>'''
+THEME_INIT_JS = '''try{var t=localStorage.getItem('tyb-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}'''
 TYPE_CONTROLS = '''<div class="type-controls"><span class="micro muted">Reading size</span><button data-size="down" aria-label="Decrease text size">A−</button><button data-size="up" aria-label="Increase text size">A+</button></div>'''
 FONTS = 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=EB+Garamond:ital,wght@0,400;0,500;1,400&amp;family=Noto+Sans+Malayalam:wght@400;500&amp;family=Noto+Serif+Malayalam:wght@400&amp;display=swap'
 FONT_HEAD = f'''<link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -52,7 +53,7 @@ def preview():
 ''', values)
     body = fill(read('frame.html'), values)
     return f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="The Yellow Bottle — a white and black editorial design preview. All article content is illustrative."/><title>The Yellow Bottle — Black &amp; White / Preview</title>{FONT_HEAD}<style>{read('theme.css')}</style></head>
+<html lang="en"><head><meta charset="utf-8"/><script>{THEME_INIT_JS}</script><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="The Yellow Bottle — a white and black editorial design preview. All article content is illustrative."/><title>The Yellow Bottle — Black &amp; White / Preview</title>{FONT_HEAD}<style>{read('theme.css')}</style></head>
 <body data-preview="true" class="is-index">{body}<script>{read('sample-posts.js')}</script><script>{read('theme.js')}</script><script>{read('preview.js')}</script></body></html>'''
 
 def blogger():
@@ -64,7 +65,9 @@ def blogger():
     return f'''<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
-<head><meta charset='UTF-8'/><meta content='width=device-width, initial-scale=1' name='viewport'/><title><data:view.title.escaped/></title><b:include data='blog' name='all-head-content'/>{FONT_HEAD}
+<head><meta charset='UTF-8'/><script type='text/javascript'>//<![CDATA[
+{THEME_INIT_JS}
+//]]></script><meta content='width=device-width, initial-scale=1' name='viewport'/><title><data:view.title.escaped/></title><b:include data='blog' name='all-head-content'/>{FONT_HEAD}
 <b:skin version='1.0.0'><![CDATA[{read('theme.css')}]]></b:skin>
 <b:template-skin><![CDATA[body#layout .overlay,body#layout .hero,body#layout .about,body#layout .footer-type{{display:none}}body#layout .wrap{{margin:0}}body#layout #archive{{display:block}}]]></b:template-skin>
 </head><body expr:class='data:view.isSingleItem ? "is-reader" : "is-index"'>{body}<script type='text/javascript'>//<![CDATA[

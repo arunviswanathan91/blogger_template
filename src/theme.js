@@ -2,6 +2,37 @@
 (() => {
   'use strict';
   const q = (s) => document.querySelector(s);
+
+  const root = document.documentElement;
+  const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
+  const effectiveTheme = () => root.dataset.theme || (systemDark && systemDark.matches ? 'dark' : 'light');
+  const describeToggle = (button) => button.setAttribute('aria-label', effectiveTheme() === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  document.querySelectorAll('[data-toggle-theme]').forEach((button) => {
+    describeToggle(button);
+    button.addEventListener('click', () => {
+      const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try { localStorage.setItem('tyb-theme', next); } catch { /* Optional preference. */ }
+      describeToggle(button);
+    });
+  });
+
+  const canMagnet = window.matchMedia
+    && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (canMagnet) {
+    document.querySelectorAll('[data-magnetic]').forEach((el) => {
+      const strength = Number(el.dataset.magnetic) || 8;
+      el.addEventListener('mousemove', (event) => {
+        const box = el.getBoundingClientRect();
+        const x = (event.clientX - box.left - box.width / 2) / (box.width / 2);
+        const y = (event.clientY - box.top - box.height / 2) / (box.height / 2);
+        el.style.transform = `translate(${(x * strength).toFixed(1)}px, ${(y * strength).toFixed(1)}px)`;
+      });
+      el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+    });
+  }
+
   document.querySelectorAll('[data-art]').forEach((art) => {
     let composition = 0;
     art.addEventListener('click', () => {

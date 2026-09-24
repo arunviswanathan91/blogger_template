@@ -7,8 +7,9 @@
     <a class="desktop-nav" __JOURNAL_ATTR__>Journal <sup>01</sup></a>
     <a class="desktop-nav" __ARCHIVE_ATTR__>Index <sup>02</sup></a>
     <a class="desktop-nav" href="#about">About <sup>03</sup></a>
-    <button data-open="search-overlay" aria-controls="search-overlay" aria-expanded="false" aria-label="Open search" hidden="hidden"><svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="1.5"/><path d="m15 15 6 6" stroke="currentColor" stroke-width="1.5"/></svg></button>
-    <button class="menu-toggle" data-open="menu-overlay" aria-controls="menu-overlay" aria-expanded="false" hidden="hidden">Menu <span class="menu-icon" aria-hidden="true"><i></i><i></i></span></button>
+    <button class="icon-btn theme-toggle" data-toggle-theme="true" data-magnetic="7" aria-label="Switch to dark theme"><svg class="icon-moon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="icon-sun" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    <button class="icon-btn" data-open="search-overlay" data-magnetic="7" aria-controls="search-overlay" aria-expanded="false" aria-label="Open search" hidden="hidden"><svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    <button class="menu-toggle" data-open="menu-overlay" aria-controls="menu-overlay" aria-expanded="false" hidden="hidden">Menu <span class="menu-icon" aria-hidden="true"><i></i><i></i><i></i></span></button>
   </nav>
 </header>
 <main id="main-content" class="wrap" tabindex="-1">__MAIN__</main>
@@ -25,10 +26,10 @@
   __PREVIEW_NOTE__
 </footer>
 <section class="overlay" id="menu-overlay" role="dialog" aria-modal="true" aria-labelledby="menu-title" hidden="hidden">
-  <div class="overlay-top"><span class="wordmark" id="menu-title">The contents.</span><button class="close-button" data-close="true">Close ×</button></div>
+  <div class="overlay-top"><span class="wordmark" id="menu-title">The contents.</span><button class="close-button" data-close="true">Close <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
   <div class="overlay-grid"><div class="menu-note"><span class="micro">Pick a place<br/>to lose yourself.</span><svg class="about-symbol" viewBox="0 0 100 100" aria-hidden="true"><circle cx="35" cy="50" r="32" fill="currentColor"/><circle cx="65" cy="50" r="32" fill="none" stroke="currentColor"/></svg></div><div><nav class="menu-links" aria-label="Explore the journal"><a __JOURNAL_ATTR__>All writing <span>00</span></a><a __POETRY_ATTR__>Poetry <span lang="ml">കവിതകൾ / 01</span></a><a __STORIES_ATTR__>Stories <span lang="ml">കഥകൾ / 02</span></a><a __ESSAYS_ATTR__>Essays <span lang="ml">ലേഖനങ്ങൾ / 03</span></a><a __SELECTED_ATTR__>Selected <span lang="ml">തിരഞ്ഞെടുത്ത / 04</span></a><a __VIDEO_ATTR__>Moving image <span lang="ml">വീഡിയോസ് / 05</span></a></nav><nav class="menu-sub" aria-label="More pages"><a __ARCHIVE_ATTR__>The index ↗</a><a href="#about">About the author ↗</a><a href="https://arunviswanathan91.blogspot.com/p/copy-right-statement.html">Copyright and Content Use ↗</a></nav></div></div>
 </section>
 <section class="overlay" id="search-overlay" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden="hidden">
-  <div class="overlay-top"><span class="wordmark">Between the lines.</span><button class="close-button" data-close="true">Close ×</button></div>
+  <div class="overlay-top"><span class="wordmark">Between the lines.</span><button class="close-button" data-close="true">Close <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
   <div class="search-inner"><span class="micro">The Yellow Bottle / Search</span><h2 id="search-title">Looking for<br/><em>something?</em></h2><form class="search-form" __SEARCH_ATTR__ method="get" role="search"><label class="sr-only" for="search-input">Search the journal</label><input id="search-input" type="search" name="q" placeholder="A word. A thought. A feeling." autocomplete="off" required="required"/><button type="submit" aria-label="Submit search">↗</button></form><p>__SEARCH_NOTE__</p></div>
 </section>

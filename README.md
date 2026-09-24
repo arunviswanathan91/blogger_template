@@ -1,6 +1,6 @@
 # The Yellow Bottle
 
-A custom white-and-black journal for Arun Viswanathan. Oversized typography, narrow chapter rails, interactive geometric bottle artwork, and a quiet reading view. English and Malayalam are both supported.
+A custom white-and-black journal for Arun Viswanathan, in light or dark. Oversized typography, narrow chapter rails, interactive mathematical artwork, and a quiet reading view. English and Malayalam are both supported.
 
 ![The Yellow Bottle desktop design](docs/desktop-preview.jpg)
 
@@ -15,12 +15,14 @@ If Blogger offers a separate mobile theme, choose the desktop/custom theme for m
 
 ## What is included
 
-- Pure white background, black text and graphic elements, grayscale rules.
-- Original SVG artwork; the bottle changes composition when clicked or keyboard-activated.
+- Pure white background, black text and graphic elements, grayscale rules — with a true dark mode (manual toggle, honours system preference, no flash on load).
+- Original mathematical SVG artwork: a hand-generated infinity curve (lemniscate) crossed by orbiting rings, which rearranges into two further quiet compositions when clicked or keyboard-activated. No stock icon shapes anywhere — the wordmark and the five chapter markers are all built from the same circle/polygon geometry.
+- Interface icons follow the open-source [Feather](https://github.com/feathericons/feather) icon set (MIT), redrawn as inline SVG so the theme stays a single self-contained file.
+- Motion is deliberately restrained: almost everything is static; the few transitions that remain are short, and a couple of primary buttons get a very subtle, coherent cursor-follow nudge on hover (skipped automatically for touch and `prefers-reduced-motion`).
 - Full-screen menu and search, keyboard focus containment, Escape to close.
 - Native Blogger posts, permalinks, labels, pagination, static pages, monthly archive, and comments.
-- Post images remain in their original colors. The interface and fallback artwork are monochrome.
-- Native post/search/archive rendering works without JavaScript. JavaScript adds the overlays, artwork, reading-size preference, copy link, and progress indicator.
+- Post images remain in their original colors. The interface and fallback artwork are monochrome in both themes.
+- Native post/search/archive rendering works without JavaScript. JavaScript adds the overlays, artwork, theme toggle, reading-size preference, copy link, and progress indicator.
 - Reduced-motion support, responsive media, Malayalam font support, and a print reading layout.
 - The exact supplied copyright line with the **Copyright and Content Use** link.
 
