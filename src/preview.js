@@ -8,22 +8,21 @@
   const routeHref = (fragment) => esc(location.href.split('#')[0] + fragment);
   const posts = SAMPLE_POSTS;
   let currentRoute = '';
-  const row = (p) => `<article><a class="post-row" href="${routeHref('#read/' + p.id)}"><span class="micro muted">${p.no}</span><div><h3 class="post-title${p.malayalam ? ' ml-title' : ''}"${p.malayalam ? ' lang="ml"' : ''}>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></div><div class="post-meta micro"><span lang="ml">${p.mlLabel}</span><time>Sample / ${p.date}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`;
+  const row = (p) => `<article><a class="post-row" href="${routeHref('#read/' + p.id)}"><span class="micro muted row-no" aria-hidden="true"></span><div><h3 class="post-title${p.malayalam ? ' ml-title' : ''}"${p.malayalam ? ' lang="ml"' : ''}>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></div><div class="post-meta micro"><span lang="ml">${p.mlLabel}</span><time>Sample / ${p.date}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`;
   function render() {
     const route = location.hash || '#home';
-    if (['#top','#about','#main-content','#writing'].includes(route)) return;
+    if (['#top','#about','#main-content','#writing','#archive'].includes(route)) return;
     const reading = route.startsWith('#read/');
-    const archive = route === '#archive';
     const filter = route.startsWith('#category/') ? route.slice(10) : 'all';
     let query = '';
     if (route.startsWith('#search/')) { try { query = decodeURIComponent(route.slice(8)).trim(); } catch { query = ''; } }
     const selected = posts.find((p) => p.id === route.slice(6));
     const isReading = reading && !!selected;
-    $('#home-view').hidden = isReading || archive;
+    $('#home-view').hidden = isReading;
     $('#reader-view').hidden = !isReading;
-    $('#index-view').hidden = !archive;
     document.body.classList.toggle('is-reader', isReading);
     document.body.classList.toggle('is-index', !isReading);
+    if (isReading) document.body.classList.remove('is-home');
     if (isReading) {
       $('#reader-title').textContent = selected.title;
       $('#reader-title').className = 'article-title' + (selected.malayalam ? ' ml-title' : '');
@@ -35,11 +34,9 @@
       $('#reader-date').textContent = 'Illustrative / ' + selected.date;
       document.querySelector('[data-copy]').textContent = 'Copy preview link ↗';
       document.title = selected.title + ' — The Yellow Bottle / Preview';
-    } else if (archive) {
-      $('#index-list').innerHTML = posts.map(row).join('');
-      document.title = 'The index — The Yellow Bottle / Preview';
     } else {
       const front = filter === 'all' && !query;
+      document.body.classList.toggle('is-home', front);
       $('#opening').hidden = !front;
       $('#featured').hidden = !front;
       const found = posts.filter((p) => (!front || p.id !== 'hand') && (filter === 'all' || (filter === 'selected' ? p.selected : p.category === filter)) && (!query || (p.title + ' ' + p.excerpt + ' ' + p.body.replace(/<[^>]+>/g, ' ') + ' ' + p.label + ' ' + p.mlLabel).toLocaleLowerCase().includes(query.toLocaleLowerCase())));

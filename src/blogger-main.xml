@@ -9,7 +9,7 @@
       <b:widget-setting name='showTimestamp'>true</b:widget-setting>
       <b:widget-setting name='showInlineAds'>false</b:widget-setting>
     </b:widget-settings>
-    <b:includable id='main' var='this'>
+    <b:includable id='main'>
       <b:if cond='data:view.isSingleItem'>
         <div class='reader-toolbar'><a expr:href='data:blog.homepageUrl'>← All writing</a>__TYPE_CONTROLS__</div>
         <b:loop values='data:posts' var='post'><b:include data='post' name='reader'/></b:loop>
@@ -17,7 +17,7 @@
         <b:if cond='data:view.isHomepage and data:posts.any'>
           <b:loop index='i' values='data:posts' var='post'><b:if cond='data:i == 0'><b:include data='post' name='lead'/></b:if></b:loop>
         </b:if>
-        <section class='writing' id='writing' aria-labelledby='writing-heading'>
+        <section class='writing' id='writing' aria-labelledby='writing-heading' data-blog-rendered='true'>
           <div class='section-heading'>
             <h2 id='writing-heading'>
               <b:if cond='data:view.isLabelSearch'><data:view.search.label/>
@@ -46,9 +46,9 @@
     <b:includable id='entry' var='post'>
       <article>
         <a class='post-row' expr:href='data:post.url'>
-          <span class='micro muted'><b:eval expr='data:i + 1'/></span>
-          <div><h3 class='post-title'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></h3><p><b:eval expr='snippet(data:post.body, {length: 130, links: false, linebreaks: false})'/></p></div>
-          <div class='post-meta micro'><b:if cond='data:post.labels'><span><data:post.labels.first.name/></span></b:if><time expr:datetime='data:post.date.iso8601'><b:eval expr='data:post.date format "dd MMM yyyy"'/></time></div>
+          <span class='micro muted row-no' aria-hidden='true'></span>
+          <div><h3 class='post-title'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></h3><p><data:post.snippets.short/></p></div>
+          <div class='post-meta micro'><b:if cond='data:post.labels'><span><data:post.labels.first.name/></span></b:if><time expr:datetime='data:post.date.iso8601'><data:post.date/></time></div>
           <span class='row-arrow' aria-hidden='true'>↗</span>
         </a>
       </article>
@@ -58,15 +58,15 @@
         <a class='lead-art' expr:href='data:post.url' expr:aria-label='data:post.title ?: "Read the latest writing"'>
           <b:if cond='data:post.featuredImage'><b:class name='has-image'/><img expr:src='resizeImage(data:post.featuredImage, 1000)' expr:alt='data:post.title' loading='lazy' width='1000' height='750'/><b:else/>__STUDY__</b:if>
         </a>
-        <div class='lead-copy'><div class='lead-meta micro'><span>01 / The opening page</span><b:if cond='data:post.labels'><span class='muted'><data:post.labels.first.name/></span></b:if></div><h2 class='lead-title'><a expr:href='data:post.url'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></a></h2><p><b:eval expr='snippet(data:post.body, {length: 200, links: false, linebreaks: false})'/></p><a class='text-link' expr:href='data:post.url'>Read the story <span class='arrow' aria-hidden='true'>↗</span></a></div>
+        <div class='lead-copy'><div class='lead-meta micro'><span>01 / The opening page</span><b:if cond='data:post.labels'><span class='muted'><data:post.labels.first.name/></span></b:if></div><h2 class='lead-title'><a expr:href='data:post.url'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></a></h2><p><data:post.snippets.long/></p><a class='text-link' expr:href='data:post.url'>Read the story <span class='arrow' aria-hidden='true'>↗</span></a></div>
       </article>
     </b:includable>
     <b:includable id='reader' var='post'>
-      <article class='reading-page'>
+      <article class='reading-page' data-blog-rendered='true'>
         <b:include data='post' name='postMetadataJSON'/>
         <div class='micro muted'><b:if cond='data:post.labels'><data:post.labels.first.name/><b:else/>The Yellow Bottle</b:if></div>
         <h1 class='article-title'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></h1>
-        <div class='article-byline'><span><data:post.author.name/></span><b:if cond='data:view.isPost'><time expr:datetime='data:post.date.iso8601'><b:eval expr='data:post.date format "dd MMM yyyy"'/></time></b:if></div>
+        <div class='article-byline'><span><data:post.author.name/></span><b:if cond='data:view.isPost'><time expr:datetime='data:post.date.iso8601'><data:post.date/></time></b:if></div>
         <div class='article-body post-body entry-content' expr:id='"post-body-" + data:post.id'><data:post.body/></div>
         <b:if cond='data:post.labels'><nav class='article-labels' aria-label='Post labels'><b:loop values='data:post.labels' var='label'><a expr:href='data:label.url' rel='tag'><data:label.name/></a></b:loop></nav></b:if>
         <div class='article-end'><a expr:href='data:blog.homepageUrl'>← All writing</a><button data-copy='true' type='button' aria-live='polite'>Copy link ↗</button></div>

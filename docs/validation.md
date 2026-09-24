@@ -2,7 +2,14 @@
 
 The generated theme and the interactive preview share the same CSS, navigation, artwork, footer, overlays, and reading enhancements.
 
-## Panels, curtain, and circle animation (latest pass)
+## Posts restored, mathematical art, index overlay (latest pass)
+
+- Live report: posts and the monthly index rendered empty on the real blog while everything outside the two Blogger widgets appeared. Blogger's servers are not reachable from this environment, so the widget code was compared against the blog's previous, working theme and rewritten to its proven constructs: no `var='this'` on `main`, the month loop in a separate includable reading Blogger's own `this`, no out-of-scope loop index (row numbers are now CSS counters), `<data:post.date/>` and `data:post.snippets` instead of `format`/`snippet()` expressions.
+- Added a feed safety net and tested it against a local server serving a Blogger-shaped JSON feed: a blank label page fetched `/feeds/posts/summary/-/ente%20kathakal` and rendered both entries; a blank post URL rendered the full post; a blank archive was rebuilt as months with counts.
+- Scroll reveals now have a failsafe so on-screen content can never stay invisible.
+- Canvas figures verified by CDP in light, dark (white + yellow), a 390 px phone (no overflow), and reduced motion (drawn complete immediately, no drift). Clicking cycles forms; the pointer leans them.
+
+## Panels, curtain, and circle animation (earlier pass)
 
 - Drove the preview through the Chrome DevTools Protocol (clicks, pointer moves, key presses, mid-animation captures): tabs unfold the right panel (active 1115 px, others 42 px at 1440 px wide), each chapter's circle figure draws completely, the menu wipes in and out, Escape closes it, it is re-hidden afterwards, and focus returns to the Menu button. No JavaScript errors.
 - Headless Chrome reports no fine pointer, so pointer-follow features stay off there by design; they were verified on a copy with that check forced on (tunnels lean toward the cursor, emblem tilt reached 9.7°).
