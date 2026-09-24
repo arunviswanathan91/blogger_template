@@ -2,7 +2,17 @@
 
 The generated theme and the interactive preview share the same CSS, navigation, artwork, footer, overlays, and reading enhancements.
 
-## Completed
+## Design refresh (this pass)
+
+Reworked the design per follow-up feedback: a true light/dark toggle, Feather-icon-based interface icons in place of the earlier bespoke ones, a mathematically generated infinity/orbit emblem in place of the literal bottle illustration, mathematically-derived polygon markers for the five chapter icons, and an overall reduction in motion (no autoplay animation; a couple of primary buttons get a small, coherent cursor-follow hover instead).
+
+- `python3 scripts/build.py` and `python3 scripts/validate.py` both pass on the rebuilt sources.
+- Screenshotted `index.html` with a headless Chromium binary (no automation framework available in this environment) at desktop width, at true 390 px and 320 px phone widths via `docs/responsive-preview.html`'s iframe technique, and with `data-theme="dark"` forced — confirmed no horizontal overflow at any size and correct color inversion throughout (header, hero, lead art, about mark, footer).
+- Confirmed via computed-style inspection (not just pixel sampling, which is misleading under this container's font rendering) that themed text and links resolve to the exact `--ink`/`--paper` values in both themes.
+- Verified both click-to-rearrange emblem compositions (`art-shift-1`, `art-shift-2`) render as intended, and that the menu overlay opens with the new close icon in place.
+- `node --check` (via `scripts/validate.py`) confirms `theme.js`'s new theme-toggle and magnetic-hover code is syntactically valid; the magnetic-hover effect itself needs a real pointer to exercise and was reviewed by hand instead of screenshotted.
+
+## Prior pass — completed
 
 - `python3 scripts/build.py` produces both deliverables reproducibly.
 - `python3 scripts/validate.py` passes XML parsing, Blogger section and include structure, native post bindings, preview-data isolation, copyright/link checks, unique preview IDs, anchor checks, and JavaScript syntax validation.
