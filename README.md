@@ -2,6 +2,8 @@
 
 A custom white-and-black journal for Arun Viswanathan. Oversized typography, narrow chapter rails, interactive geometric bottle artwork, and a quiet reading view. English and Malayalam are both supported.
 
+![The Yellow Bottle desktop design](docs/desktop-preview.jpg)
+
 ## Use it
 
 - **`the-yellow-bottle.xml`** is the complete, self-contained Blogger theme. This is the file to install.
