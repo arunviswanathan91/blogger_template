@@ -65,6 +65,7 @@ CATEGORY_LABELS = {
 CATEGORY_TITLES = {'poetry': 'Poems &amp; <em>fragments.</em>', 'stories': 'A place for <em>stories.</em>', 'essays': 'Notes &amp; <em>essays.</em>', 'selected': 'Selected <em>pages.</em>', 'video': 'The moving <em>image.</em>'}
 CATEGORIES = [(key, ml, quote(CATEGORY_LABELS[key][0]) + '?category=' + key) for key, ml in [('poetry','കവിതകൾ'),('stories','കഥകൾ'),('essays','ലേഖനങ്ങൾ'),('selected','തിരഞ്ഞെടുത്ത'),('video','വീഡിയോസ്')]]
 CATEGORY_JS = 'window.TYB_CATEGORIES = ' + json.dumps({key: {'ml': ml, 'labels': CATEGORY_LABELS[key], 'title': CATEGORY_TITLES[key], 'url': '/search/label/' + path} for key, ml, path in CATEGORIES}, ensure_ascii=False) + ';\n'
+PORTRAIT_JS = 'window.TYB_PORTRAIT = ' + json.dumps(json.loads((SRC / 'portrait.json').read_text()), separators=(',', ':')) + ';\n'
 
 
 def links(preview):
@@ -99,7 +100,7 @@ def preview():
     body = fill(read('frame.html'), values)
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><script>{THEME_INIT_JS}</script><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="The Yellow Bottle — a white and black editorial design preview. All article content is illustrative."/><title>The Yellow Bottle — Black &amp; White / Preview</title>{FONT_HEAD}<style>{read('theme.css')}</style></head>
-<body data-preview="true" class="is-index is-home">{body}<script>{read('sample-posts.js')}</script><script>{CATEGORY_JS}{read('theme.js')}</script><script>{read('figures.js')}</script><script>{read('preview.js')}</script></body></html>'''
+<body data-preview="true" class="is-index is-home">{body}<script>{read('sample-posts.js')}</script><script>{CATEGORY_JS}{PORTRAIT_JS}{read('theme.js')}</script><script>{read('figures.js')}</script><script>{read('preview.js')}</script></body></html>'''
 
 def blogger():
     values = links(False)
@@ -116,7 +117,7 @@ def blogger():
 <b:skin version='1.0.0'><![CDATA[{read('theme.css')}]]></b:skin>
 <b:template-skin><![CDATA[body#layout .overlay,body#layout .hero,body#layout .about{{display:none}}body#layout #index-overlay{{display:block;position:static;clip-path:none}}body#layout .wrap{{margin:0}}]]></b:template-skin>
 </head><body expr:class='data:view.isSingleItem ? "is-reader" : (data:view.isHomepage ? "is-index is-home" : "is-index")'>{body}<script type='text/javascript'>//<![CDATA[
-{CATEGORY_JS}{read('theme.js')}
+{CATEGORY_JS}{PORTRAIT_JS}{read('theme.js')}
 {read('figures.js')}
 //]]></script></body></html>'''
 
