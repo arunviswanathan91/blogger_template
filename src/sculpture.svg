@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="bottle-sculpture" viewBox="0 0 220 300" fill="none" aria-hidden="true">
+  <g class="bottle-cap"><rect x="85" y="20" width="50" height="16" fill="currentColor"/><path d="M90 42H130V73C130 99 169 106 169 143V267H51V143C51 106 90 99 90 73V42Z" fill="currentColor"/></g>
+  <g class="orbit"><ellipse cx="110" cy="168" rx="101" ry="40" stroke="currentColor" stroke-width="1.4" transform="rotate(-28 110 168)"/><ellipse cx="110" cy="168" rx="40" ry="101" stroke="currentColor" stroke-width="1.1" transform="rotate(-28 110 168)"/></g>
+  <g class="bottle-label"><circle cx="110" cy="175" r="32" fill="#fff"/><path d="M110 153V197M88 175H132M95 160L125 190M95 190L125 160" stroke="#080808" stroke-width="1.5"/></g>
+  <path d="M37 282H183" stroke="currentColor" stroke-width="1"/>
+</svg>
