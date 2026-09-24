@@ -18,8 +18,10 @@ If Blogger offers a separate mobile theme, choose the desktop/custom theme for m
 - Pure white background, black text and graphic elements, grayscale rules — with a true dark mode (manual toggle, honours system preference, no flash on load).
 - Original mathematical SVG artwork: a hand-generated infinity curve (lemniscate) crossed by orbiting rings, which rearranges into two further quiet compositions when clicked or keyboard-activated. No stock icon shapes anywhere — the wordmark and the five chapter markers are all built from the same circle/polygon geometry.
 - Interface icons follow the open-source [Feather](https://github.com/feathericons/feather) icon set (MIT), redrawn as inline SVG so the theme stays a single self-contained file.
-- The opening is a row of numbered panels in the manner of G!theimagineers: on desktop, clicking a chapter tab (01–05) unfolds that chapter in place while the others fold into tabs. Each chapter has its own "infinity of circles" figure that draws itself in and leans toward the cursor. On phones the tabs stay plain links to the label pages.
-- Menu and search open as a curtain that wipes in from the right, with their links rising in sequence; the infinity emblem and panel lines draw themselves once on load. Everything else stays still, all motion settles and stops when idle, and `prefers-reduced-motion` gets the finished states instantly.
+- The drawings are generated line art in the manner of Hamid Naderi Yeganeh's mathematical pieces: hundreds of circles, squares, pentagons, hexagons, ellipses or pixel cells whose centres, sizes and turns follow short formulas (`src/figures.js`). They draw themselves in, drift slowly, lean toward the cursor, and change form when clicked. Colour is ink plus one yellow, in both themes.
+- The opening is a row of numbered panels in the manner of G!theimagineers: on desktop a chapter tab (01–05) unfolds that chapter in place, each with its own figure. On phones the tabs stay links to the label pages.
+- Menu, search and the monthly index open as a curtain from the right. The menu carries a small gallery of four figures.
+- If Blogger ever returns an empty post list or index, the page rebuilds it from the blog's own public feed, so writing is never missing.
 - Full-screen menu and search, keyboard focus containment, Escape to close.
 - Native Blogger posts, permalinks, labels, pagination, static pages, monthly archive, and comments.
 - Post images remain in their original colors. The interface and fallback artwork are monochrome in both themes.
@@ -27,7 +29,7 @@ If Blogger offers a separate mobile theme, choose the desktop/custom theme for m
 - Reduced-motion support, responsive media, Malayalam font support, and a print reading layout.
 - The exact supplied copyright line with the **Copyright and Content Use** link.
 
-Only two invisible-to-the-design Blogger data components remain: `Blog1` supplies posts and comments; `BlogArchive1` supplies the monthly index. There are no sidebar gadgets, ad placements, popular-post panels, or stock Blogger navigation styles.
+Only two invisible-to-the-design Blogger data components remain: `Blog1` supplies posts and comments; `BlogArchive1` supplies the monthly index (shown in the Index overlay). There are no sidebar gadgets, ad placements, popular-post panels, or stock Blogger navigation styles.
 
 The production XML contains no sample posts. The home page automatically features the newest post and lists the remaining posts once. Search uses Blogger’s native search endpoint; label links use the existing blog labels:
 

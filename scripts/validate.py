@@ -59,6 +59,6 @@ page.feed((ROOT / 'index.html').read_text())
 assert len(page.ids) == len(set(page.ids)), 'Duplicate preview element IDs'
 for fragment in page.hashes:
     assert fragment in ['#home','#archive'] or fragment.startswith(('#read/', '#category/')) or fragment[1:] in page.ids, f'Unresolved fragment: {fragment}'
-for script in ['theme.js','preview.js','sample-posts.js']:
+for script in ['theme.js','figures.js','preview.js','sample-posts.js']:
     subprocess.run(['node','--check',str(ROOT/'src'/script)], check=True)
 print('PASS: reproducible builds, XML parse, Blogger sections/includes, native data, copyright, preview isolation, anchors, JavaScript syntax.')
