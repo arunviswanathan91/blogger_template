@@ -33,11 +33,13 @@ Only two invisible-to-the-design Blogger data components remain: `Blog1` supplie
 
 The production XML contains no sample posts. The home page automatically features the newest post and lists the remaining posts once. Search uses Blogger’s native search endpoint; label links use the existing blog labels:
 
-| Visible category | Existing Blogger label |
+Each chapter gathers several existing Blogger labels. The chapter link opens the first label's page; with JavaScript the page merges every label in the group, removes duplicates, and lists newest first. Edit the groups in `CATEGORY_LABELS` in `scripts/build.py`.
+
+| Chapter | Blogger labels |
 | --- | --- |
-| Poetry / കവിതകൾ | `ente kavithakal` |
-| Stories / കഥകൾ | `ente kathakal` |
-| Essays / ലേഖനങ്ങൾ | `Article` |
+| Poetry / കവിതകൾ | `ente kavithakal`, `My Poems`, `Poems`, `poem`, `poetry`, `Slam poetry` |
+| Stories / കഥകൾ | `ente kathakal`, `Stories`, `The come out story` |
+| Essays / ലേഖനങ്ങൾ | `Article`, `My article`, `My experiences`, `My diary` |
 | Selected / തിരഞ്ഞെടുത്ത | `My picks` |
 | Moving image / വീഡിയോസ് | `Video` |
 

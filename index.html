@@ -491,7 +491,8 @@ const SAMPLE_POSTS = [
  {id:'ordinary',no:'04',title:'In defence of ordinary days',deck:'Not every day needs to become a story.',excerpt:'A note on noticing the life that happens between the memorable parts.',category:'essays',label:'Essay',mlLabel:'ലേഖനങ്ങൾ',date:'06 SEP',selected:false,body:`<p class="first">Most days do not announce themselves. You make the tea, answer a message, put a shirt away. Nothing happens that you would know how to describe to someone who asks.</p><p>But I have begun to distrust that answer. Nothing is rarely nothing. It is often a room we have passed through too quickly to notice.</p><blockquote><p>Perhaps attention is a way of staying.</p></blockquote><p>This morning, the light reached the far edge of the table before I finished my tea. I had never noticed how long that took.</p>`},
  {id:'distance',no:'05',title:'A little distance, a little light',deck:'A moving-image notebook.',excerpt:'An imagined video entry, given the same quiet place as a poem.',category:'video',label:'Video note',mlLabel:'വീഡിയോസ്',date:'01 SEP',selected:false,body:`<p class="first">A window, a moving curtain, and the slow change of afternoon light.</p><p>A video would sit within this reading column at its natural aspect ratio, with a plain caption underneath. This specimen has no video attached.</p>`}
 ];
-</script><script>/* Progressive enhancements shared by the preview and Blogger. No dependencies. */
+</script><script>window.TYB_CATEGORIES = {"poetry": {"ml": "കവിതകൾ", "labels": ["ente kavithakal", "My Poems", "Poems", "poem", "poetry", "Slam poetry"], "title": "Poems &amp; <em>fragments.</em>", "url": "/search/label/ente%20kavithakal?category=poetry"}, "stories": {"ml": "കഥകൾ", "labels": ["ente kathakal", "Stories", "The come out story"], "title": "A place for <em>stories.</em>", "url": "/search/label/ente%20kathakal?category=stories"}, "essays": {"ml": "ലേഖനങ്ങൾ", "labels": ["Article", "My article", "My experiences", "My diary"], "title": "Notes &amp; <em>essays.</em>", "url": "/search/label/Article?category=essays"}, "selected": {"ml": "തിരഞ്ഞെടുത്ത", "labels": ["My picks"], "title": "Selected <em>pages.</em>", "url": "/search/label/My%20picks?category=selected"}, "video": {"ml": "വീഡിയോസ്", "labels": ["Video"], "title": "The moving <em>image.</em>", "url": "/search/label/Video?category=video"}};
+/* Progressive enhancements shared by the preview and Blogger. No dependencies. */
 (() => {
   'use strict';
   const q = (s) => document.querySelector(s);
@@ -697,6 +698,27 @@ const SAMPLE_POSTS = [
   const feed = (kind, query) => fetch(`/feeds/${kind}?alt=json&${query}`).then((r) => r.json()).then((d) => d.feed.entry || []);
   const entryLink = (e) => (e.link.find((l) => l.rel === 'alternate') || {}).href || '/';
   const entryDate = (e) => new Date(e.published.$t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const categories = window.TYB_CATEGORIES || {};
+  const categoryKey = new URLSearchParams(location.search).get('category');
+  const categoryOf = (label) => Object.keys(categories).find((key) => categories[key].labels.some((l) => l.toLowerCase() === label.toLowerCase()));
+  const filtersHTML = (active) => `<nav class="filters" aria-label="Writing categories"><a class="filter" data-filter="all" href="/#writing"${active ? '' : ' aria-current="page"'}>All writing</a>${Object.entries(categories).map(([key, c]) => `<a class="filter" data-filter="${key}" lang="ml" href="${esc(c.url)}"${key === active ? ' aria-current="page"' : ''}>${esc(c.ml)}</a>`).join('')}</nav>`;
+  const renderList = (holder, entries, heading, active) => {
+    const rows = entries.map((e) => `<article><a class="post-row" href="${esc(entryLink(e))}"><span class="micro muted row-no" aria-hidden="true"></span><div><h3 class="post-title">${esc(e.title.$t || 'Untitled')}</h3><p>${esc((e.summary ? e.summary.$t : '').slice(0, 150))}</p></div><div class="post-meta micro">${e.category ? `<span>${esc(e.category[0].term)}</span>` : ''}<time>${entryDate(e)}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`).join('');
+    holder.innerHTML = `<section class="writing" id="writing" data-blog-rendered="true"><div class="section-heading"><h2>${heading}</h2><span class="micro muted">${entries.length} ${entries.length === 1 ? 'piece' : 'pieces'} / English &amp; Malayalam</span></div>${filtersHTML(active)}${rows ? `<div class="post-list" data-fallback="true">${rows}</div>` : '<p class="empty">No writing found here yet. <a href="/">Return to the journal.</a></p>'}<nav class="pagination"><a class="text-link" href="#archive">Explore the index ↗</a></nav></section>`;
+    window.dispatchEvent(new Event('tyb:render'));
+  };
+  // A chapter gathers several Blogger labels: fetch each, merge, and list newest first.
+  const showCategory = async (key) => {
+    const group = categories[key];
+    const holder = document.getElementById('Blog1') || document.getElementById('journal');
+    if (!group || !holder) return;
+    const lists = await Promise.all(group.labels.map((label) => feed('posts/summary/-/' + encodeURIComponent(label), 'max-results=150').catch(() => [])));
+    const seen = new Set();
+    const entries = lists.flat()
+      .filter((e) => !seen.has(e.id.$t) && seen.add(e.id.$t))
+      .sort((a, b) => new Date(b.published.$t) - new Date(a.published.$t));
+    renderList(holder, entries, group.title, key);
+  };
   const restoreBlog = async () => {
     const holder = document.getElementById('Blog1') || document.getElementById('journal');
     if (!holder || holder.querySelector('[data-blog-rendered]')) return;
@@ -707,20 +729,20 @@ const SAMPLE_POSTS = [
       const e = entries.find((item) => new URL(entryLink(item)).pathname === location.pathname);
       if (!e) return;
       holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
-    } else {
-      const label = path.match(/^\/search\/label\/(.+)$/);
-      const month = path.match(/^\/(\d{4})\/(\d{2})\/?$/);
-      let kind = 'posts/summary', query = 'max-results=25', heading = 'Collected <em>writing.</em>';
-      if (label) { kind += '/-/' + encodeURIComponent(label[1]); heading = esc(label[1]); }
-      else if (params.get('q')) { query += '&q=' + encodeURIComponent(params.get('q')); heading = 'Search <em>results.</em>'; }
-      else if (month) {
-        query += `&published-min=${month[1]}-${month[2]}-01T00:00:00&published-max=${new Date(Date.UTC(+month[1], +month[2], 1)).toISOString().slice(0, 19)}`;
-        heading = 'From the <em>archive.</em>';
-      }
-      const rows = (await feed(kind, query)).map((e) => `<article><a class="post-row" href="${esc(entryLink(e))}"><span class="micro muted row-no" aria-hidden="true"></span><div><h3 class="post-title">${esc(e.title.$t || 'Untitled')}</h3><p>${esc((e.summary ? e.summary.$t : '').slice(0, 150))}</p></div><div class="post-meta micro">${e.category ? `<span>${esc(e.category[0].term)}</span>` : ''}<time>${entryDate(e)}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`).join('');
-      holder.innerHTML = `<section class="writing" id="writing"><div class="section-heading"><h2>${heading}</h2><span class="micro muted">The journal / An ongoing collection</span></div>${rows ? `<div class="post-list" data-fallback="true">${rows}</div>` : '<p class="empty">No writing found here yet. <a href="/">Return to the journal.</a></p>'}<nav class="pagination"><a class="text-link" href="#archive">Explore the index ↗</a></nav></section>`;
+      window.dispatchEvent(new Event('tyb:render'));
+      return;
     }
-    window.dispatchEvent(new Event('tyb:render'));
+    const label = path.match(/^\/search\/label\/(.+)$/);
+    if (label && categoryOf(label[1])) return showCategory(categoryOf(label[1]));
+    const month = path.match(/^\/(\d{4})\/(\d{2})\/?$/);
+    let kind = 'posts/summary', query = 'max-results=25', heading = 'Collected <em>writing.</em>';
+    if (label) { kind += '/-/' + encodeURIComponent(label[1]); heading = esc(label[1]); }
+    else if (params.get('q')) { query += '&q=' + encodeURIComponent(params.get('q')); heading = 'Search <em>results.</em>'; }
+    else if (month) {
+      query += `&published-min=${month[1]}-${month[2]}-01T00:00:00&published-max=${new Date(Date.UTC(+month[1], +month[2], 1)).toISOString().slice(0, 19)}`;
+      heading = 'From the <em>archive.</em>';
+    }
+    renderList(holder, await feed(kind, query), heading);
   };
   const restoreArchive = async () => {
     const holder = document.querySelector('#index-overlay .index-list');
@@ -737,12 +759,13 @@ const SAMPLE_POSTS = [
     }).join('') + '</ul>';
   };
   if (document.body.dataset.preview !== 'true' && window.fetch) {
-    restoreBlog().catch(() => {});
+    (categories[categoryKey] ? showCategory(categoryKey) : restoreBlog()).catch(() => {});
     restoreArchive().catch(() => {});
   }
   const labelPath = decoded(location.pathname);
   document.querySelectorAll('.filters a').forEach((link) => {
-    if (decoded(new URL(link.href, location.href).pathname) === labelPath) link.setAttribute('aria-current', 'page');
+    const current = categoryKey ? link.dataset.filter === categoryKey : decoded(new URL(link.href, location.href).pathname) === labelPath;
+    if (current) link.setAttribute('aria-current', 'page');
   });
   document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
 })();
