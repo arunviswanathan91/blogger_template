@@ -17,10 +17,10 @@
     });
   });
 
-  const canMagnet = window.matchMedia
-    && window.matchMedia('(hover: hover) and (pointer: fine)').matches
-    && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (canMagnet) {
+  const media = (query) => window.matchMedia ? window.matchMedia(query) : { matches: false, addEventListener() {} };
+  const motionOK = !media('(prefers-reduced-motion: reduce)').matches;
+  const finePointer = media('(hover: hover) and (pointer: fine)').matches;
+  if (motionOK && finePointer) {
     document.querySelectorAll('[data-magnetic]').forEach((el) => {
       const strength = Number(el.dataset.magnetic) || 8;
       el.addEventListener('mousemove', (event) => {
@@ -41,13 +41,101 @@
       if (composition) art.classList.add('art-shift-' + composition);
     });
   });
+
+  // Opening panels: on wide screens a chapter tab unfolds its panel in place; on phones tabs stay plain links.
+  const hero = q('[data-panels]');
+  const wide = media('(min-width: 761px)');
+  if (hero) {
+    const panels = [...hero.children].filter((el) => el.classList.contains('panel'));
+    const activate = (index) => panels.forEach((panel, i) => {
+      const on = i === index;
+      panel.classList.toggle('is-active', on);
+      const body = panel.querySelector('.panel-body');
+      if (body) body.inert = !on;
+      const tab = panel.querySelector('[data-panel-tab]');
+      if (wide.matches) tab.setAttribute('aria-expanded', String(on)); else tab.removeAttribute('aria-expanded');
+    });
+    panels.forEach((panel, i) => panel.querySelector('[data-panel-tab]').addEventListener('click', (event) => {
+      if (!wide.matches) return;
+      event.preventDefault();
+      if (!panel.classList.contains('is-active')) activate(i);
+    }));
+    wide.addEventListener('change', () => activate(0));
+    activate(0);
+    requestAnimationFrame(() => requestAnimationFrame(() => hero.classList.add('is-ready')));
+  }
+
+  // Circle tunnels lean toward the pointer; the emblem's orbit tilts with it. Both settle and stop when idle.
+  const tunnels = [...document.querySelectorAll('[data-tunnel]')].map((group) => {
+    const d = group.dataset;
+    const angle = Number(d.angle) * Math.PI / 180;
+    const home = { x: Math.cos(angle), y: Math.sin(angle) };
+    return {
+      svg: group.ownerSVGElement, cx: Number(d.cx), cy: Number(d.cy), big: Number(d.big), drift: Number(d.drift),
+      home, cur: { ...home }, goal: { ...home },
+      circles: [...group.children].map((c) => ({ c, r: Number(c.getAttribute('r')) })),
+    };
+  });
+  const emblem = q('[data-art]');
+  let pointer = null;
+  let tunnelFrame = 0;
+  const aim = () => tunnels.forEach((t) => {
+    t.goal = t.home;
+    if (!pointer || t.svg.closest('.panel:not(.is-active)')) return;
+    const box = t.svg.getBoundingClientRect();
+    if (!box.width) return;
+    const scale = box.width / t.svg.viewBox.baseVal.width;
+    const x = pointer.x - (box.left + t.cx * scale);
+    const y = pointer.y - (box.top + t.cy * scale);
+    const dist = Math.hypot(x, y) || 1;
+    const reach = .35 + .65 * Math.min(1, dist / (t.big * scale * 2.4));
+    t.goal = { x: (x / dist) * reach, y: (y / dist) * reach };
+  });
+  const step = () => {
+    tunnelFrame = 0;
+    aim();
+    let moving = false;
+    tunnels.forEach((t) => {
+      const dx = t.goal.x - t.cur.x, dy = t.goal.y - t.cur.y;
+      if (Math.abs(dx) + Math.abs(dy) < .002) return;
+      t.cur.x += dx * .07;
+      t.cur.y += dy * .07;
+      moving = true;
+      t.circles.forEach(({ c, r }) => {
+        const offset = (t.big - r) * t.drift;
+        c.setAttribute('cx', (t.cx + offset * t.cur.x).toFixed(2));
+        c.setAttribute('cy', (t.cy + offset * t.cur.y).toFixed(2));
+      });
+    });
+    if (emblem) {
+      const tilt = pointer && !emblem.closest('.panel:not(.is-active)') ? Math.max(-1, Math.min(1, (pointer.x / window.innerWidth) * 2 - 1)) * 10 : 0;
+      emblem.style.setProperty('--tilt', tilt.toFixed(1) + 'deg');
+    }
+    if (moving) tunnelFrame = requestAnimationFrame(step);
+  };
+  const wake = () => { if (!tunnelFrame) tunnelFrame = requestAnimationFrame(step); };
+  if (motionOK && finePointer) {
+    document.addEventListener('pointermove', (event) => { pointer = { x: event.clientX, y: event.clientY }; wake(); }, { passive: true });
+    root.addEventListener('mouseleave', () => { pointer = null; wake(); });
+    if (hero) hero.addEventListener('transitionend', (event) => { if (event.propertyName === 'flex-grow') wake(); });
+  }
+
+  // Menu and search slide in as a curtain; their contents rise in sequence.
+  document.querySelectorAll('.menu-links a').forEach((link, i) => { link.classList.add('rise'); link.style.setProperty('--i', i); });
+  document.querySelectorAll('.menu-sub').forEach((el) => { el.classList.add('rise'); el.style.setProperty('--i', 6); });
+  document.querySelectorAll('.menu-note, .overlay-top').forEach((el) => el.classList.add('rise'));
+  document.querySelectorAll('.search-inner > *').forEach((el, i) => { el.classList.add('rise'); el.style.setProperty('--i', i + 1); });
+  const overlayTimers = new WeakMap();
   let activeOverlay = null;
   let returnFocus = null;
   const setBackgroundInert = (value) => document.querySelectorAll('.site-header,main,.about,.footer').forEach((el) => { el.inert = value; });
   const closeOverlay = () => {
     if (!activeOverlay) return;
-    activeOverlay.hidden = true;
+    const overlay = activeOverlay;
     activeOverlay = null;
+    overlay.classList.remove('is-open');
+    clearTimeout(overlayTimers.get(overlay));
+    overlayTimers.set(overlay, setTimeout(() => { if (!overlay.classList.contains('is-open')) overlay.hidden = true; }, motionOK ? 850 : 0));
     document.body.classList.remove('menu-open');
     setBackgroundInert(false);
     document.querySelectorAll('[data-open]').forEach((el) => el.setAttribute('aria-expanded', 'false'));
@@ -61,11 +149,14 @@
       closeOverlay();
       returnFocus = trigger;
       activeOverlay = target;
+      clearTimeout(overlayTimers.get(target));
       target.hidden = false;
+      void target.offsetWidth;
+      target.classList.add('is-open');
       document.body.classList.add('menu-open');
       setBackgroundInert(true);
       trigger.setAttribute('aria-expanded', 'true');
-      (target.querySelector('input') || target.querySelector('[data-close]')).focus();
+      (target.querySelector('input') || target.querySelector('[data-close]')).focus({ preventScroll: true });
     });
   });
   document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', closeOverlay));
@@ -136,7 +227,27 @@
     });
   };
   language();
-  window.addEventListener('tyb:render', () => { language(); updateSize(); queueProgress(); });
+  // Index content rises gently into view once, in the order it arrives.
+  const revealTargets = '.lead, .section-heading, .filters, .writing article, .pagination, .about > *, .footer-top, .footer-type, .archive-heading, #index-list article';
+  const revealer = motionOK && 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
+    let order = 0;
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.style.setProperty('--d', order++);
+      entry.target.classList.add('is-in');
+      revealer.unobserve(entry.target);
+    });
+  }, { threshold: .12, rootMargin: '0px 0px -40px 0px' }) : null;
+  const reveal = () => {
+    if (!revealer) return;
+    document.querySelectorAll(revealTargets).forEach((el) => {
+      if (el.classList.contains('reveal')) return;
+      el.classList.add('reveal');
+      revealer.observe(el);
+    });
+  };
+  reveal();
+  window.addEventListener('tyb:render', () => { language(); updateSize(); queueProgress(); reveal(); });
   const decoded = (value) => { try { return decodeURIComponent(value); } catch { return value; } };
   const labelPath = decoded(location.pathname);
   document.querySelectorAll('.filters a').forEach((link) => {
