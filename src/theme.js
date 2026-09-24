@@ -171,6 +171,39 @@
     });
   };
   language();
+  // A post that opens with a picture: blur it into a wash behind the title and lift the sharp copy beside it.
+  const fullSize = (src) => src.replace(/\/(s\d+|w\d+-h\d+)(-[a-z0-9-]+)?\//, '/s1600/').replace(/=(s|w)\d+[^/]*$/, '=s1600');
+  const decorateReader = () => {
+    const page = q('.reading-page:not([hidden])');
+    const body = page && page.querySelector('.article-body');
+    const img = body && body.querySelector('img');
+    if (!img || page.dataset.decorated) return;
+    page.dataset.decorated = 'true';
+    const src = fullSize(img.currentSrc || img.src);
+    const backdrop = document.createElement('div');
+    backdrop.className = 'reader-backdrop';
+    backdrop.setAttribute('aria-hidden', 'true');
+    backdrop.style.setProperty('--img', `url("${src.replace(/"/g, '%22')}")`);
+    document.body.prepend(backdrop);
+    document.body.classList.add('has-backdrop');
+    // Only a leading picture moves; one further down stays with its text.
+    const block = img.closest('.separator') || img.closest('a') || img;
+    const before = document.createRange();
+    before.setStart(body, 0);
+    before.setEndBefore(block);
+    if (before.toString().trim().length > 160) return;
+    img.src = src;
+    img.removeAttribute('width');
+    img.removeAttribute('height');
+    const cover = document.createElement('figure');
+    cover.className = 'reader-cover';
+    cover.append(block);
+    (page.querySelector('.article-byline') || page.querySelector('.article-title')).after(cover);
+    page.classList.add('has-cover');
+  };
+  decorateReader();
+  window.addEventListener('tyb:render', decorateReader);
+
   // Index content rises gently into view once, in the order it arrives.
   const revealTargets = '.lead, .section-heading, .filters, .writing article, .pagination, .about > *, .footer-top';
   const revealer = motionOK && 'IntersectionObserver' in window ? new IntersectionObserver((entries) => {
