@@ -2,7 +2,14 @@
 
 The generated theme and the interactive preview share the same CSS, navigation, artwork, footer, overlays, and reading enhancements.
 
-## Design refresh (this pass)
+## Panels, curtain, and circle animation (latest pass)
+
+- Drove the preview through the Chrome DevTools Protocol (clicks, pointer moves, key presses, mid-animation captures): tabs unfold the right panel (active 1115 px, others 42 px at 1440 px wide), each chapter's circle figure draws completely, the menu wipes in and out, Escape closes it, it is re-hidden afterwards, and focus returns to the Menu button. No JavaScript errors.
+- Headless Chrome reports no fine pointer, so pointer-follow features stay off there by design; they were verified on a copy with that check forced on (tunnels lean toward the cursor, emblem tilt reached 9.7°).
+- Checked dark mode, a true 390 px viewport (no horizontal overflow; tabs remain links), and `prefers-reduced-motion` (states apply instantly).
+- Fixed during testing: `vector-effect: non-scaling-stroke` broke `pathLength`-normalised dashes, leaving circles three-quarters drawn.
+
+## Design refresh (earlier pass)
 
 Reworked the design per follow-up feedback: a true light/dark toggle, Feather-icon-based interface icons in place of the earlier bespoke ones, a mathematically generated infinity/orbit emblem in place of the literal bottle illustration, mathematically-derived polygon markers for the five chapter icons, and an overall reduction in motion (no autoplay animation; a couple of primary buttons get a small, coherent cursor-follow hover instead).
 
