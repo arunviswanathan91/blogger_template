@@ -11,6 +11,14 @@
   const motionOK = !media('(prefers-reduced-motion: reduce)').matches;
   const finePointer = media('(hover: hover) and (pointer: fine)').matches;
 
+  const portrait = window.TYB_PORTRAIT;
+  const tone = (u, v) => {
+    const i = min(portrait.h - 1, max(0, Math.floor(v * portrait.h))) * portrait.w + min(portrait.w - 1, max(0, Math.floor(u * portrait.w)));
+    const d = parseInt(portrait.dark[i], 16) / 15;
+    return [colors.dark ? 1 - d : d, portrait.red[i] === '1' ? 1 : 0];
+  };
+  const magnify = (f, x, y) => f.lens > .01 ? f.lens * Math.exp(-(sq(x - f.local.x) + sq(y - f.local.y)) / sq(f.w * .22)) : 0;
+
   // Each form: n shapes; at(s, t, m) gives [x, y, size, turn] inside a -1..1 square for s in 0..1.
   // t is a slow clock that keeps the lines drifting; m is the eased pointer offset (-1..1).
   // accent(s, t) marks the shapes drawn in yellow.
@@ -77,6 +85,35 @@
     pixelKnot: { n: 1800, shape: 'pixel',
       at: (s, t, m) => { const p = TAU * s; return [.85 * sin(3 * p + t * .3 + m.x * .4), .85 * sin(4 * p + m.y * .4), 0, 0]; },
       accent: (s) => Math.floor(s * 12) % 4 === 0 },
+    // A line portrait from a 68x110 darkness map of the author's photo (src/portrait.json).
+    portraitLines: { n: 1, lw: .5,
+      custom: (f, groups) => {
+        const rows = 104, gap = f.h / rows, step = max(.7, f.w / 300), shown = Math.ceil(rows * ease(f.drawn));
+        for (let j = 0; j < shown; j++) {
+          const v = (j + .5) / rows, y0 = v * f.h;
+          let phase = j * 1.3, last = -1;
+          for (let x = 0; x <= f.w; x += step) {
+            const [tone0, g] = tone(x / f.w, v), d = pow(tone0, 1.25), near = magnify(f, x, y0);
+            phase += (.1 + d * 1.1) * step / .8;
+            const y = y0 + sin(phase + f.t * 3 + near * 2.5) * d * gap * .95 * (1 + near * .6);
+            if (g !== last) { groups[g].moveTo(x, y); last = g; } else groups[g].lineTo(x, y);
+          }
+        }
+      } },
+    portraitRings: { n: 1, lw: .6,
+      custom: (f, groups) => {
+        const step = f.w / 48, rowStep = step * .866, rows = Math.ceil(f.h / rowStep), shown = Math.ceil(rows * ease(f.drawn));
+        for (let row = 0; row < shown; row++) {
+          const y = step / 2 + row * rowStep;
+          for (let x = row % 2 ? step / 2 : 0; x < f.w; x += step) {
+            const [tone0, g] = tone(x / f.w, y / f.h);
+            const r = pow(tone0, 1.2) * step * .62 * (1 + .12 * sin(f.t * 2 + x * .05 + y * .04)) * (1 + magnify(f, x, y) * .6);
+            if (r < .35) continue;
+            groups[g].moveTo(x + r, y);
+            groups[g].arc(x, y, r, 0, TAU);
+          }
+        }
+      } },
   };
   const FIGURES = {
     opening: ['petals', 'bottle', 'pixels'],
@@ -86,6 +123,7 @@
     essays: ['hexVortex', 'hexRing'],
     selected: ['pentagons', 'bottle'],
     video: ['ellipses', 'pixelKnot'],
+    portrait: ['portraitLines', 'portraitRings'],
   };
 
   const polygon = (ctx, sides, x, y, r, turn) => {
@@ -102,10 +140,11 @@
     else if (shape === 'ellipse') { ctx.moveTo(x + r * cos(turn), y + r * sin(turn)); ctx.ellipse(x, y, r, r * .36, turn, 0, TAU); }
   };
 
-  let colors = { ink: '#080808', accent: '#e8b400' };
+  let colors = { ink: '#080808', accent: '#e8b400', dark: false };
   const readColors = () => {
     const style = getComputedStyle(document.documentElement);
-    colors = { ink: style.getPropertyValue('--ink').trim() || colors.ink, accent: style.getPropertyValue('--accent').trim() || colors.accent };
+    const ink = style.getPropertyValue('--ink').trim() || colors.ink;
+    colors = { ink, accent: style.getPropertyValue('--accent').trim() || colors.accent, dark: parseInt(ink.replace('#', '').slice(0, 2), 16) > 128 };
   };
 
   const paint = (f, formName, alpha) => {
@@ -115,7 +154,8 @@
     const count = Math.ceil(form.n * ease(f.drawn));
     const cell = max(1.5, scale / 90);
     const groups = [new Path2D(), new Path2D()];
-    for (let i = 0; i < count; i++) {
+    if (form.custom) form.custom(f, groups);
+    else for (let i = 0; i < count; i++) {
       const s = i / form.n;
       const [x, y, r, turn] = form.at(s, f.t, f.m);
       const g = form.accent(s, f.t) ? 1 : 0;
@@ -155,12 +195,15 @@
       if (f.morph < 1) { f.morph = min(1, f.morph + dt / 1.1); changed = true; }
       if (motionOK) {
         f.t += dt * .16;
-        let goal = { x: 0, y: 0 };
+        let goal = { x: 0, y: 0 }, inside = false;
         if (pointer) {
           const box = f.el.getBoundingClientRect();
+          f.local = { x: pointer.x - box.left, y: pointer.y - box.top };
+          inside = f.local.x > -30 && f.local.y > -30 && f.local.x < box.width + 30 && f.local.y < box.height + 30;
           goal = { x: max(-1, min(1, (pointer.x - box.left - box.width / 2) / (box.width * .75))), y: max(-1, min(1, (pointer.y - box.top - box.height / 2) / (box.height * .75))) };
         }
         f.m = { x: f.m.x + (goal.x - f.m.x) * .05, y: f.m.y + (goal.y - f.m.y) * .05 };
+        f.lens += ((inside ? 1 : 0) - f.lens) * .08;
         changed = true;
         again = true;
       }
@@ -190,12 +233,12 @@
 
   document.querySelectorAll('.figure-frame[data-figure]').forEach((el) => {
     const forms = FIGURES[el.dataset.figure];
-    if (!forms) return;
+    if (!forms || (el.dataset.figure === 'portrait' && !portrait)) return;
     const canvas = document.createElement('canvas');
     canvas.setAttribute('aria-hidden', 'true');
     el.replaceChildren(canvas);
     el.classList.add('is-live');
-    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
+    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true, lens: 0, local: { x: 0, y: 0 } };
     frames.push(f);
     (el.closest('[data-art]') || el).addEventListener('click', () => {
       f.previous = f.forms[f.index];

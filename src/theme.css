@@ -183,7 +183,8 @@ figure, h1, h2, h3, p { margin: 0; }
 .about-copy h2 { font-size: clamp(40px,4.8vw,70px); line-height: 1.1; letter-spacing: -.06em; font-weight: 500; }
 .about-copy h2 em { font-family: var(--serif); font-weight: 400; }
 .about-copy p { margin-top: 22px; font-size: 15px; max-width: 450px; line-height: 1.8; }
-.about-symbol { width: 150px; margin-top: 40px; }
+.about-portrait { width: min(100%, 300px); aspect-ratio: 68 / 110; margin-top: 36px; }
+.about-portrait-note { margin-top: 12px; font-size: 9px; }
 .footer { margin: 0 var(--gutter); border-top: 1px solid var(--ink); padding: 30px 0 20px; }
 .footer-top { display: flex; align-items: center; justify-content: space-between; gap: 25px; }
 .footer-links { display: flex; gap: 25px; flex-wrap: wrap; font-size: 11px; }
@@ -332,7 +333,7 @@ figure, h1, h2, h3, p { margin: 0; }
   .post-row p { font-size: 17px; }
   .post-row:hover { padding-left: 6px; padding-right: 6px; }
   .about { grid-template-columns: 1fr; gap: 35px; margin-top: 50px; padding: 35px 0 40px; }
-  .about-symbol { display: none; }
+  .about-portrait { width: min(100%, 220px); margin-top: 24px; }
   .about-copy p { font-size: 14px; }
   .footer-top { align-items: flex-start; }
   .footer-links { gap: 0 20px; justify-content: flex-end; max-width: 240px; font-size: 10px; }
