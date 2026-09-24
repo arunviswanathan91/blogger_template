@@ -3,9 +3,12 @@
   'use strict';
   const $ = (s) => document.querySelector(s);
   const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  // Preview services may insert a <base> pointing at the raw source file.
+  // Keep generated article links on this rendered document, including its query string.
+  const routeHref = (fragment) => esc(location.href.split('#')[0] + fragment);
   const posts = SAMPLE_POSTS;
   let currentRoute = '';
-  const row = (p) => `<article><a class="post-row" href="#read/${p.id}"><span class="micro muted">${p.no}</span><div><h3 class="post-title${p.malayalam ? ' ml-title' : ''}"${p.malayalam ? ' lang="ml"' : ''}>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></div><div class="post-meta micro"><span lang="ml">${p.mlLabel}</span><time>Sample / ${p.date}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`;
+  const row = (p) => `<article><a class="post-row" href="${routeHref('#read/' + p.id)}"><span class="micro muted">${p.no}</span><div><h3 class="post-title${p.malayalam ? ' ml-title' : ''}"${p.malayalam ? ' lang="ml"' : ''}>${esc(p.title)}</h3><p>${esc(p.excerpt)}</p></div><div class="post-meta micro"><span lang="ml">${p.mlLabel}</span><time>Sample / ${p.date}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`;
   function render() {
     const route = location.hash || '#home';
     if (['#top','#about','#main-content','#writing'].includes(route)) return;
@@ -42,8 +45,8 @@
       const found = posts.filter((p) => (!front || p.id !== 'hand') && (filter === 'all' || (filter === 'selected' ? p.selected : p.category === filter)) && (!query || (p.title + ' ' + p.excerpt + ' ' + p.body.replace(/<[^>]+>/g, ' ') + ' ' + p.label + ' ' + p.mlLabel).toLocaleLowerCase().includes(query.toLocaleLowerCase())));
       const titles = {all:'Collected <em>writing.</em>',poetry:'Poems &amp; <em>fragments.</em>',stories:'A place for <em>stories.</em>',essays:'Notes &amp; <em>essays.</em>',selected:'Selected <em>pages.</em>',video:'The moving <em>image.</em>'};
       $('#writing-heading').innerHTML = query ? 'Found between the <em>lines.</em>' : titles[filter] || titles.all;
-      $('#result-count').textContent = query ? `${found.length} sample results for “${query}”` : `${found.length} sample pieces / English & Malayalam`;
-      $('#post-list').innerHTML = found.length ? found.map(row).join('') : '<p class="empty">Nothing here yet. Try another word or <a href="#home">return to all writing.</a></p>';
+      $('#result-count').textContent = query ? `${found.length} sample ${found.length === 1 ? 'result' : 'results'} for “${query}”` : `${found.length} sample pieces / English & Malayalam`;
+      $('#post-list').innerHTML = found.length ? found.map(row).join('') : `<p class="empty">Nothing here yet. Try another word or <a href="${routeHref('#home')}">return to all writing.</a></p>`;
       document.querySelectorAll('.filter').forEach((link) => {
         link.removeAttribute('aria-current');
         if (link.dataset.filter === filter && !query) link.setAttribute('aria-current','page');

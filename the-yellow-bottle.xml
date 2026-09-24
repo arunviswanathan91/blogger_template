@@ -247,8 +247,8 @@ figure, h1, h2, h3, p { margin: 0; }
   .edition-strip { padding: 15px 0; }
   .edition-strip .micro { font-size: 8px; }
   .edition-strip .languages { font-size: 9px; }
-  .lead { grid-template-columns: 1fr; gap: 28px; padding: 38px 0 43px; }
-  .lead-art { min-height: 285px; aspect-ratio: 1.6; }
+  .lead { grid-template-columns: minmax(0,1fr); gap: 28px; padding: 38px 0 43px; }
+  .lead-art { min-height: 0; min-width: 0; width: 100%; height: auto; aspect-ratio: 1.3; }
   .lead-art svg { max-height: 230px; }
   .lead-copy h2 { font-size: 45px; max-width: 500px; margin: 18px 0; }
   .lead-copy p { font-size: 21px; }
@@ -285,7 +285,7 @@ figure, h1, h2, h3, p { margin: 0; }
 }
 @media (max-width: 390px) {
   .hero-main { grid-template-columns: minmax(0,1fr) 76px; gap: 9px; }
-  .hero-title { font-size: 24vw; }
+  .hero-title { font-size: 21.5vw; }
   .hero-art .art-caption { font-size: 7px; }
   .hero-description { max-width: 220px; font-size: 13px; }
   .round-link { width: 44px; height: 44px; }
