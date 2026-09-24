@@ -205,12 +205,32 @@
   const plain = (html) => new DOMParser().parseFromString(html, 'text/html').documentElement.textContent.replace(/\s+/g, ' ').trim();
   const entryLink = (e) => (e.link.find((l) => l.rel === 'alternate') || {}).href || '/';
   const entryDate = (e) => new Date(e.published.$t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const store = {
+    get: (key) => { try { return JSON.parse(sessionStorage.getItem('tyb:' + key)); } catch { return null; } },
+    set: (key, value) => { try { sessionStorage.setItem('tyb:' + key, JSON.stringify(value)); } catch { /* Cache is optional. */ } },
+  };
+  const postId = (e) => (e.id.$t.match(/post-(\d+)/) || [])[1];
+  const pathOf = (href) => { try { return new URL(href, location.href).pathname; } catch { return ''; } };
+  // Lists are small: keep only what a row needs.
+  const slim = (e) => ({ id: e.id, title: e.title, summary: e.summary, published: e.published, category: e.category, link: e.link });
+  const fetchPost = (id) => fetch(`/feeds/posts/default/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry);
+  // Start downloading a post as soon as the reader points at it, so the next page opens from memory.
+  const prefetch = (link) => {
+    const id = link.dataset.postId, path = pathOf(link.href);
+    if (!id || store.get('post:' + path) || link.dataset.prefetching) return;
+    link.dataset.prefetching = 'true';
+    fetchPost(id).then((entry) => store.set('post:' + path, entry)).catch(() => {});
+  };
+  ['pointerover', 'focusin', 'touchstart'].forEach((type) => document.addEventListener(type, (event) => {
+    const link = event.target.closest && event.target.closest('a.post-row[data-post-id]');
+    if (link) prefetch(link);
+  }, { passive: true }));
   const categories = window.TYB_CATEGORIES || {};
   const categoryKey = new URLSearchParams(location.search).get('category');
   const categoryOf = (label) => Object.keys(categories).find((key) => categories[key].labels.some((l) => l.toLowerCase() === label.toLowerCase()));
   const filtersHTML = (active) => `<nav class="filters" aria-label="Writing categories"><a class="filter" data-filter="all" href="/#writing"${active ? '' : ' aria-current="page"'}>All writing</a>${Object.entries(categories).map(([key, c]) => `<a class="filter" data-filter="${key}" lang="ml" href="${esc(c.url)}"${key === active ? ' aria-current="page"' : ''}>${esc(c.ml)}</a>`).join('')}</nav>`;
   const renderList = (holder, entries, heading, active) => {
-    const rows = entries.map((e) => `<article><a class="post-row" href="${esc(entryLink(e))}"><span class="micro muted row-no" aria-hidden="true"></span><div><h3 class="post-title">${esc(e.title.$t || 'Untitled')}</h3><p>${esc(plain(e.summary ? e.summary.$t : '').slice(0, 150))}</p></div><div class="post-meta micro">${e.category ? `<span>${esc(e.category[0].term)}</span>` : ''}<time>${entryDate(e)}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`).join('');
+    const rows = entries.map((e) => `<article><a class="post-row" href="${esc(entryLink(e))}" data-post-id="${esc(postId(e) || '')}"><span class="micro muted row-no" aria-hidden="true"></span><div><h3 class="post-title">${esc(e.title.$t || 'Untitled')}</h3><p>${esc(plain(e.summary ? e.summary.$t : '').slice(0, 150))}</p></div><div class="post-meta micro">${e.category ? `<span>${esc(e.category[0].term)}</span>` : ''}<time>${entryDate(e)}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`).join('');
     holder.innerHTML = `<section class="writing" id="writing" data-blog-rendered="true"><div class="section-heading"><h2>${heading}</h2><span class="micro muted">${entries.length} ${entries.length === 1 ? 'piece' : 'pieces'} / English &amp; Malayalam</span></div>${filtersHTML(active)}${rows ? `<div class="post-list" data-fallback="true">${rows}</div>` : '<p class="empty">No writing found here yet. <a href="/">Return to the journal.</a></p>'}<nav class="pagination"><a class="text-link" href="#archive">Explore the index ↗</a></nav></section>`;
     window.dispatchEvent(new Event('tyb:render'));
   };
@@ -219,12 +239,16 @@
     const group = categories[key];
     const holder = document.getElementById('Blog1') || document.getElementById('journal');
     if (!group || !holder) return;
+    const cached = store.get('list:category:' + key);
+    if (cached) renderList(holder, cached, group.title, key);
     const lists = await Promise.all(group.labels.map((label) => feed('posts/summary/-/' + encodeURIComponent(label), 'max-results=150').catch(() => [])));
     const seen = new Set();
     const entries = lists.flat()
       .filter((e) => !seen.has(e.id.$t) && seen.add(e.id.$t))
-      .sort((a, b) => new Date(b.published.$t) - new Date(a.published.$t));
-    renderList(holder, entries, group.title, key);
+      .sort((a, b) => new Date(b.published.$t) - new Date(a.published.$t))
+      .map(slim);
+    store.set('list:category:' + key, entries);
+    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, group.title, key);
   };
   const restoreBlog = async () => {
     const holder = document.getElementById('Blog1') || document.getElementById('journal');
@@ -232,9 +256,19 @@
     const path = decoded(location.pathname);
     const params = new URLSearchParams(location.search);
     if (/^\/(\d{4}\/\d{2}\/[^/]+|p\/[^/]+)\.html$/.test(path)) {
-      const entries = await feed(path.startsWith('/p/') ? 'pages/default' : 'posts/default', 'max-results=500');
-      const e = entries.find((item) => new URL(entryLink(item)).pathname === location.pathname);
+      let e = store.get('post:' + location.pathname);
+      if (!e && !path.startsWith('/p/')) {
+        const head = document.querySelector('link[href*="/feeds/"][href*="/comments/default"]');
+        const id = head && (head.href.match(/\/feeds\/(\d+)\/comments/) || [])[1];
+        if (id) e = await fetchPost(id).catch(() => null);
+      }
+      if (!e) {
+        const summaries = await feed(path.startsWith('/p/') ? 'pages/summary' : 'posts/summary', 'max-results=500');
+        const match = summaries.find((item) => pathOf(entryLink(item)) === location.pathname);
+        if (match) e = path.startsWith('/p/') ? (await feed('pages/default', 'max-results=500')).find((item) => pathOf(entryLink(item)) === location.pathname) : await fetchPost(postId(match));
+      }
       if (!e) return;
+      store.set('post:' + location.pathname, e);
       holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page" data-blog-rendered="true"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
       window.dispatchEvent(new Event('tyb:render'));
       return;
@@ -249,7 +283,29 @@
       query += `&published-min=${month[1]}-${month[2]}-01T00:00:00&published-max=${new Date(Date.UTC(+month[1], +month[2], 1)).toISOString().slice(0, 19)}`;
       heading = 'From the <em>archive.</em>';
     }
-    renderList(holder, await feed(kind, query), heading);
+    const listKey = 'list:' + kind + '?' + query;
+    const cached = store.get(listKey);
+    if (cached) renderList(holder, cached, heading);
+    const entries = (await feed(kind, query)).map(slim);
+    store.set(listKey, entries);
+    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, heading);
+  };
+  // Blogger's own list carries titles and links; dates and excerpts come from one cached summary feed.
+  const fillNative = async () => {
+    const slots = [...document.querySelectorAll('[data-fill]')];
+    if (!slots.length) return;
+    let summaries = store.get('summaries');
+    if (!summaries) { summaries = (await feed('posts/summary', 'max-results=150')).map(slim); store.set('summaries', summaries); }
+    const byId = new Map(summaries.map((e) => [postId(e), e]));
+    const missing = [...new Set(slots.map((slot) => slot.closest('[data-post-id]')?.dataset.postId).filter((id) => id && !byId.has(id)))].slice(0, 30);
+    (await Promise.all(missing.map((id) => fetch(`/feeds/posts/summary/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry).catch(() => null))))
+      .forEach((e) => { if (e) byId.set(postId(e), e); });
+    slots.forEach((slot) => {
+      const e = byId.get(slot.closest('[data-post-id]')?.dataset.postId);
+      if (!e) return;
+      if (slot.dataset.fill === 'date') { slot.textContent = entryDate(e); slot.setAttribute('datetime', e.published.$t); }
+      else slot.textContent = plain(e.summary ? e.summary.$t : '').slice(0, slot.dataset.fill === 'excerpt-long' ? 220 : 150);
+    });
   };
   const restoreArchive = async () => {
     const holder = document.querySelector('#index-overlay .index-list');
@@ -271,6 +327,7 @@
     setTimeout(release, 6000);
     (categories[categoryKey] ? showCategory(categoryKey) : restoreBlog()).catch(() => {}).finally(release);
     restoreArchive().catch(() => {});
+    fillNative().catch(() => {});
   }
   const labelPath = decoded(location.pathname);
   document.querySelectorAll('.filters a').forEach((link) => {

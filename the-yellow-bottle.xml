@@ -487,7 +487,6 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
                 <b:if cond='not data:view.isHomepage or data:i != 0'><b:include data='post' name='entry'/></b:if>
               </b:loop>
             </div>
-            <b:if cond='data:view.isHomepage and data:posts.size == 1'><p class='empty'>The first of many pages.</p></b:if>
           <b:else/><p class='empty'>No writing found here yet. <a expr:href='data:blog.homepageUrl'>Return to the journal.</a></p></b:if>
           <nav class='pagination' aria-label='Post pagination'>
             <b:if cond='data:newerPageUrl'><a class='text-link' expr:href='data:newerPageUrl'>← Newer writing</a></b:if>
@@ -499,16 +498,16 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
     </b:includable>
     <b:includable id='entry' var='post'>
       <article>
-        <a class='post-row' expr:href='data:post.url'>
+        <a class='post-row' expr:href='data:post.url' expr:data-post-id='data:post.id'>
           <span class='micro muted row-no' aria-hidden='true'></span>
-          <div><h3 class='post-title'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></h3><p><data:post.snippets.short/></p></div>
-          <div class='post-meta micro'><b:if cond='data:post.labels'><span><data:post.labels.first.name/></span></b:if><time expr:datetime='data:post.date.iso8601'><data:post.date/></time></div>
+          <div><h3 class='post-title'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></h3><p data-fill='excerpt'></p></div>
+          <div class='post-meta micro'><b:if cond='data:post.labels'><span><data:post.labels.first.name/></span></b:if><time data-fill='date'></time></div>
           <span class='row-arrow' aria-hidden='true'>↗</span>
         </a>
       </article>
     </b:includable>
     <b:includable id='lead' var='post'>
-      <article class='lead'>
+      <article class='lead' expr:data-post-id='data:post.id'>
         <a class='lead-art' expr:href='data:post.url' expr:aria-label='data:post.title ?: "Read the latest writing"'>
           <b:if cond='data:post.featuredImage'><b:class name='has-image'/><img expr:src='resizeImage(data:post.featuredImage, 1000)' expr:alt='data:post.title' loading='lazy' width='1000' height='750'/><b:else/><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 310" fill="none" aria-hidden="true">
   <circle cx="155" cy="155" r="114" fill="currentColor"/>
@@ -519,15 +518,15 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 </svg>
 </b:if>
         </a>
-        <div class='lead-copy'><div class='lead-meta micro'><span>01 / The opening page</span><b:if cond='data:post.labels'><span class='muted'><data:post.labels.first.name/></span></b:if></div><h2 class='lead-title'><a expr:href='data:post.url'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></a></h2><p><data:post.snippets.long/></p><a class='text-link' expr:href='data:post.url'>Read the story <span class='arrow' aria-hidden='true'>↗</span></a></div>
+        <div class='lead-copy'><div class='lead-meta micro'><span>01 / The opening page</span><b:if cond='data:post.labels'><span class='muted'><data:post.labels.first.name/></span></b:if></div><h2 class='lead-title'><a expr:href='data:post.url'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></a></h2><p data-fill='excerpt-long'></p><a class='text-link' expr:href='data:post.url'>Read the story <span class='arrow' aria-hidden='true'>↗</span></a></div>
       </article>
     </b:includable>
     <b:includable id='reader' var='post'>
-      <article class='reading-page' data-blog-rendered='true'>
+      <article class='reading-page' data-blog-rendered='true' expr:data-post-id='data:post.id'>
         <b:include data='post' name='postMetadataJSON'/>
         <div class='micro muted'><b:if cond='data:post.labels'><data:post.labels.first.name/><b:else/>The Yellow Bottle</b:if></div>
         <h1 class='article-title'><b:if cond='data:post.title'><data:post.title/><b:else/>Untitled</b:if></h1>
-        <div class='article-byline'><span><data:post.author.name/></span><b:if cond='data:view.isPost'><time expr:datetime='data:post.date.iso8601'><data:post.date/></time></b:if></div>
+        <div class='article-byline'><span><data:post.author.name/></span><b:if cond='data:view.isPost'><time data-fill='date'></time></b:if></div>
         <div class='article-body post-body entry-content' expr:id='"post-body-" + data:post.id'><data:post.body/></div>
         <b:if cond='data:post.labels'><nav class='article-labels' aria-label='Post labels'><b:loop values='data:post.labels' var='label'><a expr:href='data:label.url' rel='tag'><data:label.name/></a></b:loop></nav></b:if>
         <div class='article-end'><a expr:href='data:blog.homepageUrl'>← All writing</a><button data-copy='true' type='button' aria-live='polite'>Copy link ↗</button></div>
@@ -978,12 +977,32 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
   const plain = (html) => new DOMParser().parseFromString(html, 'text/html').documentElement.textContent.replace(/\s+/g, ' ').trim();
   const entryLink = (e) => (e.link.find((l) => l.rel === 'alternate') || {}).href || '/';
   const entryDate = (e) => new Date(e.published.$t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+  const store = {
+    get: (key) => { try { return JSON.parse(sessionStorage.getItem('tyb:' + key)); } catch { return null; } },
+    set: (key, value) => { try { sessionStorage.setItem('tyb:' + key, JSON.stringify(value)); } catch { /* Cache is optional. */ } },
+  };
+  const postId = (e) => (e.id.$t.match(/post-(\d+)/) || [])[1];
+  const pathOf = (href) => { try { return new URL(href, location.href).pathname; } catch { return ''; } };
+  // Lists are small: keep only what a row needs.
+  const slim = (e) => ({ id: e.id, title: e.title, summary: e.summary, published: e.published, category: e.category, link: e.link });
+  const fetchPost = (id) => fetch(`/feeds/posts/default/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry);
+  // Start downloading a post as soon as the reader points at it, so the next page opens from memory.
+  const prefetch = (link) => {
+    const id = link.dataset.postId, path = pathOf(link.href);
+    if (!id || store.get('post:' + path) || link.dataset.prefetching) return;
+    link.dataset.prefetching = 'true';
+    fetchPost(id).then((entry) => store.set('post:' + path, entry)).catch(() => {});
+  };
+  ['pointerover', 'focusin', 'touchstart'].forEach((type) => document.addEventListener(type, (event) => {
+    const link = event.target.closest && event.target.closest('a.post-row[data-post-id]');
+    if (link) prefetch(link);
+  }, { passive: true }));
   const categories = window.TYB_CATEGORIES || {};
   const categoryKey = new URLSearchParams(location.search).get('category');
   const categoryOf = (label) => Object.keys(categories).find((key) => categories[key].labels.some((l) => l.toLowerCase() === label.toLowerCase()));
   const filtersHTML = (active) => `<nav class="filters" aria-label="Writing categories"><a class="filter" data-filter="all" href="/#writing"${active ? '' : ' aria-current="page"'}>All writing</a>${Object.entries(categories).map(([key, c]) => `<a class="filter" data-filter="${key}" lang="ml" href="${esc(c.url)}"${key === active ? ' aria-current="page"' : ''}>${esc(c.ml)}</a>`).join('')}</nav>`;
   const renderList = (holder, entries, heading, active) => {
-    const rows = entries.map((e) => `<article><a class="post-row" href="${esc(entryLink(e))}"><span class="micro muted row-no" aria-hidden="true"></span><div><h3 class="post-title">${esc(e.title.$t || 'Untitled')}</h3><p>${esc(plain(e.summary ? e.summary.$t : '').slice(0, 150))}</p></div><div class="post-meta micro">${e.category ? `<span>${esc(e.category[0].term)}</span>` : ''}<time>${entryDate(e)}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`).join('');
+    const rows = entries.map((e) => `<article><a class="post-row" href="${esc(entryLink(e))}" data-post-id="${esc(postId(e) || '')}"><span class="micro muted row-no" aria-hidden="true"></span><div><h3 class="post-title">${esc(e.title.$t || 'Untitled')}</h3><p>${esc(plain(e.summary ? e.summary.$t : '').slice(0, 150))}</p></div><div class="post-meta micro">${e.category ? `<span>${esc(e.category[0].term)}</span>` : ''}<time>${entryDate(e)}</time></div><span class="row-arrow" aria-hidden="true">↗</span></a></article>`).join('');
     holder.innerHTML = `<section class="writing" id="writing" data-blog-rendered="true"><div class="section-heading"><h2>${heading}</h2><span class="micro muted">${entries.length} ${entries.length === 1 ? 'piece' : 'pieces'} / English &amp; Malayalam</span></div>${filtersHTML(active)}${rows ? `<div class="post-list" data-fallback="true">${rows}</div>` : '<p class="empty">No writing found here yet. <a href="/">Return to the journal.</a></p>'}<nav class="pagination"><a class="text-link" href="#archive">Explore the index ↗</a></nav></section>`;
     window.dispatchEvent(new Event('tyb:render'));
   };
@@ -992,12 +1011,16 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     const group = categories[key];
     const holder = document.getElementById('Blog1') || document.getElementById('journal');
     if (!group || !holder) return;
+    const cached = store.get('list:category:' + key);
+    if (cached) renderList(holder, cached, group.title, key);
     const lists = await Promise.all(group.labels.map((label) => feed('posts/summary/-/' + encodeURIComponent(label), 'max-results=150').catch(() => [])));
     const seen = new Set();
     const entries = lists.flat()
       .filter((e) => !seen.has(e.id.$t) && seen.add(e.id.$t))
-      .sort((a, b) => new Date(b.published.$t) - new Date(a.published.$t));
-    renderList(holder, entries, group.title, key);
+      .sort((a, b) => new Date(b.published.$t) - new Date(a.published.$t))
+      .map(slim);
+    store.set('list:category:' + key, entries);
+    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, group.title, key);
   };
   const restoreBlog = async () => {
     const holder = document.getElementById('Blog1') || document.getElementById('journal');
@@ -1005,9 +1028,19 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     const path = decoded(location.pathname);
     const params = new URLSearchParams(location.search);
     if (/^\/(\d{4}\/\d{2}\/[^/]+|p\/[^/]+)\.html$/.test(path)) {
-      const entries = await feed(path.startsWith('/p/') ? 'pages/default' : 'posts/default', 'max-results=500');
-      const e = entries.find((item) => new URL(entryLink(item)).pathname === location.pathname);
+      let e = store.get('post:' + location.pathname);
+      if (!e && !path.startsWith('/p/')) {
+        const head = document.querySelector('link[href*="/feeds/"][href*="/comments/default"]');
+        const id = head && (head.href.match(/\/feeds\/(\d+)\/comments/) || [])[1];
+        if (id) e = await fetchPost(id).catch(() => null);
+      }
+      if (!e) {
+        const summaries = await feed(path.startsWith('/p/') ? 'pages/summary' : 'posts/summary', 'max-results=500');
+        const match = summaries.find((item) => pathOf(entryLink(item)) === location.pathname);
+        if (match) e = path.startsWith('/p/') ? (await feed('pages/default', 'max-results=500')).find((item) => pathOf(entryLink(item)) === location.pathname) : await fetchPost(postId(match));
+      }
       if (!e) return;
+      store.set('post:' + location.pathname, e);
       holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page" data-blog-rendered="true"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
       window.dispatchEvent(new Event('tyb:render'));
       return;
@@ -1022,7 +1055,29 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
       query += `&published-min=${month[1]}-${month[2]}-01T00:00:00&published-max=${new Date(Date.UTC(+month[1], +month[2], 1)).toISOString().slice(0, 19)}`;
       heading = 'From the <em>archive.</em>';
     }
-    renderList(holder, await feed(kind, query), heading);
+    const listKey = 'list:' + kind + '?' + query;
+    const cached = store.get(listKey);
+    if (cached) renderList(holder, cached, heading);
+    const entries = (await feed(kind, query)).map(slim);
+    store.set(listKey, entries);
+    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, heading);
+  };
+  // Blogger's own list carries titles and links; dates and excerpts come from one cached summary feed.
+  const fillNative = async () => {
+    const slots = [...document.querySelectorAll('[data-fill]')];
+    if (!slots.length) return;
+    let summaries = store.get('summaries');
+    if (!summaries) { summaries = (await feed('posts/summary', 'max-results=150')).map(slim); store.set('summaries', summaries); }
+    const byId = new Map(summaries.map((e) => [postId(e), e]));
+    const missing = [...new Set(slots.map((slot) => slot.closest('[data-post-id]')?.dataset.postId).filter((id) => id && !byId.has(id)))].slice(0, 30);
+    (await Promise.all(missing.map((id) => fetch(`/feeds/posts/summary/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry).catch(() => null))))
+      .forEach((e) => { if (e) byId.set(postId(e), e); });
+    slots.forEach((slot) => {
+      const e = byId.get(slot.closest('[data-post-id]')?.dataset.postId);
+      if (!e) return;
+      if (slot.dataset.fill === 'date') { slot.textContent = entryDate(e); slot.setAttribute('datetime', e.published.$t); }
+      else slot.textContent = plain(e.summary ? e.summary.$t : '').slice(0, slot.dataset.fill === 'excerpt-long' ? 220 : 150);
+    });
   };
   const restoreArchive = async () => {
     const holder = document.querySelector('#index-overlay .index-list');
@@ -1044,6 +1099,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     setTimeout(release, 6000);
     (categories[categoryKey] ? showCategory(categoryKey) : restoreBlog()).catch(() => {}).finally(release);
     restoreArchive().catch(() => {});
+    fillNative().catch(() => {});
   }
   const labelPath = decoded(location.pathname);
   document.querySelectorAll('.filters a').forEach((link) => {
