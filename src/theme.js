@@ -12,11 +12,13 @@
   });
   let activeOverlay = null;
   let returnFocus = null;
+  const setBackgroundInert = (value) => document.querySelectorAll('.site-header,main,.about,.footer').forEach((el) => { el.inert = value; });
   const closeOverlay = () => {
     if (!activeOverlay) return;
     activeOverlay.hidden = true;
     activeOverlay = null;
     document.body.classList.remove('menu-open');
+    setBackgroundInert(false);
     document.querySelectorAll('[data-open]').forEach((el) => el.setAttribute('aria-expanded', 'false'));
     if (returnFocus && returnFocus.isConnected) returnFocus.focus();
   };
@@ -30,6 +32,7 @@
       activeOverlay = target;
       target.hidden = false;
       document.body.classList.add('menu-open');
+      setBackgroundInert(true);
       trigger.setAttribute('aria-expanded', 'true');
       (target.querySelector('input') || target.querySelector('[data-close]')).focus();
     });

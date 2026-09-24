@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>The Yellow Bottle — responsive review</title>
+<style>*{box-sizing:border-box}body{margin:0;font:14px Arial,sans-serif;background:#ededed;color:#111}header{padding:18px 25px;background:white;border-bottom:1px solid #aaa;display:flex;gap:20px;align-items:center;flex-wrap:wrap}h1{margin:0;font-size:17px}label{margin-left:auto}select{padding:10px;border:1px solid #aaa;background:white;font:inherit}main{padding:25px;overflow:auto}iframe{display:block;width:390px;height:1000px;border:0;background:white;margin:0 auto}a{color:inherit}p{font-size:11px;margin:0}</style></head>
+<body><header><h1>The Yellow Bottle / Responsive review</h1><a href="../index.html">Open full preview ↗</a><label for="width">Viewport width</label><select id="width"><option value="320">320 px — small phone</option><option value="390" selected>390 px — phone</option><option value="768">768 px — tablet</option><option value="1280">1280 px — desktop</option></select><p>Sample content. Change the width to inspect the same design at different sizes.</p></header>
+<main><iframe id="preview" title="Interactive design preview" src="../index.html"></iframe></main>
+<script>document.getElementById('width').addEventListener('change',function(){document.getElementById('preview').style.width=this.value+'px';});</script></body>
+</html>
