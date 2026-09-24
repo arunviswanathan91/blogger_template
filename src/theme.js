@@ -180,12 +180,17 @@
     if (!img || page.dataset.decorated) return;
     page.dataset.decorated = 'true';
     const src = fullSize(img.currentSrc || img.src);
-    const backdrop = document.createElement('div');
-    backdrop.className = 'reader-backdrop';
-    backdrop.setAttribute('aria-hidden', 'true');
-    backdrop.style.setProperty('--img', `url("${src.replace(/"/g, '%22')}")`);
-    document.body.prepend(backdrop);
-    document.body.classList.add('has-backdrop');
+    const glow = document.createElement('div');
+    glow.className = 'reader-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    glow.style.setProperty('--img', `url("${src.replace(/"/g, '%22')}")`);
+    page.prepend(glow);
+    page.classList.add('has-glow');
+    // The glow covers only the title block: label, title and byline.
+    const fit = () => { const end = page.querySelector('.article-byline') || page.querySelector('.article-title'); if (end) glow.style.height = (end.offsetTop + end.offsetHeight + 90) + 'px'; };
+    fit();
+    window.addEventListener('resize', fit);
+    if (document.fonts) document.fonts.ready.then(fit);
     // Only a leading picture moves; one further down stays with its text.
     const block = img.closest('.separator') || img.closest('a') || img;
     const before = document.createRange();
