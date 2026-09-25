@@ -323,7 +323,7 @@
     const month = path.match(/^\/(\d{4})\/(\d{2})\/?$/);
     let kind = 'posts/summary', query = 'max-results=25', heading = 'Collected <em>writing.</em>';
     if (label) { kind += '/-/' + encodeURIComponent(label[1]); heading = esc(label[1]); }
-    else if (params.get('q')) { query += '&q=' + encodeURIComponent(params.get('q')); heading = 'Search <em>results.</em>'; }
+    else if (params.get('q')) { query += '&q=' + encodeURIComponent(params.get('q')); heading = `Results for <em>“${esc(params.get('q'))}”</em>`; }
     else if (month) {
       query += `&published-min=${month[1]}-${month[2]}-01T00:00:00&published-max=${new Date(Date.UTC(+month[1], +month[2], 1)).toISOString().slice(0, 19)}`;
       heading = 'From the <em>archive.</em>';
@@ -498,6 +498,37 @@
   };
   enhanceReader();
   window.addEventListener('tyb:render', enhanceReader);
+  // Search as you type: every post's title, labels and excerpt are matched in the page, in English or Malayalam,
+  // and Blogger's own full-text search adds posts that match deeper in the text.
+  const searchInput = document.getElementById('search-input');
+  const searchOut = q('.search-results');
+  if (searchInput && searchOut && !preview && window.fetch) {
+    let index = null, timer = 0, ticket = 0;
+    const loadIndex = () => index || (index = feed('posts/summary', 'max-results=500').then((list) => list.map(slim)).catch(() => []));
+    searchInput.addEventListener('focus', loadIndex);
+    const mark = (text, words) => esc(text).replace(new RegExp(`(${words.map((w) => esc(w).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'giu'), '<mark>$1</mark>');
+    const show = (words, found, query) => {
+      searchOut.innerHTML = found.length
+        ? found.slice(0, 12).map((e) => `<a href="${esc(entryLink(e))}"><strong>${mark(e.title.$t || 'Untitled', words)}</strong><time>${entryDate(e)}</time><small>${mark(plain(e.summary ? e.summary.$t : '').slice(0, 140), words)}</small></a>`).join('') + `<a class="search-all" href="/search?q=${encodeURIComponent(query)}">All results for “${esc(query)}” ↗</a>`
+        : `<p>Nothing found for “${esc(query)}” yet.</p>`;
+    };
+    searchInput.addEventListener('input', () => {
+      clearTimeout(timer);
+      const query = searchInput.value.trim(), mine = ++ticket;
+      if (query.length < 2) { searchOut.innerHTML = ''; return; }
+      timer = setTimeout(async () => {
+        const words = query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
+        const text = (e) => [e.title.$t, e.summary ? plain(e.summary.$t) : '', ...(e.category || []).map((c) => c.term)].join(' ').toLocaleLowerCase();
+        const local = (await loadIndex()).filter((e) => words.every((w) => text(e).includes(w)));
+        if (mine !== ticket) return;
+        show(words, local, query);
+        const deep = await feed('posts/summary', 'max-results=12&q=' + encodeURIComponent(query)).catch(() => []);
+        if (mine !== ticket) return;
+        const seen = new Set(local.map(postId));
+        show(words, local.concat(deep.filter((e) => !seen.has(postId(e))).map(slim)), query);
+      }, 180);
+    });
+  }
   if (document.body.dataset.preview !== 'true' && window.fetch) {
     // Release the held layout even if the feed cannot fill the page.
     const release = () => { const holder = document.getElementById('Blog1'); if (holder && !document.querySelector('[data-blog-rendered]')) holder.setAttribute('data-blog-rendered', 'none'); };
