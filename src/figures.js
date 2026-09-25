@@ -72,6 +72,14 @@
         return ['a', .875 * cos(2 * PI * s) * k, .875 * sin(2 * PI * s) * k, 1 / 8 + .75 * pow(sin(q), 4), c - open, c + open];
       },
       hue: (s, t) => bands(s, t, 4) },
+    // A small string drawing for the read-more corner: 72 chords joining each point on a circle to the point at three
+    // times its angle (a cardioid's envelope family), few enough that every line stays distinct at 120 px.
+    strings: { n: 72, fixed: true, fit: .9, lw: .7,
+      el: (s, t, m) => {
+        const a = TAU * s + t * .6 + m.x * .3, b = 3 * a + .6 * sin(t + m.y);
+        return ['l', cos(a), sin(a), cos(b), sin(b)];
+      },
+      hue: (s, t) => bands(s, t, 1) },
     // Layered compositions: an outer wreath of circles holding a smaller figure at its centre.
     // 15,000 moving circles, after Hamid Naderi Yeganeh's animation of the same name: a four-fold curve wound 21 times,
     // with a fast 13-fold epicycle that curls the chain of circles into loops. Every term turns with time.
@@ -131,7 +139,7 @@
     selected: ['arcs7', 'circles10'],
     video: ['circles10', 'arcs8'],
     portrait: ['portraitLines', 'portraitRings'],
-    more: ['segments4', 'segments8'],
+    more: ['strings'],
   };
 
   // Two- and three-colour sets from the owner's palette. The deepest tones (#500140, #14353F) give way to ink on the dark page.
@@ -168,7 +176,7 @@
   };
 
   // Dense families (the circles) are thinned so each line stays visible; the already open ones keep almost every line.
-  const budget = (form, f) => form.custom ? 1 : Math.round(form.n * (form.keep || .55) * min(1, max(.5, min(f.w, f.h) / 620)));
+  const budget = (form, f) => form.custom ? 1 : form.fixed ? form.n : Math.round(form.n * (form.keep || .55) * min(1, max(.5, min(f.w, f.h) / 620)));
   const paint = (f, formName, alpha, zoom = 1) => {
     const form = FORMS[formName];
     if (form.layers) { form.layers.forEach(([name, k]) => paint(f, name, alpha, k)); return; }

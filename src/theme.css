@@ -307,6 +307,9 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 .comment-open { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 22px; border: 1px solid var(--ink); border-radius: 44px; font-size: 13px; transition: background .25s, color .25s; }
 .comment-open:hover, .comment-open:focus-visible { background: var(--ink); color: var(--paper); }
 .comment-write p { margin-top: 12px; font-size: 10px; }
+.post-rights { margin: 40px 0 26px; padding-top: 16px; border-top: 1px solid var(--line); font: 400 10px/1.7 var(--sans); letter-spacing: .02em; color: var(--quiet); }
+.post-rights a { text-decoration: underline; text-underline-offset: 2px; }
+.post-rights strong { font-weight: 600; color: var(--ink); }
 .read-more { display: grid; grid-template-columns: 120px minmax(0,1fr); gap: 28px; align-items: center; margin-top: 45px; padding-bottom: 10px; }
 .read-more-art { width: 120px; }
 .read-more h2 { margin-bottom: 10px; }
