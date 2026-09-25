@@ -95,14 +95,12 @@ figure, h1, h2, h3, p { margin: 0; }
 .hero { --tab: 42px; display: flex; border-bottom: 1px solid var(--ink); min-height: 650px; container-type: inline-size; overflow: hidden; }
 .panel { position: relative; display: flex; flex: 0 0 var(--tab); min-width: 0; overflow: hidden; transition: flex-grow .95s var(--ease-panel); }
 .panel.is-active { flex-grow: 1; }
-.panel + .panel::before { content: ''; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ink); transform-origin: top; transition: transform 1.2s var(--ease-panel) calc(var(--p) * 90ms); }
-.js .hero:not(.is-ready) .panel::before { transform: scaleY(0); }
+.panel + .panel::before { content: ''; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ink); }
 .panel-tab { position: relative; flex: 0 0 var(--tab); width: var(--tab); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 29px 0; transition: background .3s, color .3s; }
 .panel-tab .chapter-name { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; letter-spacing: .025em; white-space: nowrap; }
-.panel-tab .rail-shape { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 16px; height: 16px; transition: transform .4s ease, fill .4s ease; }
+.panel-tab .rail-shape { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 16px; height: 16px; transition: fill .4s ease; }
 .panel-tab .rail-mark { width: 10px; height: 18px; }
 .panel:not(.is-active) > .panel-tab:hover, .panel:not(.is-active) > .panel-tab:focus-visible { background: var(--ink); color: var(--paper); }
-.panel:not(.is-active) > .panel-tab:hover .rail-shape { transform: scale(1.18) rotate(18deg); }
 .panel.is-active > .panel-tab { cursor: default; }
 .panel.is-active > .panel-tab .rail-shape { fill: currentColor; }
 .panel-body { flex: none; width: calc(100cqw - 6 * var(--tab)); transition: opacity .6s ease .5s; }

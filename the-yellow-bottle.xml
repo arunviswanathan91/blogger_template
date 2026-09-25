@@ -124,14 +124,12 @@ figure, h1, h2, h3, p { margin: 0; }
 .hero { --tab: 42px; display: flex; border-bottom: 1px solid var(--ink); min-height: 650px; container-type: inline-size; overflow: hidden; }
 .panel { position: relative; display: flex; flex: 0 0 var(--tab); min-width: 0; overflow: hidden; transition: flex-grow .95s var(--ease-panel); }
 .panel.is-active { flex-grow: 1; }
-.panel + .panel::before { content: ''; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ink); transform-origin: top; transition: transform 1.2s var(--ease-panel) calc(var(--p) * 90ms); }
-.js .hero:not(.is-ready) .panel::before { transform: scaleY(0); }
+.panel + .panel::before { content: ''; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ink); }
 .panel-tab { position: relative; flex: 0 0 var(--tab); width: var(--tab); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 29px 0; transition: background .3s, color .3s; }
 .panel-tab .chapter-name { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; letter-spacing: .025em; white-space: nowrap; }
-.panel-tab .rail-shape { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 16px; height: 16px; transition: transform .4s ease, fill .4s ease; }
+.panel-tab .rail-shape { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 16px; height: 16px; transition: fill .4s ease; }
 .panel-tab .rail-mark { width: 10px; height: 18px; }
 .panel:not(.is-active) > .panel-tab:hover, .panel:not(.is-active) > .panel-tab:focus-visible { background: var(--ink); color: var(--paper); }
-.panel:not(.is-active) > .panel-tab:hover .rail-shape { transform: scale(1.18) rotate(18deg); }
 .panel.is-active > .panel-tab { cursor: default; }
 .panel.is-active > .panel-tab .rail-shape { fill: currentColor; }
 .panel-body { flex: none; width: calc(100cqw - 6 * var(--tab)); transition: opacity .6s ease .5s; }
@@ -486,7 +484,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
     </div>
   </div>
   <div class="panel" style="--p:1">
-    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/ente%20kavithakal?category=poetry"' aria-controls="panel-poetry" data-panel-tab="true"><span class="micro">01</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6.5"/></svg><span class="chapter-name">Poetry</span></a>
+    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/ente%20kavithakal?category=poetry"' aria-controls="panel-poetry" data-panel-tab="true"><span class="micro">01</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="9" r="6.5"/></svg><span class="chapter-name">Poetry <span aria-hidden="true">/</span> <span lang="ml">കവിതകൾ</span></span></a>
     <div class="panel-body chapter-body" id="panel-poetry" inert="inert">
       <div class="chapter-top"><span class="micro">Chapter 01 / 05</span><span class="micro muted" lang="ml">കവിതകൾ</span></div>
       <div class="chapter-figure figure-frame" data-figure="poetry"></div>
@@ -494,7 +492,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
     </div>
   </div>
   <div class="panel" style="--p:2">
-    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/ente%20kathakal?category=stories"' aria-controls="panel-stories" data-panel-tab="true"><span class="micro">02</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="12" height="12"/></svg><span class="chapter-name">Stories</span></a>
+    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/ente%20kathakal?category=stories"' aria-controls="panel-stories" data-panel-tab="true"><span class="micro">02</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="12" height="12"/></svg><span class="chapter-name">Stories <span aria-hidden="true">/</span> <span lang="ml">കഥകൾ</span></span></a>
     <div class="panel-body chapter-body" id="panel-stories" inert="inert">
       <div class="chapter-top"><span class="micro">Chapter 02 / 05</span><span class="micro muted" lang="ml">കഥകൾ</span></div>
       <div class="chapter-figure figure-frame" data-figure="stories"></div>
@@ -502,7 +500,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
     </div>
   </div>
   <div class="panel" style="--p:3">
-    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/Article?category=essays"' aria-controls="panel-essays" data-panel-tab="true"><span class="micro">03</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><polygon points="9.00,2.00 15.06,5.50 15.06,12.50 9.00,16.00 2.94,12.50 2.94,5.50"/></svg><span class="chapter-name">Essays</span></a>
+    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/Article?category=essays"' aria-controls="panel-essays" data-panel-tab="true"><span class="micro">03</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><polygon points="9.00,2.00 15.06,5.50 15.06,12.50 9.00,16.00 2.94,12.50 2.94,5.50"/></svg><span class="chapter-name">Essays <span aria-hidden="true">/</span> <span lang="ml">ലേഖനങ്ങൾ</span></span></a>
     <div class="panel-body chapter-body" id="panel-essays" inert="inert">
       <div class="chapter-top"><span class="micro">Chapter 03 / 05</span><span class="micro muted" lang="ml">ലേഖനങ്ങൾ</span></div>
       <div class="chapter-figure figure-frame" data-figure="essays"></div>
@@ -510,7 +508,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
     </div>
   </div>
   <div class="panel" style="--p:4">
-    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/My%20picks?category=selected"' aria-controls="panel-selected" data-panel-tab="true"><span class="micro">04</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><polygon points="9.00,2.00 15.66,6.84 13.11,14.66 4.89,14.66 2.34,6.84"/></svg><span class="chapter-name">Selected</span></a>
+    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/My%20picks?category=selected"' aria-controls="panel-selected" data-panel-tab="true"><span class="micro">04</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><polygon points="9.00,2.00 15.66,6.84 13.11,14.66 4.89,14.66 2.34,6.84"/></svg><span class="chapter-name">Selected <span aria-hidden="true">/</span> <span lang="ml">തിരഞ്ഞെടുത്ത</span></span></a>
     <div class="panel-body chapter-body" id="panel-selected" inert="inert">
       <div class="chapter-top"><span class="micro">Chapter 04 / 05</span><span class="micro muted" lang="ml">തിരഞ്ഞെടുത്ത</span></div>
       <div class="chapter-figure figure-frame" data-figure="selected"></div>
@@ -518,7 +516,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
     </div>
   </div>
   <div class="panel" style="--p:5">
-    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/Video?category=video"' aria-controls="panel-video" data-panel-tab="true"><span class="micro">05</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><ellipse cx="9" cy="9" rx="7" ry="4" transform="rotate(-30 9 9)"/></svg><span class="chapter-name">Moving image</span></a>
+    <a class="panel-tab" expr:href='data:blog.homepageUrl + "search/label/Video?category=video"' aria-controls="panel-video" data-panel-tab="true"><span class="micro">05</span><svg class="rail-shape" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round" aria-hidden="true"><ellipse cx="9" cy="9" rx="7" ry="4" transform="rotate(-30 9 9)"/></svg><span class="chapter-name">Moving image <span aria-hidden="true">/</span> <span lang="ml">വീഡിയോസ്</span></span></a>
     <div class="panel-body chapter-body" id="panel-video" inert="inert">
       <div class="chapter-top"><span class="micro">Chapter 05 / 05</span><span class="micro muted" lang="ml">വീഡിയോസ്</span></div>
       <div class="chapter-figure figure-frame" data-figure="video"></div>

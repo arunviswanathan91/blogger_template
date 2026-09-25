@@ -39,7 +39,7 @@ def chapter_panels(mapping):
         attr = mapping[key.upper() + '_ATTR']
         ml = labels[key]
         html += f'''<div class="panel" style="--p:{n}">
-    <a class="panel-tab" {attr} aria-controls="panel-{key}" data-panel-tab="true"><span class="micro">0{n}</span>{rail_shape(shape)}<span class="chapter-name">{name}</span></a>
+    <a class="panel-tab" {attr} aria-controls="panel-{key}" data-panel-tab="true"><span class="micro">0{n}</span>{rail_shape(shape)}<span class="chapter-name">{name} <span aria-hidden="true">/</span> <span lang="ml">{ml}</span></span></a>
     <div class="panel-body chapter-body" id="panel-{key}" inert="inert">
       <div class="chapter-top"><span class="micro">Chapter 0{n} / 05</span><span class="micro muted" lang="ml">{ml}</span></div>
       <div class="chapter-figure figure-frame" data-figure="{key}"></div>
