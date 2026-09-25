@@ -39,7 +39,7 @@ def chapter_panels(mapping):
         attr = mapping[key.upper() + '_ATTR']
         ml = labels[key]
         html += f'''<div class="panel" style="--p:{n}">
-    <a class="panel-tab" {attr} aria-controls="panel-{key}" data-panel-tab="true"><span class="micro">0{n}</span>{rail_shape(shape)}<span class="chapter-name">{name}</span></a>
+    <a class="panel-tab" {attr} aria-controls="panel-{key}" data-panel-tab="true"><span class="micro">0{n}</span>{rail_shape(shape)}<span class="chapter-name">{name} <span aria-hidden="true">/</span> <span lang="ml">{ml}</span></span></a>
     <div class="panel-body chapter-body" id="panel-{key}" inert="inert">
       <div class="chapter-top"><span class="micro">Chapter 0{n} / 05</span><span class="micro muted" lang="ml">{ml}</span></div>
       <div class="chapter-figure figure-frame" data-figure="{key}"></div>
@@ -64,12 +64,45 @@ CATEGORY_LABELS = {
 }
 CATEGORY_TITLES = {'poetry': 'Poems &amp; <em>fragments.</em>', 'stories': 'A place for <em>stories.</em>', 'essays': 'Notes &amp; <em>essays.</em>', 'selected': 'Selected <em>pages.</em>', 'video': 'The moving <em>image.</em>'}
 CATEGORIES = [(key, ml, quote(CATEGORY_LABELS[key][0]) + '?category=' + key) for key, ml in [('poetry','കവിതകൾ'),('stories','കഥകൾ'),('essays','ലേഖനങ്ങൾ'),('selected','തിരഞ്ഞെടുത്ത'),('video','വീഡിയോസ്')]]
-CATEGORY_JS = 'window.TYB_CATEGORIES = ' + json.dumps({key: {'ml': ml, 'labels': CATEGORY_LABELS[key], 'title': CATEGORY_TITLES[key], 'url': '/search/label/' + path} for key, ml, path in CATEGORIES}, ensure_ascii=False) + ';\n'
+POLICY = 'https://arunviswanathan91.blogspot.com/p/copy-right-statement.html'
+LINE_ART_PAGE = 'https://arunviswanathan91.blogspot.com/p/about-line-art-used-in-this-website-and.html'
+# Shown under every post.
+RIGHTS = f'<p class="post-rights">Original work by Arun Viswanathan | TheYellow Bottle. When quoting or referring to this post, please credit the author and link to the original post. AI-training and other reuse permissions are governed by this website’s <a href="{POLICY}">Copyright and Content Use</a> policy. <strong>Absolutely no AI training.</strong></p>'
+# Invisible to readers, present in the page source for crawlers and language models.
+AI_NOTICE = f'''<!--
+COPYRIGHT AND AI USE NOTICE
+
+Original content copyright (c) 2009-2026 Arun Viswanathan.
+Publication: TheYellow Bottle.
+Website: https://arunviswanathan91.blogspot.com/
+Copyright and Content Use policy:
+{POLICY}
+
+Except where permitted by applicable law or expressly authorised
+in writing, no permission is granted to use this website's original
+content to train or fine-tune artificial intelligence or
+machine-learning models.
+
+When lawfully quoting, summarising or otherwise referring to a
+specific post, please identify Arun Viswanathan and TheYellow Bottle
+as the author and publication, and provide a direct link to the
+original post.
+
+Attribution alone does not grant permission for otherwise
+unauthorised use. Statutory exceptions remain unaffected.
+-->'''
+AI_HEAD = AI_NOTICE + '<meta name="robots" content="noai, noimageai"/><meta name="copyright" content="© 2009–2026 Arun Viswanathan | TheYellow Bottle"/><script type="application/ld+json">' + json.dumps({
+    '@context': 'https://schema.org', '@type': 'WebSite', 'name': 'TheYellow Bottle', 'url': 'https://arunviswanathan91.blogspot.com/',
+    'author': {'@type': 'Person', 'name': 'Arun Viswanathan'}, 'copyrightHolder': {'@type': 'Person', 'name': 'Arun Viswanathan'},
+    'copyrightYear': '2009', 'license': POLICY,
+    'usageInfo': 'No permission is granted to use this content to train or fine-tune AI or machine-learning models. When quoting or referring to a post, credit Arun Viswanathan and TheYellow Bottle and link to the original post.'}, ensure_ascii=False) + '</script>'
+RIGHTS_JS = 'window.TYB_RIGHTS = ' + json.dumps(RIGHTS, ensure_ascii=False) + ';\n'
+CATEGORY_JS = RIGHTS_JS + 'window.TYB_CATEGORIES = ' + json.dumps({key: {'ml': ml, 'labels': CATEGORY_LABELS[key], 'title': CATEGORY_TITLES[key], 'url': '/search/label/' + path} for key, ml, path in CATEGORIES}, ensure_ascii=False) + ';\n'
 PORTRAIT_JS = 'window.TYB_PORTRAIT = ' + json.dumps(json.loads((SRC / 'portrait.json').read_text()), separators=(',', ':')) + ';\n'
 
 
 def links(preview):
-    mapping = {'MARK':MARK, 'SCULPTURE':read('sculpture.svg'), 'STUDY':read('study.svg'), 'TYPE_CONTROLS':TYPE_CONTROLS}
+    mapping = {'MARK':MARK, 'SCULPTURE':read('sculpture.svg'), 'STUDY':read('study.svg'), 'TYPE_CONTROLS':TYPE_CONTROLS, 'RIGHTS':RIGHTS, 'AI_NOTICE':AI_NOTICE}
     mapping['HOME_ATTR'] = 'href="#home"' if preview else "expr:href='data:blog.homepageUrl'"
     mapping['JOURNAL_ATTR'] = 'href="#home"' if preview else "expr:href='data:blog.homepageUrl + \"#writing\"'"
     mapping['ARCHIVE_ATTR'] = 'href="#archive"'
@@ -94,12 +127,12 @@ def preview():
 <section id="home-view"><div id="opening">__HERO__</div>
 <article class="lead" id="featured"><a class="lead-art" href="#read/hand" aria-label="Read The shape of a hand">__STUDY__</a><div class="lead-copy"><div class="lead-meta micro"><span>01 / The opening page</span><span class="muted">Poetry &amp; prose / Sample</span></div><h2 class="lead-title"><a href="#read/hand">The shape<br/>of a hand.</a></h2><p>Some things are remembered without thinking. A voice. A warmth. The outline of someone who is no longer in the room.</p><a class="text-link" href="#read/hand">Read the story <span class="arrow" aria-hidden="true">↗</span></a></div></article>
 <section class="writing" id="writing" aria-labelledby="writing-heading"><div class="section-heading"><h2 id="writing-heading">Collected <em>writing.</em></h2><span class="micro muted" id="result-count" aria-live="polite">Sample writing / 02–05</span></div>__FILTERS__<div id="post-list"></div><nav class="pagination" aria-label="More writing"><span class="micro muted">There is more between the lines.</span><a class="text-link" href="#archive">Explore the index <span class="arrow" aria-hidden="true">↗</span></a></nav></section></section>
-<section id="reader-view" hidden="hidden"><div class="reader-toolbar"><a href="#home">← All writing</a>__TYPE_CONTROLS__</div><article class="reading-page"><div class="micro muted" id="reader-category"></div><h1 class="article-title" id="reader-title"></h1><p class="article-deck" id="reader-deck"></p><div class="article-byline"><span>Arun Viswanathan / Sample writing</span><span id="reader-date"></span></div><div class="article-body" id="reader-body"></div><div class="article-end"><a href="#home">← All writing</a><button type="button" data-copy="true" aria-live="polite">Copy preview link ↗</button></div><div class="comments"><h3>A note in the margin.</h3><p>This is a reading specimen. On the blog, readers’ comments appear here, with Blogger’s own comment form below them.</p></div></article></section>
+<section id="reader-view" hidden="hidden"><div class="reader-toolbar"><a href="#home">← All writing</a>__TYPE_CONTROLS__</div><article class="reading-page"><div class="micro muted" id="reader-category"></div><h1 class="article-title" id="reader-title"></h1><p class="article-deck" id="reader-deck"></p><div class="article-byline"><span>Arun Viswanathan / Sample writing</span><span id="reader-date"></span></div><div class="article-body" id="reader-body"></div>__RIGHTS__<div class="article-end"><a href="#home">← All writing</a><button type="button" data-copy="true" aria-live="polite">Copy preview link ↗</button></div><div class="comments"><h3>A note in the margin.</h3><p>This is a reading specimen. On the blog, readers’ comments appear here, with Blogger’s own comment form below them.</p></div></article></section>
 <noscript><p class="empty">This interactive preview requires JavaScript. The Blogger theme renders real posts and navigation without it.</p></noscript>
 ''', values)
     body = fill(read('frame.html'), values)
     return f'''<!doctype html>
-<html lang="en"><head><meta charset="utf-8"/><script>{THEME_INIT_JS}</script><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="The Yellow Bottle — a white and black editorial design preview. All article content is illustrative."/><title>The Yellow Bottle — Black &amp; White / Preview</title>{FONT_HEAD}<style>{read('theme.css')}</style></head>
+<html lang="en"><head><meta charset="utf-8"/><script>{THEME_INIT_JS}</script><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="The Yellow Bottle — a white and black editorial design preview. All article content is illustrative."/><title>The Yellow Bottle — Black &amp; White / Preview</title>{AI_HEAD}{FONT_HEAD}<style>{read('theme.css')}</style></head>
 <body data-preview="true" class="is-index is-home">{body}<script>{read('sample-posts.js')}</script><script>{CATEGORY_JS}{PORTRAIT_JS}{read('theme.js')}</script><script>{read('figures.js')}</script><script>{read('preview.js')}</script></body></html>'''
 
 def blogger():
@@ -113,7 +146,7 @@ def blogger():
 <html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
 <head><meta charset='UTF-8'/><script type='text/javascript'>//<![CDATA[
 {THEME_INIT_JS}
-//]]></script><meta content='width=device-width, initial-scale=1' name='viewport'/><title><data:view.title.escaped/></title><b:include data='blog' name='all-head-content'/>{FONT_HEAD}
+//]]></script><meta content='width=device-width, initial-scale=1' name='viewport'/><title><data:view.title.escaped/></title><b:include data='blog' name='all-head-content'/>{AI_HEAD}{FONT_HEAD}
 <b:skin version='1.0.0'><![CDATA[{read('theme.css')}]]></b:skin>
 <b:template-skin><![CDATA[body#layout .overlay,body#layout .hero,body#layout .about{{display:none}}body#layout #index-overlay{{display:block;position:static;clip-path:none}}body#layout .wrap{{margin:0}}]]></b:template-skin>
 </head><body expr:class='data:view.isSingleItem ? "is-reader" : (data:view.isHomepage ? "is-index is-home" : "is-index")'>{body}<script type='text/javascript'>//<![CDATA[

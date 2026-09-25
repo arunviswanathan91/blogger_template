@@ -569,6 +569,7 @@
   const enhanceReader = () => {
     const page = q('.reading-page:not([hidden])');
     if (!page || page.closest('[hidden]')) return;
+    if (window.TYB_RIGHTS && !page.querySelector('.post-rights')) (page.querySelector('.article-body') || page.lastElementChild).insertAdjacentHTML('afterend', window.TYB_RIGHTS);
     buildActions(page);
     fixInk();
     if (!preview && window.fetch) { buildMore(page).catch(() => {}); buildComments(page).catch(() => {}); }

@@ -95,14 +95,12 @@ figure, h1, h2, h3, p { margin: 0; }
 .hero { --tab: 42px; display: flex; border-bottom: 1px solid var(--ink); min-height: 650px; container-type: inline-size; overflow: hidden; }
 .panel { position: relative; display: flex; flex: 0 0 var(--tab); min-width: 0; overflow: hidden; transition: flex-grow .95s var(--ease-panel); }
 .panel.is-active { flex-grow: 1; }
-.panel + .panel::before { content: ''; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ink); transform-origin: top; transition: transform 1.2s var(--ease-panel) calc(var(--p) * 90ms); }
-.js .hero:not(.is-ready) .panel::before { transform: scaleY(0); }
+.panel + .panel::before { content: ''; position: absolute; z-index: 2; left: 0; top: 0; bottom: 0; width: 1px; background: var(--ink); }
 .panel-tab { position: relative; flex: 0 0 var(--tab); width: var(--tab); display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 29px 0; transition: background .3s, color .3s; }
 .panel-tab .chapter-name { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 12px; letter-spacing: .025em; white-space: nowrap; }
-.panel-tab .rail-shape { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 16px; height: 16px; transition: transform .4s ease, fill .4s ease; }
+.panel-tab .rail-shape { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 16px; height: 16px; transition: fill .4s ease; }
 .panel-tab .rail-mark { width: 10px; height: 18px; }
 .panel:not(.is-active) > .panel-tab:hover, .panel:not(.is-active) > .panel-tab:focus-visible { background: var(--ink); color: var(--paper); }
-.panel:not(.is-active) > .panel-tab:hover .rail-shape { transform: scale(1.18) rotate(18deg); }
 .panel.is-active > .panel-tab { cursor: default; }
 .panel.is-active > .panel-tab .rail-shape { fill: currentColor; }
 .panel-body { flex: none; width: calc(100cqw - 6 * var(--tab)); transition: opacity .6s ease .5s; }
@@ -307,6 +305,9 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 .comment-open { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 22px; border: 1px solid var(--ink); border-radius: 44px; font-size: 13px; transition: background .25s, color .25s; }
 .comment-open:hover, .comment-open:focus-visible { background: var(--ink); color: var(--paper); }
 .comment-write p { margin-top: 12px; font-size: 10px; }
+.post-rights { margin: 40px 0 26px; padding-top: 16px; border-top: 1px solid var(--line); font: 400 10px/1.7 var(--sans); letter-spacing: .02em; color: var(--quiet); }
+.post-rights a { text-decoration: underline; text-underline-offset: 2px; }
+.post-rights strong { font-weight: 600; color: var(--ink); }
 .read-more { display: grid; grid-template-columns: 120px minmax(0,1fr); gap: 28px; align-items: center; margin-top: 45px; padding-bottom: 10px; }
 .read-more-art { width: 120px; }
 .read-more h2 { margin-bottom: 10px; }

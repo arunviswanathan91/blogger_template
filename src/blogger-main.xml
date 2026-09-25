@@ -68,6 +68,8 @@
         <div class='article-byline'><span><data:post.author.name/></span><b:if cond='data:view.isPost'><time data-fill='date'></time></b:if></div>
         <div class='article-body post-body entry-content' expr:id='"post-body-" + data:post.id'><data:post.body/></div>
         <b:if cond='data:post.labels'><nav class='article-labels' aria-label='Post labels'><b:loop values='data:post.labels' var='label'><a expr:href='data:label.url' rel='tag'><data:label.name/></a></b:loop></nav></b:if>
+        __RIGHTS__
+        __AI_NOTICE__
         <div class='article-end'><a expr:href='data:blog.homepageUrl'>← All writing</a><button data-copy='true' type='button' aria-live='polite'>Copy link ↗</button></div>
         <b:if cond='data:post.allowComments'><b:include data='post' name='commentPicker'/></b:if>
       </article>
