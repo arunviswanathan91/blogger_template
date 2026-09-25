@@ -1,0 +1,85 @@
+<!-- Paste into Blogger → Pages → "About the line art used in this website" → HTML view. The theme draws every figure live. -->
+<style>
+.la-intro { font-size: 1em; }
+.la-grid { display: grid; gap: 56px; margin: 48px 0; }
+.la-item { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 32px; align-items: start; }
+.la-item .figure-frame { width: 100%; }
+.la-item h3 { margin: 0 0 .4em; font: 500 1.05em/1.3 var(--sans, sans-serif); letter-spacing: -.02em; }
+.la-item p { margin: 0 0 .7em; font-size: .78em; line-height: 1.7; }
+.la-f { font: 400 .74em/1.9 'Courier New', monospace; overflow-wrap: anywhere; padding: 14px 16px; border-left: 1px solid currentColor; margin: .6em 0 0; }
+.la-note { font-size: .72em; opacity: .75; }
+@media (max-width: 640px) { .la-item { grid-template-columns: 1fr; gap: 16px; } .la-item .figure-frame { max-width: 260px; } }
+</style>
+
+<p class="la-intro">Every drawing on this website is made of simple lines: circles, straight segments and arcs, placed one by one by short formulas. Most of them are the formulas published by the mathematical artist <strong>Hamid Naderi Yeganeh</strong> in <a href="https://www.scientificamerican.com/article/making-mathematical-art/">“Making Mathematical Art”</a> (<em>Scientific American</em>); the opening figure follows his animation <em>15,000 Moving Circles</em>. The drawings are generated live in your browser. They keep moving slowly, lean a little toward the mouse pointer, and change when clicked.</p>
+<p class="la-note">In every formula k runs from 1 to N and s = k / N. On the website a slowly increasing time t is added inside some terms, so the figures flow; set t = 0 to get the still image.</p>
+
+<div class="la-grid">
+
+<div class="la-item"><div class="figure-frame" data-form="moving15" data-palette="opening"></div><div>
+<h3>15,000 moving circles — the opening</h3>
+<p>A four-fold curve wound 21 times, with a fast 13-fold loop riding on it that curls each chain of circles into small spirals. The colours pass through six sets in turn.</p>
+<p class="la-f">φ = 42πs, ψ = 2πs, T = time<br/>ρ = 0.22 + 0.62 sin²(ψ)<br/>a = 0.1 ρ cos(3ψ + T)<br/>e = 0.055 + 0.03 sin(5ψ − 0.6T)<br/>X = ρ cos φ + a cos 3φ + e cos(13φ + T)<br/>Y = ρ sin φ − a sin 3φ + e sin(13φ + T)<br/>R = 1/160 + 0.03 sin⁴(2φ + 2ψ + T/2)<br/>circle k: centre (X, Y), radius R</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="circles14" data-palette="opening"></div><div>
+<h3>14,000 circles</h3>
+<p class="la-f">X = cos(10πs) (1 − ½ cos²(16πs))<br/>Y = sin(10πs) (1 − ½ cos²(16πs))<br/>R = 1/200 + (1/10) sin⁴(52πs)</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="circles12" data-palette="stories"></div><div>
+<h3>12,000 circles — Stories</h3>
+<p class="la-f">X = cos(14πs) (1 − ¾ cos²(32πs))<br/>Y = sin(14πs) (1 − ¾ cos²(32πs))<br/>R = 1/200 + (1/10) sin⁶(56πs)</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="circles10" data-palette="video"></div><div>
+<h3>10,000 circles — Moving image</h3>
+<p class="la-f">X = cos(14πs) (1 − ¾ cos²(20πs))<br/>Y = sin(14πs) (1 − ¾ cos²(24πs))<br/>R = 1/200 + (1/10) sin⁶(54πs)</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="circles9" data-palette="poetry"></div><div>
+<h3>9,000 circles — Poetry</h3>
+<p class="la-f">X = cos(14πs) (1 − ¾ cos²(36πs))<br/>Y = sin(14πs) (1 − ¾ cos²(36πs))<br/>R = 1/200 + (1/10) sin⁶(64πs)</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="segments8" data-palette="essays"></div><div>
+<h3>8,000 line segments</h3>
+<p>Each line runs from (A, B) to (C, D).</p>
+<p class="la-f">A = sin(14πs) (sin²(12πs) + sin²(18πs))<br/>B = cos(14πs) (sin²(12πs) + sin²(18πs))<br/>C = sin(14πs) (sin²(8πs) + sin²(10πs))<br/>D = cos(14πs) (sin²(8πs) + sin²(10πs))</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="segments4" data-palette="essays"></div><div>
+<h3>4,000 line segments — Essays</h3>
+<p class="la-f">u = sin²(16πs) + sin²(14πs)<br/>A = sin(14πs) u, B = cos(14πs) u<br/>C = sin(30πs) u, D = cos(30πs) u<br/>line k: from (A, B) to (C, D)</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="arcs8" data-palette="selected"></div><div>
+<h3>8,000 arcs</h3>
+<p>Each arc has centre (X, Y) and radius S, and runs from angle B through C to angle A.</p>
+<p class="la-f">S = 1/8 + (5/8) sin⁴(32πs)<br/>A = −86πs + π/20 + (7π/8) cos⁴(32πs)<br/>B = −86πs − π/20 − (7π/8) cos⁴(32πs)<br/>C = −86πs<br/>X = ¾ cos(2πs) (1 − ½ cos(24πs) − ¼ cos³(32πs) + ¼ cos³(48πs))<br/>Y = ¾ sin(2πs) (1 − ½ cos(24πs) − ¼ cos³(32πs) + ¼ cos³(48πs))</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="arcs7" data-palette="selected"></div><div>
+<h3>7,000 arcs — Selected</h3>
+<p class="la-f">S = 1/8 + ¾ sin⁴(32πs)<br/>A, B, C as for 8,000 arcs<br/>X = ⅞ cos(2πs) (1 − ½ cos(32πs) − ¼ cos³(40πs) + ¼ cos³(48πs))<br/>Y = ⅞ sin(2πs) (1 − ½ cos(32πs) − ¼ cos³(40πs) + ¼ cos³(48πs))</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="crown" data-palette="opening"></div><div>
+<h3>Layered figures</h3>
+<p>Clicking the opening figure shows three layered compositions: the 14,000 circles holding the 8,000 arcs at half size; the 12,000 circles around the 8,000 segments; and the 9,000 circles around the 10,000 circles and the 4,000 segments.</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-form="strings" data-palette="more"></div><div>
+<h3>72 strings — Read more</h3>
+<p>The small drawing beside “Read more” under each post: every point on a circle joined to the point at three times its angle. Together the lines trace a cardioid.</p>
+<p class="la-f">a = 2πk / 72, k = 1 … 72<br/>line k: from (cos a, sin a) to (cos 3a, sin 3a)</p>
+</div></div>
+
+<div class="la-item"><div class="figure-frame" data-figure="portrait" style="aspect-ratio: 68 / 110;"></div><div>
+<h3>The line portrait — About</h3>
+<p>104 horizontal lines drawn over a 68 × 110 grid of darkness values taken from a photograph (only the grid is stored, not the photo). Each line waves harder where the picture is darker, and a band of colour sweeps across all the lines at once. Click it for the second version: a halftone of circles whose size follows the same darkness.</p>
+<p class="la-f">d = darkness(x, y)^1.25, between 0 and 1<br/>phase grows along the line by (0.1 + 1.1 d) per step<br/>y_line(x) = y₀ + sin(phase + 3t) · d · 0.95 · gap<br/>halftone: r = darkness^1.2 · 0.62 · cell</p>
+</div></div>
+
+</div>
+<p class="la-note">Formulas for the circles, segments and arcs: Hamid Naderi Yeganeh. Drawings, motion and colour on this website: generated in the browser by the theme.</p>
