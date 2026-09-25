@@ -1,6 +1,6 @@
 # The Yellow Bottle
 
-A custom white-and-black journal for Arun Viswanathan, in light or dark. Oversized typography, narrow chapter rails, interactive mathematical artwork, and a quiet reading view. English and Malayalam are both supported.
+A custom white-and-black journal for Arun Viswanathan, in light or dark. It has oversized typography, narrow chapter rails, moving mathematical artwork in colour, and a quiet reading view with comments, sharing and likes. English and Malayalam are both supported.
 
 ![The Yellow Bottle desktop design](docs/desktop-preview.jpg)
 
@@ -17,15 +17,20 @@ If Blogger offers a separate mobile theme, choose the desktop/custom theme for m
 
 - Pure white background, black text and graphic elements, grayscale rules — with a true dark mode (manual toggle, honours system preference, no flash on load).
 - Original mathematical SVG artwork: a hand-generated infinity curve (lemniscate) crossed by orbiting rings, which rearranges into two further quiet compositions when clicked or keyboard-activated. No stock icon shapes anywhere — the wordmark and the five chapter markers are all built from the same circle/polygon geometry.
-- The About section shows a moving line portrait of the author: wave lines that ripple harder where the photo is darker (click for a ring halftone), stirred by the cursor, inverted in dark mode so it stays a positive image. Only a 68×110 grid of tone values (`src/portrait.json`) is stored, not the photo.
+- The About section shows a moving line portrait of the author. Its wave lines ripple harder where the photo is darker, and a band of colour sweeps across every line at the same moment. The cursor steers it, and a click switches to a ring halftone. It is inverted in dark mode so it stays a positive image. Only a 68×110 grid of tone values (`src/portrait.json`) is stored, not the photo.
 - Interface icons follow the open-source [Feather](https://github.com/feathericons/feather) icon set (MIT), redrawn as inline SVG so the theme stays a single self-contained file.
-- The drawings are generated line art in the manner of Hamid Naderi Yeganeh's mathematical pieces: hundreds of circles, squares, pentagons, hexagons, ellipses or pixel cells whose centres, sizes and turns follow short formulas (`src/figures.js`). They draw themselves in, drift slowly, lean toward the cursor, and change form when clicked. Colour is ink plus one yellow, in both themes.
+- The drawings use the formulas Hamid Naderi Yeganeh published in [“Making Mathematical Art”](https://www.scientificamerican.com/article/making-mathematical-art/) (*Scientific American*): 14,000, 12,000, 10,000 and 9,000 circles, 8,000 and 4,000 line segments, and 8,000 and 7,000 arcs. The page draws each element from the published formula for its centre, radius or end points (`src/figures.js`). A slow clock turns the inner terms, so the figures keep flowing; they lean toward the cursor and change to the next formula when clicked. Colour bands in eight muted tones travel along each figure, with a brighter set on the dark theme. The opening figure is large on every screen size. The artwork is credited to Hamid Naderi Yeganeh.
 - The opening is a row of numbered panels in the manner of G!theimagineers: on desktop a chapter tab (01–05) unfolds that chapter in place, each with its own figure. On phones the tabs stay links to the label pages.
 - Menu, search and the monthly index open as a curtain from the right. The menu carries a small gallery of four figures.
 - If Blogger ever returns an empty post list or index, the page rebuilds it from the blog's own public feed, so writing is never missing.
+- Edits made in the Blogger dashboard always show. A remembered copy of a post opens instantly, but the live version is fetched each time and replaces the copy when the post has changed. Lists and excerpts are refreshed in the same way.
+- Every post ends with a like, a share button and the comments:
+  - **Like:** a burst of coloured lines, not a heart, with a shared counter. Each browser counts once. The count is kept by the free [CounterAPI](https://counterapi.dev) service (namespace `the-yellow-bottle`). If that service is unreachable, the like still animates and the number is simply hidden. Point `window.TYB_LIKES_API` at another compatible counter to change it.
+  - **Share:** a black button with a white line icon. It opens the phone's own share sheet, or on a computer a menu for WhatsApp, Facebook, X, Telegram, email and copy link.
+  - **Comments:** listed from the post's Blogger comment feed, with Blogger's own comment form (sign-in, moderation and notifications all stay in Blogger). A link opens the same form in a new window. When Blogger renders its native comment form, that form is used instead.
 - Full-screen menu and search, keyboard focus containment, Escape to close.
 - Native Blogger posts, permalinks, labels, pagination, static pages, monthly archive, and comments.
-- Post images remain in their original colors. The interface and fallback artwork are monochrome in both themes.
+- Post images remain in their original colours. The interface is monochrome in both themes; only the artwork and the like carry colour.
 - Native post/search/archive rendering works without JavaScript. JavaScript adds the overlays, artwork, theme toggle, reading-size preference, copy link, and progress indicator.
 - Reduced-motion support, responsive media, Malayalam font support, and a print reading layout.
 - The exact supplied copyright line with the **Copyright and Content Use** link.

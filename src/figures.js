@@ -1,11 +1,11 @@
-/* Generated line drawings: families of simple shapes whose centres, sizes and turns follow small formulas,
-   after Hamid Naderi Yeganeh's mathematical art. Canvas, crisp at any pixel density. No dependencies. */
+/* Generated line drawings: thousands of circles, segments and arcs whose centres, sizes and angles follow the
+   formulas Hamid Naderi Yeganeh published in "Making Mathematical Art" (Scientific American), set in motion and in
+   colour. Canvas, crisp at any pixel density. No dependencies. */
 (() => {
   'use strict';
   const TAU = Math.PI * 2, PI = Math.PI;
-  const { sin, cos, pow, atan2, min, max, hypot } = Math;
+  const { sin, cos, pow, min, max, hypot } = Math;
   const sq = (v) => v * v;
-  const smooth = (v) => { const c = min(1, max(0, v)); return c * c * (3 - 2 * c); };
   const ease = (v) => 1 - pow(1 - v, 3);
   const media = (q) => window.matchMedia ? window.matchMedia(q) : { matches: false, addEventListener() {} };
   const motionOK = !media('(prefers-reduced-motion: reduce)').matches;
@@ -15,161 +15,147 @@
   const tone = (u, v) => {
     const i = min(portrait.h - 1, max(0, Math.floor(v * portrait.h))) * portrait.w + min(portrait.w - 1, max(0, Math.floor(u * portrait.w)));
     const d = parseInt(portrait.dark[i], 16) / 15;
-    return [colors.dark ? 1 - d : d, portrait.red[i] === '1' ? 1 : 0];
+    return [colors.dark ? 1 - d : d];
   };
 
-  // Each form: n shapes; at(s, t, m) gives [x, y, size, turn] inside a -1..1 square for s in 0..1.
-  // t is a slow clock that keeps the lines drifting; m is the eased pointer offset (-1..1).
-  // accent(s, t) marks the shapes drawn in yellow.
-  const lens = (s, t, m, lobes, beat, pull) => {
-    const a = lobes * PI * s + m.x * .35;
-    const w = 1 - (pull + m.y * .12) * sq(cos(beat * PI * s + t));
-    return [cos(a) * w, sin(a) * w];
-  };
-  const drift = (u, t, m, reach) => {
-    const ax = max(-1, min(1, cos(t * .25) * .35 + m.x * .9));
-    const ay = max(-1, min(1, sin(t * .25) * .35 + m.y * .9));
-    return [ax * reach, ay * reach];
-  };
+  // Each form draws n elements; for element k, s = k / n runs 0..1 exactly as in the published formulas.
+  // t is a slow clock that turns the inner terms so the figure keeps flowing; m is the eased pointer offset (-1..1).
+  // hue(s, t) picks one of the palette colours, so colour bands travel slowly along the figure.
+  const P = 8;
+  const bands = (s, t, k) => Math.floor(((s * k + t * .12) % 1 + 1) % 1 * P);
+  // The portrait stays in ink; a band a third as wide as the picture carries the palette across every line together.
+  const band = (w) => { const k = ((w % 1) + 1) % 1; return k < .36 ? Math.floor(k / .36 * P) : P; };
+  const circles = (N, a, b, c, d, pow6, bY) => ({ n: N, fit: .86, lw: .42,
+    el: (s, t, m) => {
+      const lift = c + m.y * .08, turn = a * PI * s + m.x * .3;
+      const kx = 1 - lift * sq(cos(b * PI * s + t)), ky = 1 - lift * sq(cos((bY || b) * PI * s + t));
+      return ['c', cos(turn) * kx, sin(turn) * ky, 1 / 200 + pow(sin(d * PI * s + t * .5), pow6) / 10];
+    },
+    hue: (s, t) => bands(s, t, a / 2) });
   const FORMS = {
-    petals: { n: 900, shape: 'circle', lw: .45,
-      at: (s, t, m) => [...lens(s, t, m, 6, 16, .72), .02 + .11 * pow(sin(24 * PI * s), 6), 0],
-      accent: (s) => sq(sin(24 * PI * s)) > .975 },
-    bloom: { n: 700, shape: 'circle', lw: .45,
-      at: (s, t, m) => [...lens(s, t, m, 4, 10, .6), .03 + .14 * pow(sin(16 * PI * s), 4), 0],
-      accent: (s) => sq(sin(16 * PI * s)) > .96 },
-    pixels: { n: 1800, shape: 'pixel',
-      at: (s, t, m) => [...lens(s, t, m, 6, 16, .72), 0, 0],
-      accent: (s) => sin(6 * PI * s) > .86 },
-    bottle: { n: 34, shape: 'circle', lw: .7,
-      at: (s, t, m) => {
-        const u = s * 34 / 33;
-        const r = u < .22 ? .15 : u < .56 ? .15 + .27 * smooth((u - .22) / .34) : .42 - .05 * sq(max(0, (u - .86) / .14));
-        return [(m.x * .14 + sin(t * .8 + u * 2.4) * .025) * u, -.78 + u * 1.28 + m.y * .03 * u, r, 0];
+    // 14,000 circles: X = cos(10πs)(1 − ½cos²(16πs)), R = 1/200 + sin⁴(52πs)/10
+    circles14: circles(14000, 10, 16, .5, 52, 4),
+    // 12,000 circles: X = cos(14πs)(1 − ¾cos²(32πs)), R = 1/200 + sin⁶(56πs)/10
+    circles12: circles(12000, 14, 32, .75, 56, 6),
+    // 10,000 circles: X = cos(14πs)(1 − ¾cos²(20πs)), Y = sin(14πs)(1 − ¾cos²(24πs))
+    circles10: circles(10000, 14, 20, .75, 54, 6, 24),
+    // 9,000 circles: X = cos(14πs)(1 − ¾cos²(36πs)), R = 1/200 + sin⁶(64πs)/10
+    circles9: circles(9000, 14, 36, .75, 64, 6),
+    // 8,000 segments from (A, B) to (C, D)
+    segments8: { n: 8000, fit: .5, lw: .32,
+      el: (s, t, m) => {
+        const u = sq(sin(12 * PI * s + t)) + sq(sin(18 * PI * s)), v = sq(sin(8 * PI * s)) + sq(sin(10 * PI * s + t));
+        const a = 14 * PI * s + m.x * .3;
+        return ['l', sin(a) * u, cos(a) * u, sin(a) * v, cos(a) * v];
       },
-      accent: (s) => s > .62 },
-    rings: { n: 150, shape: 'circle', lw: .55,
-      at: (s, t, m) => { const a = TAU * s + m.x * .4; return [.52 * cos(a), .52 * sin(a), .26 + .18 * sin(5 * a + t), 0]; },
-      accent: (s, t) => sin(5 * (TAU * s) + t) > .92 },
-    tunnel: { n: 22, shape: 'circle', lw: .7,
-      at: (s, t, m) => {
-        const u = s * 22 / 21, r = .95 - .8 * pow(u, .9), [dx, dy] = drift(u, t, m, (.95 - r) * .65);
-        return [dx, dy, r, 0];
+      hue: (s, t) => bands(s, t, 7) },
+    // 4,000 segments: the same bloom turned 14 and 30 times
+    segments4: { n: 4000, fit: .5, lw: .36,
+      el: (s, t, m) => {
+        const u = sq(sin(16 * PI * s + t)) + sq(sin(14 * PI * s)), a = 14 * PI * s + m.x * .3, b = 30 * PI * s + m.x * .3 + m.y * .2;
+        return ['l', sin(a) * u, cos(a) * u, sin(b) * u, cos(b) * u];
       },
-      accent: (s) => s > .84 },
-    lemniscate: { n: 240, shape: 'square', lw: .55,
-      at: (s, t, m) => {
-        const p = TAU * s, d = 1 + sq(sin(p));
-        return [.92 * cos(p) / d, 1.15 * sin(p) * cos(p) / d, .05 + .12 * sq(sin(3 * p + t)), 2 * p + m.x];
+      hue: (s, t) => bands(s, t, 7) },
+    // 8,000 arcs: centre (X, Y), radius S, from angle B through C to A
+    arcs8: { n: 8000, fit: .5, lw: .34,
+      el: (s, t, m) => {
+        const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
+        const k = 1 - cos(24 * PI * s) / 2 - pow(cos(q), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
+        return ['a', .75 * cos(2 * PI * s) * k, .75 * sin(2 * PI * s) * k, 1 / 8 + 5 / 8 * pow(sin(q), 4), c - open, c + open];
       },
-      accent: (s, t) => sq(sin(3 * TAU * s + t)) > .93 },
-    squareVortex: { n: 40, shape: 'square', lw: .65,
-      at: (s, t, m) => { const u = s * 40 / 39, r = .9 * (1 - .88 * u), [dx, dy] = drift(u, t, m, (.9 - r) * .35); return [dx, dy, r, u * 1.6 + t * .12 + m.x * .6]; },
-      accent: (s) => s > .82 },
-    hexVortex: { n: 44, shape: 'hexagon', lw: .65,
-      at: (s, t, m) => { const u = s * 44 / 43, r = .92 * (1 - .9 * u), [dx, dy] = drift(u, t, m, (.92 - r) * .38); return [dx, dy, r, u * 1.1 + t * .1 + m.x * .5]; },
-      accent: (s) => s > .84 },
-    hexRing: { n: 120, shape: 'hexagon', lw: .55,
-      at: (s, t, m) => { const a = TAU * s + m.x * .3, rho = .5 + .08 * sin(3 * a + t); return [rho * cos(a), rho * sin(a), .28 + .1 * sin(6 * a), 2 * a]; },
-      accent: (s) => sin(6 * TAU * s) > .93 },
-    pentagons: { n: 700, shape: 'pentagon', lw: .45,
-      at: (s, t, m) => [...lens(s, t, m, 10, 6, .55), .018 + .075 * pow(sin(30 * PI * s), 4), 10 * PI * s],
-      accent: (s) => pow(sin(30 * PI * s), 4) > .82 },
-    ellipses: { n: 240, shape: 'ellipse', lw: .55,
-      at: (s, t, m) => {
-        const p = TAU * s, q = 3 * p + t * .35;
-        return [.66 * sin(q), .66 * sin(2 * p), .2, atan2(2 * cos(2 * p), 3 * cos(q)) + m.x * .5];
+      hue: (s, t) => bands(s, t, 4) },
+    // 7,000 arcs
+    arcs7: { n: 7000, fit: .46, lw: .34,
+      el: (s, t, m) => {
+        const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
+        const k = 1 - cos(q) / 2 - pow(cos(40 * PI * s), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
+        return ['a', .875 * cos(2 * PI * s) * k, .875 * sin(2 * PI * s) * k, 1 / 8 + .75 * pow(sin(q), 4), c - open, c + open];
       },
-      accent: (s) => Math.floor(s * 24) % 5 === 0 },
-    pixelKnot: { n: 1800, shape: 'pixel',
-      at: (s, t, m) => { const p = TAU * s; return [.85 * sin(3 * p + t * .3 + m.x * .4), .85 * sin(4 * p + m.y * .4), 0, 0]; },
-      accent: (s) => Math.floor(s * 12) % 4 === 0 },
+      hue: (s, t) => bands(s, t, 4) },
     // A line portrait from a 68x110 darkness map of the author's photo (src/portrait.json).
-    // Rhythm: the waves breathe and a slow pulse travels down the face. The pointer, anywhere on the page, steers them.
-    portraitLines: { n: 1, lw: .5,
-      custom: (f, groups) => {
-        const rows = 104, gap = f.h / rows, step = max(.7, f.w / 300), shown = Math.ceil(rows * ease(f.drawn));
-        const breath = .78 + .22 * sin(f.t * 6), tilt = f.m.y * 7, steer = f.m.x * 2.5;
-        for (let j = 0; j < shown; j++) {
-          const v = (j + .5) / rows, y0 = v * f.h, pulse = .75 + .5 * pow(max(0, sin(v * 5 - f.t * 5)), 3);
-          let phase = j * 1.3 + v * tilt, last = -1;
-          for (let x = 0; x <= f.w; x += step) {
-            const [tone0, g] = tone(x / f.w, v), d = pow(tone0, 1.25);
-            phase += (.1 + d * 1.1) * step / .8;
-            const y = y0 + sin(phase + f.t * 3 + steer) * d * gap * .95 * breath * pulse;
-            if (g !== last) { groups[g].moveTo(x, y); last = g; } else groups[g].lineTo(x, y);
-          }
+    // The waves breathe and a band of colour sweeps across every line at once. The pointer, anywhere on the page, steers them.
+    portraitLines: { lw: .55, custom: (f, groups) => {
+      const rows = 104, gap = f.h / rows, step = max(.7, f.w / 300), shown = Math.ceil(rows * ease(f.drawn));
+      const breath = .78 + .22 * sin(f.t * 6), tilt = f.m.y * 7, steer = f.m.x * 2.5, sweep = f.t * 1.6 + f.m.x * .5;
+      for (let j = 0; j < shown; j++) {
+        const v = (j + .5) / rows, y0 = v * f.h, pulse = .75 + .5 * pow(max(0, sin(v * 5 - f.t * 5)), 3);
+        let phase = j * 1.3 + v * tilt, last = -1, px = 0, py = y0;
+        for (let x = 0; x <= f.w; x += step) {
+          const u = x / f.w, [tone0] = tone(u, v), d = pow(tone0, 1.25);
+          phase += (.1 + d * 1.1) * step / .8;
+          const y = y0 + sin(phase + f.t * 3 + steer) * d * gap * .95 * breath * pulse;
+          const g = band(u * .8 + v * .45 - sweep);
+          if (last < 0) groups[g].moveTo(x, y);
+          else { if (g !== last) groups[g].moveTo(px, py); groups[g].lineTo(x, y); }
+          last = g; px = x; py = y;
         }
-      } },
-    portraitRings: { n: 1, lw: .6,
-      custom: (f, groups) => {
-        const step = f.w / 48, rowStep = step * .866, rows = Math.ceil(f.h / rowStep), shown = Math.ceil(rows * ease(f.drawn));
-        const ox = f.w * (.5 + f.m.x * .4), oy = f.h * (.5 + f.m.y * .4), wave = TAU / (f.w * .35);
-        for (let row = 0; row < shown; row++) {
-          const y = step / 2 + row * rowStep;
-          for (let x = row % 2 ? step / 2 : 0; x < f.w; x += step) {
-            const [tone0, g] = tone(x / f.w, y / f.h);
-            const r = pow(tone0, 1.2) * step * .62 * (.84 + .16 * sin(f.t * 6 - hypot(x - ox, y - oy) * wave));
-            if (r < .35) continue;
-            groups[g].moveTo(x + r, y);
-            groups[g].arc(x, y, r, 0, TAU);
-          }
+      }
+    } },
+    portraitRings: { lw: .6, custom: (f, groups) => {
+      const step = f.w / 48, rowStep = step * .866, rows = Math.ceil(f.h / rowStep), shown = Math.ceil(rows * ease(f.drawn));
+      const ox = f.w * (.5 + f.m.x * .4), oy = f.h * (.5 + f.m.y * .4), wave = TAU / (f.w * .35);
+      for (let row = 0; row < shown; row++) {
+        const y = step / 2 + row * rowStep;
+        for (let x = row % 2 ? step / 2 : 0; x < f.w; x += step) {
+          const [tone0] = tone(x / f.w, y / f.h), dist = hypot(x - ox, y - oy);
+          const r = pow(tone0, 1.2) * step * .62 * (.84 + .16 * sin(f.t * 6 - dist * wave));
+          if (r < .35) continue;
+          const g = band(dist / f.w * .9 - f.t * 1.6);
+          groups[g].moveTo(x + r, y);
+          groups[g].arc(x, y, r, 0, TAU);
         }
-      } },
+      }
+    } },
   };
   const FIGURES = {
-    opening: ['petals', 'bottle', 'pixels'],
-    bottle: ['bottle', 'petals'],
-    poetry: ['bloom', 'rings', 'tunnel'],
-    stories: ['lemniscate', 'squareVortex'],
-    essays: ['hexVortex', 'hexRing'],
-    selected: ['pentagons', 'bottle'],
-    video: ['ellipses', 'pixelKnot'],
+    opening: ['circles14', 'segments8', 'arcs8', 'circles12'],
+    poetry: ['circles9', 'circles14'],
+    stories: ['circles12', 'arcs7'],
+    essays: ['segments4', 'segments8'],
+    selected: ['arcs7', 'circles10'],
+    video: ['circles10', 'arcs8'],
     portrait: ['portraitLines', 'portraitRings'],
   };
 
-  const polygon = (ctx, sides, x, y, r, turn) => {
-    for (let k = 0; k <= sides; k++) {
-      const a = turn + k * TAU / sides - PI / 2;
-      if (k) ctx.lineTo(x + r * cos(a), y + r * sin(a)); else ctx.moveTo(x + r * cos(a), y + r * sin(a));
-    }
+  // Eight colours that sit on white without shouting, and brighter ones for the dark page.
+  const PALETTES = {
+    light: ['#2f6f6a', '#7a9a3a', '#c9a227', '#b5562e', '#8e3b62', '#6a4c93', '#3d5a80', '#2a9d8f'],
+    dark: ['#56e0cf', '#b5d86a', '#ffd166', '#f08a5d', '#e07ab8', '#b28dff', '#8fb3ff', '#5fd3c6'],
   };
-  const trace = (ctx, shape, x, y, r, turn) => {
-    if (shape === 'circle') { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, TAU); }
-    else if (shape === 'square') polygon(ctx, 4, x, y, r, turn + PI / 4);
-    else if (shape === 'pentagon') polygon(ctx, 5, x, y, r, turn);
-    else if (shape === 'hexagon') polygon(ctx, 6, x, y, r, turn);
-    else if (shape === 'ellipse') { ctx.moveTo(x + r * cos(turn), y + r * sin(turn)); ctx.ellipse(x, y, r, r * .36, turn, 0, TAU); }
-  };
-
-  let colors = { ink: '#080808', accent: '#e8b400', dark: false };
+  let colors = { ink: '#080808', dark: false, palette: PALETTES.light };
   const readColors = () => {
-    const style = getComputedStyle(document.documentElement);
-    const ink = style.getPropertyValue('--ink').trim() || colors.ink;
-    colors = { ink, accent: style.getPropertyValue('--accent').trim() || colors.accent, dark: parseInt(ink.replace('#', '').slice(0, 2), 16) > 128 };
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || colors.ink;
+    const dark = parseInt(ink.replace('#', '').slice(0, 2), 16) > 128;
+    colors = { ink, dark, palette: dark ? PALETTES.dark : PALETTES.light };
   };
 
+  // Fewer elements on small frames: the same formula with a smaller n keeps its shape, only lighter.
+  const budget = (form, f) => form.custom ? 1 : min(form.n, Math.round(form.n * min(1, max(.22, min(f.w, f.h) / 620))));
   const paint = (f, formName, alpha) => {
     const form = FORMS[formName];
     const { ctx, w, h } = f;
-    const scale = min(w, h) / 2 * .8, cx = w / 2, cy = h / 2;
-    const count = Math.ceil(form.n * ease(f.drawn));
-    const cell = max(1.5, scale / 90);
-    const groups = [new Path2D(), new Path2D()];
+    const groups = Array.from({ length: P + 1 }, () => new Path2D());
     if (form.custom) form.custom(f, groups);
-    else for (let i = 0; i < count; i++) {
-      const s = i / form.n;
-      const [x, y, r, turn] = form.at(s, f.t, f.m);
-      const g = form.accent(s, f.t) ? 1 : 0;
-      const px = cx + x * scale, py = cy + y * scale;
-      if (form.shape === 'pixel') groups[g].rect(Math.round(px / cell) * cell, Math.round(py / cell) * cell, cell * .82, cell * .82);
-      else trace(groups[g], form.shape, px, py, max(.5, r * scale), turn);
+    else {
+      const n = budget(form, f), count = Math.ceil(n * ease(f.drawn));
+      const scale = min(w, h) / 2 * form.fit, cx = w / 2, cy = h / 2;
+      for (let k = 0; k < count; k++) {
+        const s = k / n, e = form.el(s, f.t, f.m), path = groups[form.hue(s, f.t)];
+        if (e[0] === 'c') { const x = cx + e[1] * scale, y = cy - e[2] * scale, r = max(.4, e[3] * scale); path.moveTo(x + r, y); path.arc(x, y, r, 0, TAU); }
+        else if (e[0] === 'l') { path.moveTo(cx + e[1] * scale, cy - e[2] * scale); path.lineTo(cx + e[3] * scale, cy - e[4] * scale); }
+        else {
+          // Canvas angles run clockwise with y down; mirror the arc so it matches the formula's orientation.
+          const x = cx + e[1] * scale, y = cy - e[2] * scale, r = e[3] * scale;
+          path.moveTo(x + r * cos(-e[5]), y + r * sin(-e[5]));
+          path.arc(x, y, r, -e[5], -e[4]);
+        }
+      }
     }
-    ctx.globalAlpha = alpha;
+    ctx.globalAlpha = alpha * (form.custom ? 1 : colors.dark ? .9 : .82);
     groups.forEach((path, g) => {
-      const color = g ? colors.accent : colors.ink;
-      if (form.shape === 'pixel') { ctx.fillStyle = color; ctx.fill(path); }
-      else { ctx.strokeStyle = color; ctx.lineWidth = (form.lw || .5) * (g ? 1.3 : 1); ctx.stroke(path); }
+      ctx.strokeStyle = g < P ? colors.palette[g] : colors.ink;
+      ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1);
+      ctx.stroke(path);
     });
     ctx.globalAlpha = 1;
   };
@@ -203,10 +189,11 @@
           goal = { x: max(-1, min(1, (pointer.x - box.left - box.width / 2) / (box.width * .75))), y: max(-1, min(1, (pointer.y - box.top - box.height / 2) / (box.height * .75))) };
         }
         f.m = { x: f.m.x + (goal.x - f.m.x) * .05, y: f.m.y + (goal.y - f.m.y) * .05 };
-        changed = true;
         again = true;
+        // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
+        if (time - (f.painted || 0) > 31) changed = true;
       }
-      if (changed) render(f);
+      if (changed) { f.painted = time; render(f); }
       if (f.drawn < 1 || f.morph < 1) again = true;
     });
     if (again) raf = requestAnimationFrame(tick);
