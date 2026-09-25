@@ -1202,12 +1202,17 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     portrait: ['portraitLines', 'portraitRings'],
   };
 
-  // Yellow with ink (black on white, white on black), and two quiet three-colour sets built on the same pair.
+  // Two- and three-colour sets from the owner's palette. The deepest tones (#500140, #14353F) give way to ink on the dark page.
   const PALETTES = {
-    light: { duo: ['#d9a400', '#111111'], teal: ['#d9a400', '#111111', '#1f7a70'], clay: ['#d9a400', '#111111', '#b8553a'] },
-    dark: { duo: ['#f2c230', '#f2f2f2'], teal: ['#f2c230', '#f2f2f2', '#43b5a5'], clay: ['#f2c230', '#f2f2f2', '#e07a5c'] },
+    light: {
+      opening: ['#0FA077', '#14353F', '#BA9F0D'], poetry: ['#E131BD', '#500140'], stories: ['#2F42E8', '#956BCF', '#14353F'],
+      essays: ['#EB807D', '#500140'], selected: ['#F748DB', '#956BCF', '#2F42E8'], video: ['#3ED900', '#0FA077', '#14353F'], portrait: ['#E131BD', '#2F42E8'],
+    },
+    dark: {
+      opening: ['#0FA077', '#f2f2f2', '#BA9F0D'], poetry: ['#E131BD', '#f2f2f2'], stories: ['#2F42E8', '#956BCF', '#f2f2f2'],
+      essays: ['#EB807D', '#F748DB'], selected: ['#F748DB', '#956BCF', '#2F42E8'], video: ['#3ED900', '#0FA077', '#f2f2f2'], portrait: ['#E131BD', '#956BCF'],
+    },
   };
-  const FIGURE_PALETTE = { opening: 'teal', poetry: 'duo', stories: 'clay', essays: 'duo', selected: 'teal', video: 'clay', portrait: 'duo' };
   let colors = { ink: '#080808', dark: false, sets: PALETTES.light };
   const readColors = () => {
     const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || colors.ink;
@@ -1240,7 +1245,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     }
     ctx.globalAlpha = alpha;
     groups.forEach((path, g) => {
-      const pal = colors.sets[f.palette] || colors.sets.duo;
+      const pal = colors.sets[f.palette] || colors.sets.opening;
       ctx.strokeStyle = g < P ? pal[Math.floor(g * pal.length / P)] : colors.ink;
       ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1);
       ctx.stroke(path);
@@ -1312,7 +1317,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     canvas.setAttribute('aria-hidden', 'true');
     el.replaceChildren(canvas);
     el.classList.add('is-live');
-    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: FIGURE_PALETTE[el.dataset.figure], index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
+    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.figure, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     frames.push(f);
     (el.closest('[data-art]') || el).addEventListener('click', () => {
       f.previous = f.forms[f.index];
