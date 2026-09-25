@@ -42,7 +42,7 @@
     // 9,000 circles: X = cos(14πs)(1 − ¾cos²(36πs)), R = 1/200 + sin⁶(64πs)/10
     circles9: circles(9000, 14, 36, .75, 64, 6),
     // 8,000 segments from (A, B) to (C, D)
-    segments8: { n: 8000, fit: .5, lw: .42,
+    segments8: { n: 8000, keep: .9, fit: .5, lw: .42,
       el: (s, t, m) => {
         const u = sq(sin(12 * PI * s + t)) + sq(sin(18 * PI * s)), v = sq(sin(8 * PI * s)) + sq(sin(10 * PI * s + t));
         const a = 14 * PI * s + m.x * .3;
@@ -50,14 +50,14 @@
       },
       hue: (s, t) => bands(s, t, 7) },
     // 4,000 segments: the same bloom turned 14 and 30 times
-    segments4: { n: 4000, fit: .5, lw: .45,
+    segments4: { n: 4000, keep: .9, fit: .5, lw: .45,
       el: (s, t, m) => {
         const u = sq(sin(16 * PI * s + t)) + sq(sin(14 * PI * s)), a = 14 * PI * s + m.x * .3, b = 30 * PI * s + m.x * .3 + m.y * .2;
         return ['l', sin(a) * u, cos(a) * u, sin(b) * u, cos(b) * u];
       },
       hue: (s, t) => bands(s, t, 7) },
     // 8,000 arcs: centre (X, Y), radius S, from angle B through C to A
-    arcs8: { n: 8000, fit: .5, lw: .42,
+    arcs8: { n: 8000, keep: .9, fit: .5, lw: .42,
       el: (s, t, m) => {
         const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
         const k = 1 - cos(24 * PI * s) / 2 - pow(cos(q), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
@@ -65,7 +65,7 @@
       },
       hue: (s, t) => bands(s, t, 4) },
     // 7,000 arcs
-    arcs7: { n: 7000, fit: .46, lw: .42,
+    arcs7: { n: 7000, keep: .9, fit: .46, lw: .42,
       el: (s, t, m) => {
         const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
         const k = 1 - cos(q) / 2 - pow(cos(40 * PI * s), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
@@ -121,20 +121,21 @@
     portrait: ['portraitLines', 'portraitRings'],
   };
 
-  // Eight saturated colours, with a brighter set for the dark page.
+  // Yellow with ink (black on white, white on black), and two quiet three-colour sets built on the same pair.
   const PALETTES = {
-    light: ['#0b7a70', '#4f8a0b', '#d89a00', '#d9480f', '#c2185b', '#7b1fa2', '#1e4fd8', '#0288b8'],
-    dark: ['#00d1b8', '#8fe000', '#ffc400', '#ff6a1a', '#ff2e7e', '#b84dff', '#3d7bff', '#00b8f0'],
+    light: { duo: ['#d9a400', '#111111'], teal: ['#d9a400', '#111111', '#1f7a70'], clay: ['#d9a400', '#111111', '#b8553a'] },
+    dark: { duo: ['#f2c230', '#f2f2f2'], teal: ['#f2c230', '#f2f2f2', '#43b5a5'], clay: ['#f2c230', '#f2f2f2', '#e07a5c'] },
   };
-  let colors = { ink: '#080808', dark: false, palette: PALETTES.light };
+  const FIGURE_PALETTE = { opening: 'teal', poetry: 'duo', stories: 'clay', essays: 'duo', selected: 'teal', video: 'clay', portrait: 'duo' };
+  let colors = { ink: '#080808', dark: false, sets: PALETTES.light };
   const readColors = () => {
     const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || colors.ink;
     const dark = parseInt(ink.replace('#', '').slice(0, 2), 16) > 128;
-    colors = { ink, dark, palette: dark ? PALETTES.dark : PALETTES.light };
+    colors = { ink, dark, sets: dark ? PALETTES.dark : PALETTES.light };
   };
 
-  // About a third of the published count, so each line stays visibly apart instead of merging into a solid shape.
-  const budget = (form, f) => form.custom ? 1 : Math.round(form.n * .34 * min(1, max(.45, min(f.w, f.h) / 620)));
+  // Dense families (the circles) are thinned so each line stays visible; the already open ones keep almost every line.
+  const budget = (form, f) => form.custom ? 1 : Math.round(form.n * (form.keep || .55) * min(1, max(.5, min(f.w, f.h) / 620)));
   const paint = (f, formName, alpha, zoom = 1) => {
     const form = FORMS[formName];
     if (form.layers) { form.layers.forEach(([name, k]) => paint(f, name, alpha, k)); return; }
@@ -158,7 +159,8 @@
     }
     ctx.globalAlpha = alpha;
     groups.forEach((path, g) => {
-      ctx.strokeStyle = g < P ? colors.palette[g] : colors.ink;
+      const pal = colors.sets[f.palette] || colors.sets.duo;
+      ctx.strokeStyle = g < P ? pal[Math.floor(g * pal.length / P)] : colors.ink;
       ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1);
       ctx.stroke(path);
     });
@@ -229,7 +231,7 @@
     canvas.setAttribute('aria-hidden', 'true');
     el.replaceChildren(canvas);
     el.classList.add('is-live');
-    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
+    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: FIGURE_PALETTE[el.dataset.figure], index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     frames.push(f);
     (el.closest('[data-art]') || el).addEventListener('click', () => {
       f.previous = f.forms[f.index];
