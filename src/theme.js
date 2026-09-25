@@ -239,7 +239,8 @@
 
   // Safety net: if Blogger returns an empty Blog or archive widget, rebuild it from the blog's own public feed.
   const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const feed = (kind, query) => fetch(`/feeds/${kind}?alt=json&${query}`).then((r) => r.json()).then((d) => d.feed.entry || []);
+  // Always ask Blogger whether the feed changed, so edits in the dashboard are never hidden behind the browser cache.
+  const feed = (kind, query) => fetch(`/feeds/${kind}?alt=json&${query}`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.feed.entry || []);
   const plain = (html) => new DOMParser().parseFromString(html, 'text/html').documentElement.textContent.replace(/\s+/g, ' ').trim();
   const entryLink = (e) => (e.link.find((l) => l.rel === 'alternate') || {}).href || '/';
   const entryDate = (e) => new Date(e.published.$t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -250,8 +251,10 @@
   const postId = (e) => (e.id.$t.match(/post-(\d+)/) || [])[1];
   const pathOf = (href) => { try { return new URL(href, location.href).pathname; } catch { return ''; } };
   // Lists are small: keep only what a row needs.
-  const slim = (e) => ({ id: e.id, title: e.title, summary: e.summary, published: e.published, category: e.category, link: e.link });
-  const fetchPost = (id) => fetch(`/feeds/posts/default/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry);
+  const slim = (e) => ({ id: e.id, title: e.title, summary: e.summary, published: e.published, updated: e.updated, category: e.category, link: e.link });
+  // Two lists match only if the same posts are there at the same edit, so a dashboard change always shows.
+  const stamp = (list) => list.map((e) => postId(e) + '@' + (e.updated ? e.updated.$t : '')).join();
+  const fetchPost = (id) => fetch(`/feeds/posts/default/${id}?alt=json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.entry);
   // Start downloading a post as soon as the reader points at it, so the next page opens from memory.
   const prefetch = (link) => {
     const id = link.dataset.postId, path = pathOf(link.href);
@@ -286,7 +289,7 @@
       .sort((a, b) => new Date(b.published.$t) - new Date(a.published.$t))
       .map(slim);
     store.set('list:category:' + key, entries);
-    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, group.title, key);
+    if (!cached || stamp(cached) !== stamp(entries)) renderList(holder, entries, group.title, key);
   };
   const restoreBlog = async () => {
     const holder = document.getElementById('Blog1') || document.getElementById('journal');
@@ -294,21 +297,25 @@
     const path = decoded(location.pathname);
     const params = new URLSearchParams(location.search);
     if (/^\/(\d{4}\/\d{2}\/[^/]+|p\/[^/]+)\.html$/.test(path)) {
-      let e = store.get('post:' + location.pathname);
-      if (!e && !path.startsWith('/p/')) {
-        const head = document.querySelector('link[href*="/feeds/"][href*="/comments/default"]');
-        const id = head && (head.href.match(/\/feeds\/(\d+)\/comments/) || [])[1];
-        if (id) e = await fetchPost(id).catch(() => null);
-      }
+      const renderPost = (e) => {
+        holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page" data-blog-rendered="true" data-post-id="${esc(postId(e) || '')}"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
+        window.dispatchEvent(new Event('tyb:render'));
+      };
+      const isPage = path.startsWith('/p/');
+      const cached = store.get('post:' + location.pathname);
+      if (cached) renderPost(cached);
+      // A remembered copy opens instantly, but the live one is always fetched: if the post was edited, it replaces the copy.
+      const head = document.querySelector('link[href*="/feeds/"][href*="/comments/default"]');
+      const id = (head && (head.href.match(/\/feeds\/(\d+)\/comments/) || [])[1]) || (cached && postId(cached));
+      let e = !isPage && id ? await fetchPost(id).catch(() => null) : null;
       if (!e) {
-        const summaries = await feed(path.startsWith('/p/') ? 'pages/summary' : 'posts/summary', 'max-results=500');
+        const summaries = await feed(isPage ? 'pages/summary' : 'posts/summary', 'max-results=500');
         const match = summaries.find((item) => pathOf(entryLink(item)) === location.pathname);
-        if (match) e = path.startsWith('/p/') ? (await feed('pages/default', 'max-results=500')).find((item) => pathOf(entryLink(item)) === location.pathname) : await fetchPost(postId(match));
+        if (match) e = isPage ? (await feed('pages/default', 'max-results=500')).find((item) => pathOf(entryLink(item)) === location.pathname) : await fetchPost(postId(match));
       }
       if (!e) return;
       store.set('post:' + location.pathname, e);
-      holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page" data-blog-rendered="true"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
-      window.dispatchEvent(new Event('tyb:render'));
+      if (!cached || cached.updated?.$t !== e.updated?.$t || cached.content?.$t !== e.content?.$t) renderPost(e);
       return;
     }
     const label = path.match(/^\/search\/label\/(.+)$/);
@@ -326,24 +333,32 @@
     if (cached) renderList(holder, cached, heading);
     const entries = (await feed(kind, query)).map(slim);
     store.set(listKey, entries);
-    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, heading);
+    if (!cached || stamp(cached) !== stamp(entries)) renderList(holder, entries, heading);
   };
   // Blogger's own list carries titles and links; dates and excerpts come from one cached summary feed.
   const fillNative = async () => {
     const slots = [...document.querySelectorAll('[data-fill]')];
     if (!slots.length) return;
-    let summaries = store.get('summaries');
-    if (!summaries) { summaries = (await feed('posts/summary', 'max-results=150')).map(slim); store.set('summaries', summaries); }
-    const byId = new Map(summaries.map((e) => [postId(e), e]));
+    const fill = (summaries) => {
+      const byId = new Map(summaries.map((e) => [postId(e), e]));
+      slots.forEach((slot) => {
+        const e = byId.get(slot.closest('[data-post-id]')?.dataset.postId);
+        if (!e) return;
+        if (slot.dataset.fill === 'date') { slot.textContent = entryDate(e); slot.setAttribute('datetime', e.published.$t); }
+        else slot.textContent = plain(e.summary ? e.summary.$t : '').slice(0, slot.dataset.fill === 'excerpt-long' ? 220 : 150);
+      });
+      return byId;
+    };
+    // Fill instantly from memory, then from the live feed so edited excerpts replace remembered ones.
+    const cached = store.get('summaries');
+    if (cached) fill(cached);
+    const summaries = (await feed('posts/summary', 'max-results=150')).map(slim);
+    store.set('summaries', summaries);
+    const byId = fill(summaries);
     const missing = [...new Set(slots.map((slot) => slot.closest('[data-post-id]')?.dataset.postId).filter((id) => id && !byId.has(id)))].slice(0, 30);
-    (await Promise.all(missing.map((id) => fetch(`/feeds/posts/summary/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry).catch(() => null))))
-      .forEach((e) => { if (e) byId.set(postId(e), e); });
-    slots.forEach((slot) => {
-      const e = byId.get(slot.closest('[data-post-id]')?.dataset.postId);
-      if (!e) return;
-      if (slot.dataset.fill === 'date') { slot.textContent = entryDate(e); slot.setAttribute('datetime', e.published.$t); }
-      else slot.textContent = plain(e.summary ? e.summary.$t : '').slice(0, slot.dataset.fill === 'excerpt-long' ? 220 : 150);
-    });
+    if (!missing.length) return;
+    const extra = (await Promise.all(missing.map((id) => fetch(`/feeds/posts/summary/${id}?alt=json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.entry).catch(() => null)))).filter(Boolean);
+    fill(summaries.concat(extra));
   };
   const restoreArchive = async () => {
     const holder = document.querySelector('#index-overlay .index-list');
@@ -359,6 +374,130 @@
       return `<li><a href="/${y}/${m}/">${name} <span class="muted">(${count})</span></a></li>`;
     }).join('') + '</ul>';
   };
+  // Under every post: a like made of lines, a share button, and Blogger's own comments.
+  const preview = document.body.dataset.preview === 'true';
+  const likesAPI = window.TYB_LIKES_API || 'https://api.counterapi.dev/v1/the-yellow-bottle';
+  const pageURL = () => location.href.split('#')[0].replace(/[?&]m=1\b/, '');
+  // The artwork's colours, in tones that read on white and on black.
+  const likeColors = ['#2a9d8f', '#7a9a3a', '#e0a526', '#d96b3b', '#c0508a', '#7d5fc0', '#4f79b8', '#35b3a5'];
+  const burst = Array.from({ length: 12 }, (_, k) => {
+    const a = k * Math.PI / 6, c = Math.cos(a), n = Math.sin(a), r = (v) => (20 + v).toFixed(2);
+    const style = `--k:${k};--c:${likeColors[k % likeColors.length]}`;
+    return `<line class="rest" x1="${r(c * 5)}" y1="${r(n * 5)}" x2="${r(c * 9)}" y2="${r(n * 9)}" style="${style}"/><line class="ray" x1="${r(c * 11)}" y1="${r(n * 11)}" x2="${r(c * 18)}" y2="${r(n * 18)}" pathLength="1" style="${style}"/>`;
+  }).join('');
+  const shareIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>';
+  const shareTargets = [
+    ['WhatsApp', (u, t) => `https://wa.me/?text=${encodeURIComponent(t + ' ' + u)}`],
+    ['Facebook', (u) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}`],
+    ['X', (u, t) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`],
+    ['Telegram', (u, t) => `https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`],
+    ['Email', (u, t) => `mailto:?subject=${encodeURIComponent(t)}&body=${encodeURIComponent(u)}`],
+  ];
+  const likeKey = (id) => 'p' + id;
+  const liked = (id) => { try { return localStorage.getItem('tyb-liked:' + id) === '1'; } catch { return false; } };
+  const counter = (id, up) => fetch(`${likesAPI}/${likeKey(id)}${up ? '/up' : '/'}`, { cache: 'no-store' })
+    .then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((d) => Number(d.count ?? d.value) || 0);
+  const showCount = (button, value) => {
+    const out = button.querySelector('.like-count');
+    if (value == null) { out.textContent = ''; return; }
+    out.textContent = value;
+    button.setAttribute('aria-label', `Like this piece. ${value} ${value === 1 ? 'like' : 'likes'} so far`);
+  };
+  const buildActions = (page) => {
+    if (page.querySelector('.post-actions')) return;
+    const id = page.dataset.postId || 'preview';
+    const title = (page.querySelector('.article-title')?.textContent || document.title).trim();
+    const bar = document.createElement('div');
+    bar.className = 'post-actions';
+    bar.innerHTML = `<button class="like-button${liked(id) ? ' is-liked' : ''}" type="button" aria-pressed="${liked(id)}" aria-label="Like this piece"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true">${burst}</svg><span class="like-count micro" aria-hidden="true"></span></button><div class="share"><button class="share-button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Share this piece">${shareIcon}<span>Share</span></button><div class="share-menu" hidden="hidden">${shareTargets.map(([name]) => `<a data-share="${name}" target="_blank" rel="noopener noreferrer">${name} <span aria-hidden="true">↗</span></a>`).join('')}<button type="button" data-copy="true">Copy link</button></div></div>`;
+    const end = page.querySelector('.article-end');
+    if (end) { end.querySelector('[data-copy]')?.remove(); end.append(bar); } else page.append(bar);
+    const like = bar.querySelector('.like-button');
+    if (!preview && id !== 'preview') counter(id, false).then((v) => showCount(like, v)).catch(() => showCount(like, null));
+    like.addEventListener('click', () => {
+      like.classList.remove('is-bursting');
+      void like.offsetWidth;
+      like.classList.add('is-bursting');
+      if (liked(id)) return;
+      try { localStorage.setItem('tyb-liked:' + id, '1'); } catch { /* A like still counts without memory. */ }
+      like.classList.add('is-liked');
+      like.setAttribute('aria-pressed', 'true');
+      const shown = Number(like.querySelector('.like-count').textContent);
+      if (!preview && id !== 'preview') counter(id, true).then((v) => showCount(like, v)).catch(() => showCount(like, shown ? shown + 1 : null));
+    });
+    const share = bar.querySelector('.share-button'), menu = bar.querySelector('.share-menu');
+    const close = () => { menu.hidden = true; share.setAttribute('aria-expanded', 'false'); };
+    share.addEventListener('click', async () => {
+      if (navigator.share && !finePointer) {
+        try { await navigator.share({ title, url: pageURL() }); return; } catch (error) { if (error && error.name === 'AbortError') return; }
+      }
+      menu.querySelectorAll('[data-share]').forEach((a) => { a.href = shareTargets.find(([name]) => name === a.dataset.share)[1](pageURL(), title); });
+      menu.hidden = !menu.hidden;
+      share.setAttribute('aria-expanded', String(!menu.hidden));
+    });
+    document.addEventListener('click', (event) => { if (!event.target.closest('.share')) close(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  };
+  // Comments come from the post's public comment feed; writing one uses Blogger's own comment form.
+  const cleanComment = (html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const walk = (node) => [...node.childNodes].map((child) => {
+      if (child.nodeType === 3) return esc(child.textContent);
+      if (child.nodeType !== 1) return '';
+      const tag = child.tagName.toLowerCase();
+      if (['script', 'style', 'iframe', 'object', 'noscript', 'template'].includes(tag)) return '';
+      const inner = walk(child);
+      if (tag === 'br') return '<br/>';
+      if (['b', 'strong', 'i', 'em'].includes(tag)) return `<${tag}>${inner}</${tag}>`;
+      if (tag === 'a' && /^https?:/i.test(child.getAttribute('href') || '')) return `<a href="${esc(child.getAttribute('href'))}" rel="nofollow noopener noreferrer" target="_blank">${inner}</a>`;
+      return inner;
+    }).join('');
+    return walk(doc.body);
+  };
+  const blogIdFromHead = () => {
+    const link = document.querySelector('link[rel="service.post"], link[rel="EditURI"], link[href*="blogID="]');
+    return link ? (link.href.match(/feeds\/(\d+)\//) || link.href.match(/blogID=(\d+)/) || [])[1] : null;
+  };
+  const buildComments = async (page) => {
+    const id = page.dataset.postId;
+    if (!id || page.dataset.comments || document.querySelector('#comment-editor, .comment-form iframe, #comments[data-built]')) return;
+    page.dataset.comments = 'true';
+    let blogId = blogIdFromHead();
+    const [entries, post] = await Promise.all([
+      feed(`${id}/comments/default`, 'max-results=200').catch(() => []),
+      blogId ? null : fetchPost(id).catch(() => null),
+    ]);
+    if (!blogId) blogId = post && (post.id.$t.match(/blog-(\d+)/) || [])[1];
+    if (!blogId) return;
+    const list = entries.slice().sort((a, b) => new Date(a.published.$t) - new Date(b.published.$t)).map((c) => {
+      const reply = (c.link || []).some((l) => l.rel === 'related');
+      const name = c.author && c.author[0] ? c.author[0].name.$t : 'Anonymous';
+      return `<div class="comment${reply ? ' is-reply' : ''}"><div class="comment-head"><strong>${esc(name)}</strong><time class="micro muted">${entryDate(c)}</time></div><div class="comment-body">${cleanComment(c.content ? c.content.$t : '')}</div></div>`;
+    }).join('');
+    const origin = encodeURIComponent(location.origin);
+    const old = page.querySelector('.comments');
+    const section = document.createElement('section');
+    section.className = 'comments';
+    section.id = 'comments';
+    section.dataset.built = 'true';
+    section.innerHTML = `<h3>${entries.length ? `${entries.length} ${entries.length === 1 ? 'response' : 'responses'}.` : 'Leave a <em>response.</em>'}</h3>${list ? `<div class="comment-list">${list}</div>` : '<p class="muted comment-empty">Be the first to write something here.</p>'}<div class="comment-write"><h4 class="micro">Write a comment</h4><iframe class="comment-frame" title="Write a comment" loading="lazy" src="https://www.blogger.com/comment/frame/${blogId}?po=${id}&amp;hl=en&amp;saa=85391&amp;origin=${origin}&amp;skin=contempo"></iframe><a class="text-link" href="https://www.blogger.com/comment/fullpage/post/${blogId}/${id}" target="_blank" rel="noopener">Open the comment form in a new window <span class="arrow" aria-hidden="true">↗</span></a></div>`;
+    if (old) old.replaceWith(section); else page.append(section);
+  };
+  // Blogger's comment frame reports its height; let it grow instead of scrolling inside itself.
+  window.addEventListener('message', (event) => {
+    if (!/\.blogger\.com$/.test(new URL(event.origin || 'null', location.href).hostname || '')) return;
+    const data = typeof event.data === 'string' ? event.data : JSON.stringify(event.data || '');
+    const height = Number((data.match(/"?height"?\s*[:=]\s*"?(\d{2,4})/) || [])[1]);
+    document.querySelectorAll('.comment-frame').forEach((frame) => { if (height && frame.contentWindow === event.source) frame.style.height = height + 'px'; });
+  });
+  const enhanceReader = () => {
+    const page = q('.reading-page:not([hidden])');
+    if (!page || page.closest('[hidden]')) return;
+    buildActions(page);
+    if (!preview && window.fetch) buildComments(page).catch(() => {});
+  };
+  enhanceReader();
+  window.addEventListener('tyb:render', enhanceReader);
   if (document.body.dataset.preview !== 'true' && window.fetch) {
     // Release the held layout even if the feed cannot fill the page.
     const release = () => { const holder = document.getElementById('Blog1'); if (holder && !document.querySelector('[data-blog-rendered]')) holder.setAttribute('data-blog-rendered', 'none'); };

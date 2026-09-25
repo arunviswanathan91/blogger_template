@@ -1,8 +1,19 @@
-# Validation — 24 September 2026
+# Validation — 25 September 2026
 
 The generated theme and the interactive preview share the same CSS, navigation, artwork, footer, overlays, and reading enhancements.
 
-## Posts restored, mathematical art, index overlay (latest pass)
+## Colour artwork, comments, share, likes, fresh posts (latest pass)
+
+- Replaced every figure with the eight formulas from Hamid Naderi Yeganeh's *Scientific American* article: circles (14k, 12k, 10k, 9k), segments (8k, 4k) and arcs (8k, 7k). Checked each at 1440, 1024 and 390 px in light and dark. The opening art cycled through all four of its formulas on click. The opening ran at about 50 fps in headless Chromium without a GPU; drift is capped near 30 fps.
+- Portrait: checked that the colour band crosses all lines together and that the face stays readable in both themes. Removed the "Give it a nudge" and "Tap to redraw" captions.
+- Post page, tested on a local Blogger-shaped server with an empty `Blog1`:
+  - **Comments:** 2 comments were listed, with the reply indented. A `<script>` and an `<img onerror>` in a comment body were stripped. The comment form frame pointed at `blogger.com/comment/frame/555?po=777…`. blogger.com is blocked here, so the form itself is untested.
+  - **Like:** the count went from 41 to 42 on the first click and stayed at 42 on a second click.
+  - **Share:** the menu produced correct WhatsApp, Facebook, X, Telegram and email links.
+  - **Phone (390 px, dark):** no horizontal overflow.
+- Dashboard edits: opened a post, changed it on the server, then opened it again in the same tab. The remembered copy showed first, and within the next second the edited title and body replaced it.
+
+## Posts restored, mathematical art, index overlay (earlier pass)
 
 - Live report: posts and the monthly index rendered empty on the real blog while everything outside the two Blogger widgets appeared. Blogger's servers are not reachable from this environment, so the widget code was compared against the blog's previous, working theme and rewritten to its proven constructs: no `var='this'` on `main`, the month loop in a separate includable reading Blogger's own `this`, no out-of-scope loop index (row numbers are now CSS counters), `<data:post.date/>` and `data:post.snippets` instead of `format`/`snippet()` expressions.
 - Added a feed safety net and tested it against a local server serving a Blogger-shaped JSON feed: a blank label page fetched `/feeds/posts/summary/-/ente%20kathakal` and rendered both entries; a blank post URL rendered the full post; a blank archive was rebuilt as months with counts.

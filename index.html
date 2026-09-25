@@ -111,17 +111,16 @@ figure, h1, h2, h3, p { margin: 0; }
 .panel.is-active > .panel-tab .rail-shape { fill: currentColor; }
 .panel-body { flex: none; width: calc(100cqw - 6 * var(--tab)); transition: opacity .6s ease .5s; }
 .js .panel:not(.is-active) > .panel-body { opacity: 0; transition: opacity .25s ease; }
-.hero-main { display: grid; grid-template-columns: minmax(0,1fr) clamp(200px,19vw,290px); grid-template-rows: auto 1fr auto; padding: 31px 35px 26px 28px; column-gap: 18px; }
+.hero-main { display: grid; grid-template-columns: minmax(0,1fr) clamp(300px,36vw,600px); grid-template-rows: auto 1fr auto; padding: 31px 35px 26px 28px; column-gap: 18px; }
 .hero-topline { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; align-self: start; gap: 20px; }
-.hero-title { font-size: clamp(90px, 13.4vw, 205px); font-weight: 600; line-height: .84; letter-spacing: -.085em; align-self: center; padding: 18px 0 25px; }
+.hero-title { font-size: clamp(80px, 10.8vw, 175px); font-weight: 600; line-height: .84; letter-spacing: -.085em; align-self: center; padding: 18px 0 25px; }
 .hero-title .prefix { display: block; font: italic 400 clamp(31px,3.6vw,51px)/1 var(--serif); letter-spacing: -.05em; margin: 0 0 17px 6px; }
 .hero-title .word { display: block; }
 .hero-title .word + .word { margin-top: 14px; }
-.hero-art { align-self: center; position: relative; padding-top: 39px; }
+.hero-art { align-self: center; position: relative; grid-row: 2; grid-column: 2; margin: -10px -10px 0 0; }
 .hero-emblem { width: 100%; max-height: 270px; overflow: visible; }
 .art-play { padding: 0; width: 100%; display: block; }
 .art-play:focus-visible { outline-offset: 10px; }
-.art-caption { text-align: center; font-size: 9px; letter-spacing: .08em; margin-top: 23px; }
 .hero-bottom { grid-column: 1/-1; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; margin-top: 32px; }
 .hero-description { font-size: 17px; line-height: 1.55; max-width: 305px; letter-spacing: -.025em; }
 .round-link { width: 54px; height: 54px; border-radius: 50%; border: 1px solid var(--ink); display: grid; place-items: center; font: 24px Arial, sans-serif; transition: background .25s, color .25s, transform .25s ease; flex-shrink: 0; }
@@ -129,11 +128,11 @@ figure, h1, h2, h3, p { margin: 0; }
 .figure-frame { position: relative; display: block; width: 100%; aspect-ratio: 1; }
 .figure-frame canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .figure-frame.is-live { cursor: pointer; }
-.hero-figure { aspect-ratio: 1 / 1.08; }
+.hero-figure { aspect-ratio: 1; }
 .hero-figure .hero-emblem { width: 100%; height: 100%; }
 .chapter-body { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); grid-template-rows: auto minmax(0,1fr); padding: 31px 0 0 28px; column-gap: clamp(24px,4vw,64px); }
 .chapter-top { grid-column: 1/-1; display: flex; justify-content: space-between; gap: 20px; padding-right: 35px; }
-.chapter-figure { align-self: center; justify-self: center; width: min(100%, 460px); margin: 24px 0; }
+.chapter-figure { align-self: center; justify-self: center; width: min(100%, 580px); margin: 12px 0; }
 .chapter-copy { display: flex; flex-direction: column; justify-content: center; border-left: 1px solid var(--ink); padding: 30px 35px 40px clamp(24px,3vw,48px); }
 .chapter-title { font-size: clamp(46px,5.4vw,90px); font-weight: 500; letter-spacing: -.065em; line-height: .98; }
 .chapter-ml { font: 400 clamp(17px,1.5vw,22px)/1.6 'Noto Sans Malayalam', var(--sans); color: var(--quiet); margin: 12px 0 24px; }
@@ -184,7 +183,6 @@ figure, h1, h2, h3, p { margin: 0; }
 .about-copy h2 em { font-family: var(--serif); font-weight: 400; }
 .about-copy p { margin-top: 22px; font-size: 15px; max-width: 450px; line-height: 1.8; }
 .about-portrait { width: min(100%, 300px); aspect-ratio: 68 / 110; margin-top: 36px; }
-.about-portrait-note { margin-top: 12px; font-size: 9px; }
 .footer { margin: 0 var(--gutter); border-top: 1px solid var(--ink); padding: 30px 0 20px; }
 .footer-top { display: flex; align-items: center; justify-content: space-between; gap: 25px; }
 .footer-links { display: flex; gap: 25px; flex-wrap: wrap; font-size: 11px; }
@@ -277,6 +275,33 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 .article-end { padding: 22px 0; border-block: 1px solid var(--ink); display: flex; justify-content: space-between; gap: 25px; align-items: center; font-size: 11px; }
 .article-end button, .article-end a { min-height: 44px; }
 .article-end a { display: flex; align-items: center; }
+.post-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
+.like-button { display: inline-flex; align-items: center; gap: 4px; padding: 0 4px; }
+.like-button svg { width: 44px; height: 44px; overflow: visible; stroke-linecap: round; }
+.like-button line { stroke: currentColor; stroke-width: 1.3; transition: stroke .5s ease calc(var(--k) * 25ms), transform .5s var(--ease-out) calc(var(--k) * 25ms); transform-origin: 20px 20px; }
+.like-button .ray { stroke: var(--c); stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+.like-button.is-liked .rest { stroke: var(--c); stroke-width: 1.6; }
+.like-button.is-bursting .ray { animation: ray .9s var(--ease-out) calc(var(--k) * 18ms) both; }
+.like-button.is-bursting .rest { animation: rest-turn .9s var(--ease-out) both; }
+@keyframes ray { 0% { opacity: 1; stroke-dashoffset: 1; } 55% { opacity: 1; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: -1; } }
+@keyframes rest-turn { 0% { transform: rotate(0) scale(1); } 40% { transform: rotate(15deg) scale(.7); } 100% { transform: rotate(30deg) scale(1); } }
+.like-count { min-width: 1ch; font-size: 11px; letter-spacing: .04em; }
+.share { position: relative; }
+.share-button { display: inline-flex; align-items: center; gap: 9px; height: 40px; padding: 0 18px 0 14px; border-radius: 40px; background: #0b0b0b; color: #fff; border: 1px solid var(--ink); font: 500 11px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; }
+.share-button svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.share-button:hover, .share-button:focus-visible { background: #262626; }
+.share-menu { position: absolute; right: 0; bottom: calc(100% + 10px); z-index: 20; min-width: 190px; display: grid; background: var(--paper); border: 1px solid var(--ink); padding: 6px 0; }
+.share-menu[hidden] { display: none; }
+.share-menu a, .share-menu button { display: flex; justify-content: space-between; align-items: center; min-height: 40px; padding: 0 16px; font-size: 12px; text-align: left; width: 100%; }
+.share-menu a:hover, .share-menu button:hover, .share-menu a:focus-visible, .share-menu button:focus-visible { background: var(--surface-hover); }
+.comments h3 em { font-family: var(--serif); font-weight: 400; }
+.comment-head { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; }
+.comments .comment.is-reply { margin-left: 30px; }
+.comment-empty { margin-bottom: 10px; }
+.comment-write { margin-top: 35px; }
+.comment-write h4 { margin-bottom: 14px; }
+.comment-frame { display: block; width: 100%; height: 320px; border: 1px solid var(--line); background: #fff; }
+.comment-write .text-link { margin-top: 16px; font-size: 11px; }
 .comments { margin-top: 55px; font-size: 14px; }
 .comments h3 { font-size: 26px; font-weight: 500; letter-spacing: -.04em; margin: 0 0 25px; }
 .comments .comment { padding: 25px 0; border-bottom: 1px solid var(--line); }
@@ -295,12 +320,11 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 @media (min-width: 1650px) { body { max-width: 1800px; margin: 0 auto; } }
 @media (max-width: 1100px) {
   .hero { --tab: 38px; min-height: 590px; }
-  .hero-main { grid-template-columns: minmax(0,1fr) 170px; padding-right: 25px; }
-  .hero-title { font-size: 10vw; }
+  .hero-main { grid-template-columns: minmax(0,1fr) 36vw; padding-right: 25px; }
+  .hero-title { font-size: 9.2vw; }
   .chapter-body { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
   .chapter-copy { padding-right: 25px; }
   .hero-topline .micro:last-child { display: none; }
-  .hero-art { padding-top: 30px; }
   .lead-art { min-height: 315px; }
   .post-row { grid-template-columns: 30px minmax(0,1fr) 125px 25px; gap: 20px; }
 }
@@ -315,11 +339,10 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
   .panel + .panel::before { content: none; }
   .panel:first-child > .panel-tab, .chapter-body { display: none; }
   .js .hero .panel > .hero-main { opacity: 1; }
-  .hero-main { grid-column: 1/-1; width: auto; grid-template-columns: minmax(0,1fr) 120px; padding: 26px 0 30px; gap: 15px; }
+  .hero-main { grid-column: 1/-1; width: auto; grid-template-columns: minmax(0,1fr); padding: 26px 0 30px; gap: 15px; }
   .hero-title { font-size: clamp(85px,16vw,126px); padding: 14px 0 20px; }
   .hero-title .prefix { font-size: 34px; }
-  .hero-art { padding-top: 35px; }
-  .hero-art .art-caption { font-size: 8px; letter-spacing: .02em; margin-top: 15px; }
+  .hero-art { grid-row: 3; grid-column: 1; justify-self: center; width: min(100%, 440px); margin: -6px 0 0; }
   .hero-bottom { margin-top: 13px; gap: 20px; }
   .hero-description { font-size: 14px; max-width: 250px; }
   .hero-aside { display: none; }
@@ -369,9 +392,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
   .article-body blockquote { font-size: 1.4em; }
 }
 @media (max-width: 390px) {
-  .hero-main { grid-template-columns: minmax(0,1fr) 76px; gap: 9px; }
   .hero-title { font-size: 21.5vw; }
-  .hero-art .art-caption { font-size: 7px; }
   .hero-description { max-width: 220px; font-size: 13px; }
   .round-link { width: 44px; height: 44px; }
   .hero-topline .micro { font-size: 8px; }
@@ -381,7 +402,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 @media print {
-  .site-header, .hero, .edition-strip, .overlay, .reader-toolbar, .article-end, .comments, .about, .footer, .progress, .article-labels { display: none !important; }
+  .site-header, .hero, .edition-strip, .overlay, .reader-toolbar, .article-end, .post-actions, .comments, .about, .footer, .progress, .article-labels { display: none !important; }
   .wrap { margin: 0; }
   .reading-page { margin: 0 auto; max-width: 100%; }
   .article-title { font-size: 30pt; }
@@ -414,7 +435,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
   <g class="emblem-nodes"><circle cx="120" cy="150" r="4" fill="currentColor"/><circle cx="174" cy="73.63" r="3" stroke="currentColor" stroke-width="1"/><circle cx="66" cy="73.63" r="3" stroke="currentColor" stroke-width="1"/><circle cx="174" cy="226.37" r="3" stroke="currentColor" stroke-width="1"/><circle cx="66" cy="226.37" r="3" stroke="currentColor" stroke-width="1"/></g>
   <path class="draw" pathLength="1" d="M35 282H205" stroke="currentColor" stroke-width="1"/>
 </svg>
-</span></button><p class="art-caption micro" aria-hidden="true">A thought takes shape.<br/>Give it a nudge ↗</p></div>
+</span></button></div>
       <div class="hero-bottom"><p class="hero-description">Poems, stories, and things<br/>I didn’t say out loud.</p><span class="micro muted hero-aside">A little ink.<br/>A little infinity.</span><a class="round-link" href="#writing" aria-label="Explore the writing" data-magnetic="12">↓</a></div>
     </div>
   </div>
@@ -470,11 +491,11 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 </svg>
 </a><div class="lead-copy"><div class="lead-meta micro"><span>01 / The opening page</span><span class="muted">Poetry &amp; prose / Sample</span></div><h2 class="lead-title"><a href="#read/hand">The shape<br/>of a hand.</a></h2><p>Some things are remembered without thinking. A voice. A warmth. The outline of someone who is no longer in the room.</p><a class="text-link" href="#read/hand">Read the story <span class="arrow" aria-hidden="true">↗</span></a></div></article>
 <section class="writing" id="writing" aria-labelledby="writing-heading"><div class="section-heading"><h2 id="writing-heading">Collected <em>writing.</em></h2><span class="micro muted" id="result-count" aria-live="polite">Sample writing / 02–05</span></div><nav class="filters" aria-label="Writing categories"><a class="filter" data-filter="all" href="#home">All writing</a><a class="filter" data-filter="poetry" lang="ml" href="#category/poetry">കവിതകൾ</a><a class="filter" data-filter="stories" lang="ml" href="#category/stories">കഥകൾ</a><a class="filter" data-filter="essays" lang="ml" href="#category/essays">ലേഖനങ്ങൾ</a><a class="filter" data-filter="selected" lang="ml" href="#category/selected">തിരഞ്ഞെടുത്ത</a><a class="filter" data-filter="video" lang="ml" href="#category/video">വീഡിയോസ്</a></nav><div id="post-list"></div><nav class="pagination" aria-label="More writing"><span class="micro muted">There is more between the lines.</span><a class="text-link" href="#archive">Explore the index <span class="arrow" aria-hidden="true">↗</span></a></nav></section></section>
-<section id="reader-view" hidden="hidden"><div class="reader-toolbar"><a href="#home">← All writing</a><div class="type-controls"><span class="micro muted">Reading size</span><button data-size="down" aria-label="Decrease text size">A−</button><button data-size="up" aria-label="Increase text size">A+</button></div></div><article class="reading-page"><div class="micro muted" id="reader-category"></div><h1 class="article-title" id="reader-title"></h1><p class="article-deck" id="reader-deck"></p><div class="article-byline"><span>Arun Viswanathan / Sample writing</span><span id="reader-date"></span></div><div class="article-body" id="reader-body"></div><div class="article-end"><a href="#home">← All writing</a><button type="button" data-copy="true" aria-live="polite">Copy preview link ↗</button></div><div class="comments"><h3>A note in the margin.</h3><p>This is a reading specimen. The installed theme uses your blog’s native comment system.</p></div></article></section>
+<section id="reader-view" hidden="hidden"><div class="reader-toolbar"><a href="#home">← All writing</a><div class="type-controls"><span class="micro muted">Reading size</span><button data-size="down" aria-label="Decrease text size">A−</button><button data-size="up" aria-label="Increase text size">A+</button></div></div><article class="reading-page"><div class="micro muted" id="reader-category"></div><h1 class="article-title" id="reader-title"></h1><p class="article-deck" id="reader-deck"></p><div class="article-byline"><span>Arun Viswanathan / Sample writing</span><span id="reader-date"></span></div><div class="article-body" id="reader-body"></div><div class="article-end"><a href="#home">← All writing</a><button type="button" data-copy="true" aria-live="polite">Copy preview link ↗</button></div><div class="comments"><h3>A note in the margin.</h3><p>This is a reading specimen. On the blog, readers’ comments appear here, with Blogger’s own comment form below them.</p></div></article></section>
 <noscript><p class="empty">This interactive preview requires JavaScript. The Blogger theme renders real posts and navigation without it.</p></noscript>
 </main>
 <section class="about wrap" id="about" aria-labelledby="about-title">
-  <div><span class="micro">03 / A note from the author</span><div class="about-portrait figure-frame" data-figure="portrait" role="img" aria-label="Line portrait of Arun Viswanathan"></div><p class="about-portrait-note micro muted" aria-hidden="true">Drawn in lines. Tap to redraw ↗</p></div>
+  <div><span class="micro">03 / A note from the author</span><div class="about-portrait figure-frame" data-figure="portrait" role="img" aria-label="Line portrait of Arun Viswanathan"></div></div>
   <div class="about-copy"><h2 id="about-title">A small place.<br/>An <em>open mind.</em></h2><p>The Yellow Bottle, by Arun Viswanathan.<br/>Poetry, stories, and the life in between. Written in English and Malayalam. Collected here since 2009.</p><a class="text-link" href="https://www.instagram.com/8.5pixels/" target="_blank" rel="noopener noreferrer">Find me on Instagram <span class="arrow" aria-hidden="true">↗</span></a></div>
 </section>
 <footer class="footer">
@@ -485,7 +506,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 </footer>
 <section class="overlay" id="menu-overlay" role="dialog" aria-modal="true" aria-labelledby="menu-title" hidden="hidden">
   <div class="overlay-top"><span class="wordmark" id="menu-title">The contents.</span><button class="close-button" data-close="true">Close <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
-  <div class="overlay-grid"><div class="menu-note"><span class="micro">Pick a place<br/>to lose yourself.</span><div class="menu-gallery"><figure><div class="figure-frame" data-figure="poetry"></div><figcaption class="micro muted">Fig. 01 / Circles</figcaption></figure><figure><div class="figure-frame" data-figure="stories"></div><figcaption class="micro muted">Fig. 02 / Squares</figcaption></figure><figure><div class="figure-frame" data-figure="essays"></div><figcaption class="micro muted">Fig. 03 / Hexagons</figcaption></figure><figure><div class="figure-frame" data-figure="video" data-start="1"></div><figcaption class="micro muted">Fig. 04 / Pixels</figcaption></figure></div></div><div><nav class="menu-links" aria-label="Explore the journal"><a href="#home">All writing <span>00</span></a><a href="#category/poetry">Poetry <span lang="ml">കവിതകൾ / 01</span></a><a href="#category/stories">Stories <span lang="ml">കഥകൾ / 02</span></a><a href="#category/essays">Essays <span lang="ml">ലേഖനങ്ങൾ / 03</span></a><a href="#category/selected">Selected <span lang="ml">തിരഞ്ഞെടുത്ത / 04</span></a><a href="#category/video">Moving image <span lang="ml">വീഡിയോസ് / 05</span></a></nav><nav class="menu-sub" aria-label="More pages"><a href="#archive">The index ↗</a><a href="#about">About the author ↗</a><a href="https://arunviswanathan91.blogspot.com/p/copy-right-statement.html">Copyright and Content Use ↗</a></nav></div></div>
+  <div class="overlay-grid"><div class="menu-note"><span class="micro">Pick a place<br/>to lose yourself.</span><div class="menu-gallery"><figure><div class="figure-frame" data-figure="poetry"></div><figcaption class="micro muted">Fig. 01 / 9,000 circles</figcaption></figure><figure><div class="figure-frame" data-figure="stories"></div><figcaption class="micro muted">Fig. 02 / 12,000 circles</figcaption></figure><figure><div class="figure-frame" data-figure="essays"></div><figcaption class="micro muted">Fig. 03 / 4,000 lines</figcaption></figure><figure><div class="figure-frame" data-figure="video" data-start="1"></div><figcaption class="micro muted">Fig. 04 / 8,000 arcs</figcaption></figure></div></div><div><nav class="menu-links" aria-label="Explore the journal"><a href="#home">All writing <span>00</span></a><a href="#category/poetry">Poetry <span lang="ml">കവിതകൾ / 01</span></a><a href="#category/stories">Stories <span lang="ml">കഥകൾ / 02</span></a><a href="#category/essays">Essays <span lang="ml">ലേഖനങ്ങൾ / 03</span></a><a href="#category/selected">Selected <span lang="ml">തിരഞ്ഞെടുത്ത / 04</span></a><a href="#category/video">Moving image <span lang="ml">വീഡിയോസ് / 05</span></a></nav><nav class="menu-sub" aria-label="More pages"><a href="#archive">The index ↗</a><a href="#about">About the author ↗</a><a href="https://arunviswanathan91.blogspot.com/p/copy-right-statement.html">Copyright and Content Use ↗</a></nav></div></div>
 </section>
 <section class="overlay" id="search-overlay" role="dialog" aria-modal="true" aria-labelledby="search-title" hidden="hidden">
   <div class="overlay-top"><span class="wordmark">Between the lines.</span><button class="close-button" data-close="true">Close <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button></div>
@@ -746,7 +767,8 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
 
   // Safety net: if Blogger returns an empty Blog or archive widget, rebuild it from the blog's own public feed.
   const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const feed = (kind, query) => fetch(`/feeds/${kind}?alt=json&${query}`).then((r) => r.json()).then((d) => d.feed.entry || []);
+  // Always ask Blogger whether the feed changed, so edits in the dashboard are never hidden behind the browser cache.
+  const feed = (kind, query) => fetch(`/feeds/${kind}?alt=json&${query}`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.feed.entry || []);
   const plain = (html) => new DOMParser().parseFromString(html, 'text/html').documentElement.textContent.replace(/\s+/g, ' ').trim();
   const entryLink = (e) => (e.link.find((l) => l.rel === 'alternate') || {}).href || '/';
   const entryDate = (e) => new Date(e.published.$t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -757,8 +779,10 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
   const postId = (e) => (e.id.$t.match(/post-(\d+)/) || [])[1];
   const pathOf = (href) => { try { return new URL(href, location.href).pathname; } catch { return ''; } };
   // Lists are small: keep only what a row needs.
-  const slim = (e) => ({ id: e.id, title: e.title, summary: e.summary, published: e.published, category: e.category, link: e.link });
-  const fetchPost = (id) => fetch(`/feeds/posts/default/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry);
+  const slim = (e) => ({ id: e.id, title: e.title, summary: e.summary, published: e.published, updated: e.updated, category: e.category, link: e.link });
+  // Two lists match only if the same posts are there at the same edit, so a dashboard change always shows.
+  const stamp = (list) => list.map((e) => postId(e) + '@' + (e.updated ? e.updated.$t : '')).join();
+  const fetchPost = (id) => fetch(`/feeds/posts/default/${id}?alt=json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.entry);
   // Start downloading a post as soon as the reader points at it, so the next page opens from memory.
   const prefetch = (link) => {
     const id = link.dataset.postId, path = pathOf(link.href);
@@ -793,7 +817,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
       .sort((a, b) => new Date(b.published.$t) - new Date(a.published.$t))
       .map(slim);
     store.set('list:category:' + key, entries);
-    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, group.title, key);
+    if (!cached || stamp(cached) !== stamp(entries)) renderList(holder, entries, group.title, key);
   };
   const restoreBlog = async () => {
     const holder = document.getElementById('Blog1') || document.getElementById('journal');
@@ -801,21 +825,25 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     const path = decoded(location.pathname);
     const params = new URLSearchParams(location.search);
     if (/^\/(\d{4}\/\d{2}\/[^/]+|p\/[^/]+)\.html$/.test(path)) {
-      let e = store.get('post:' + location.pathname);
-      if (!e && !path.startsWith('/p/')) {
-        const head = document.querySelector('link[href*="/feeds/"][href*="/comments/default"]');
-        const id = head && (head.href.match(/\/feeds\/(\d+)\/comments/) || [])[1];
-        if (id) e = await fetchPost(id).catch(() => null);
-      }
+      const renderPost = (e) => {
+        holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page" data-blog-rendered="true" data-post-id="${esc(postId(e) || '')}"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
+        window.dispatchEvent(new Event('tyb:render'));
+      };
+      const isPage = path.startsWith('/p/');
+      const cached = store.get('post:' + location.pathname);
+      if (cached) renderPost(cached);
+      // A remembered copy opens instantly, but the live one is always fetched: if the post was edited, it replaces the copy.
+      const head = document.querySelector('link[href*="/feeds/"][href*="/comments/default"]');
+      const id = (head && (head.href.match(/\/feeds\/(\d+)\/comments/) || [])[1]) || (cached && postId(cached));
+      let e = !isPage && id ? await fetchPost(id).catch(() => null) : null;
       if (!e) {
-        const summaries = await feed(path.startsWith('/p/') ? 'pages/summary' : 'posts/summary', 'max-results=500');
+        const summaries = await feed(isPage ? 'pages/summary' : 'posts/summary', 'max-results=500');
         const match = summaries.find((item) => pathOf(entryLink(item)) === location.pathname);
-        if (match) e = path.startsWith('/p/') ? (await feed('pages/default', 'max-results=500')).find((item) => pathOf(entryLink(item)) === location.pathname) : await fetchPost(postId(match));
+        if (match) e = isPage ? (await feed('pages/default', 'max-results=500')).find((item) => pathOf(entryLink(item)) === location.pathname) : await fetchPost(postId(match));
       }
       if (!e) return;
       store.set('post:' + location.pathname, e);
-      holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page" data-blog-rendered="true"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
-      window.dispatchEvent(new Event('tyb:render'));
+      if (!cached || cached.updated?.$t !== e.updated?.$t || cached.content?.$t !== e.content?.$t) renderPost(e);
       return;
     }
     const label = path.match(/^\/search\/label\/(.+)$/);
@@ -833,24 +861,32 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     if (cached) renderList(holder, cached, heading);
     const entries = (await feed(kind, query)).map(slim);
     store.set(listKey, entries);
-    if (!cached || cached.map(postId).join() !== entries.map(postId).join()) renderList(holder, entries, heading);
+    if (!cached || stamp(cached) !== stamp(entries)) renderList(holder, entries, heading);
   };
   // Blogger's own list carries titles and links; dates and excerpts come from one cached summary feed.
   const fillNative = async () => {
     const slots = [...document.querySelectorAll('[data-fill]')];
     if (!slots.length) return;
-    let summaries = store.get('summaries');
-    if (!summaries) { summaries = (await feed('posts/summary', 'max-results=150')).map(slim); store.set('summaries', summaries); }
-    const byId = new Map(summaries.map((e) => [postId(e), e]));
+    const fill = (summaries) => {
+      const byId = new Map(summaries.map((e) => [postId(e), e]));
+      slots.forEach((slot) => {
+        const e = byId.get(slot.closest('[data-post-id]')?.dataset.postId);
+        if (!e) return;
+        if (slot.dataset.fill === 'date') { slot.textContent = entryDate(e); slot.setAttribute('datetime', e.published.$t); }
+        else slot.textContent = plain(e.summary ? e.summary.$t : '').slice(0, slot.dataset.fill === 'excerpt-long' ? 220 : 150);
+      });
+      return byId;
+    };
+    // Fill instantly from memory, then from the live feed so edited excerpts replace remembered ones.
+    const cached = store.get('summaries');
+    if (cached) fill(cached);
+    const summaries = (await feed('posts/summary', 'max-results=150')).map(slim);
+    store.set('summaries', summaries);
+    const byId = fill(summaries);
     const missing = [...new Set(slots.map((slot) => slot.closest('[data-post-id]')?.dataset.postId).filter((id) => id && !byId.has(id)))].slice(0, 30);
-    (await Promise.all(missing.map((id) => fetch(`/feeds/posts/summary/${id}?alt=json`).then((r) => r.json()).then((d) => d.entry).catch(() => null))))
-      .forEach((e) => { if (e) byId.set(postId(e), e); });
-    slots.forEach((slot) => {
-      const e = byId.get(slot.closest('[data-post-id]')?.dataset.postId);
-      if (!e) return;
-      if (slot.dataset.fill === 'date') { slot.textContent = entryDate(e); slot.setAttribute('datetime', e.published.$t); }
-      else slot.textContent = plain(e.summary ? e.summary.$t : '').slice(0, slot.dataset.fill === 'excerpt-long' ? 220 : 150);
-    });
+    if (!missing.length) return;
+    const extra = (await Promise.all(missing.map((id) => fetch(`/feeds/posts/summary/${id}?alt=json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.entry).catch(() => null)))).filter(Boolean);
+    fill(summaries.concat(extra));
   };
   const restoreArchive = async () => {
     const holder = document.querySelector('#index-overlay .index-list');
@@ -866,6 +902,130 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
       return `<li><a href="/${y}/${m}/">${name} <span class="muted">(${count})</span></a></li>`;
     }).join('') + '</ul>';
   };
+  // Under every post: a like made of lines, a share button, and Blogger's own comments.
+  const preview = document.body.dataset.preview === 'true';
+  const likesAPI = window.TYB_LIKES_API || 'https://api.counterapi.dev/v1/the-yellow-bottle';
+  const pageURL = () => location.href.split('#')[0].replace(/[?&]m=1\b/, '');
+  // The artwork's colours, in tones that read on white and on black.
+  const likeColors = ['#2a9d8f', '#7a9a3a', '#e0a526', '#d96b3b', '#c0508a', '#7d5fc0', '#4f79b8', '#35b3a5'];
+  const burst = Array.from({ length: 12 }, (_, k) => {
+    const a = k * Math.PI / 6, c = Math.cos(a), n = Math.sin(a), r = (v) => (20 + v).toFixed(2);
+    const style = `--k:${k};--c:${likeColors[k % likeColors.length]}`;
+    return `<line class="rest" x1="${r(c * 5)}" y1="${r(n * 5)}" x2="${r(c * 9)}" y2="${r(n * 9)}" style="${style}"/><line class="ray" x1="${r(c * 11)}" y1="${r(n * 11)}" x2="${r(c * 18)}" y2="${r(n * 18)}" pathLength="1" style="${style}"/>`;
+  }).join('');
+  const shareIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>';
+  const shareTargets = [
+    ['WhatsApp', (u, t) => `https://wa.me/?text=${encodeURIComponent(t + ' ' + u)}`],
+    ['Facebook', (u) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}`],
+    ['X', (u, t) => `https://twitter.com/intent/tweet?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`],
+    ['Telegram', (u, t) => `https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`],
+    ['Email', (u, t) => `mailto:?subject=${encodeURIComponent(t)}&body=${encodeURIComponent(u)}`],
+  ];
+  const likeKey = (id) => 'p' + id;
+  const liked = (id) => { try { return localStorage.getItem('tyb-liked:' + id) === '1'; } catch { return false; } };
+  const counter = (id, up) => fetch(`${likesAPI}/${likeKey(id)}${up ? '/up' : '/'}`, { cache: 'no-store' })
+    .then((r) => r.ok ? r.json() : Promise.reject(r.status)).then((d) => Number(d.count ?? d.value) || 0);
+  const showCount = (button, value) => {
+    const out = button.querySelector('.like-count');
+    if (value == null) { out.textContent = ''; return; }
+    out.textContent = value;
+    button.setAttribute('aria-label', `Like this piece. ${value} ${value === 1 ? 'like' : 'likes'} so far`);
+  };
+  const buildActions = (page) => {
+    if (page.querySelector('.post-actions')) return;
+    const id = page.dataset.postId || 'preview';
+    const title = (page.querySelector('.article-title')?.textContent || document.title).trim();
+    const bar = document.createElement('div');
+    bar.className = 'post-actions';
+    bar.innerHTML = `<button class="like-button${liked(id) ? ' is-liked' : ''}" type="button" aria-pressed="${liked(id)}" aria-label="Like this piece"><svg viewBox="0 0 40 40" fill="none" aria-hidden="true">${burst}</svg><span class="like-count micro" aria-hidden="true"></span></button><div class="share"><button class="share-button" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Share this piece">${shareIcon}<span>Share</span></button><div class="share-menu" hidden="hidden">${shareTargets.map(([name]) => `<a data-share="${name}" target="_blank" rel="noopener noreferrer">${name} <span aria-hidden="true">↗</span></a>`).join('')}<button type="button" data-copy="true">Copy link</button></div></div>`;
+    const end = page.querySelector('.article-end');
+    if (end) { end.querySelector('[data-copy]')?.remove(); end.append(bar); } else page.append(bar);
+    const like = bar.querySelector('.like-button');
+    if (!preview && id !== 'preview') counter(id, false).then((v) => showCount(like, v)).catch(() => showCount(like, null));
+    like.addEventListener('click', () => {
+      like.classList.remove('is-bursting');
+      void like.offsetWidth;
+      like.classList.add('is-bursting');
+      if (liked(id)) return;
+      try { localStorage.setItem('tyb-liked:' + id, '1'); } catch { /* A like still counts without memory. */ }
+      like.classList.add('is-liked');
+      like.setAttribute('aria-pressed', 'true');
+      const shown = Number(like.querySelector('.like-count').textContent);
+      if (!preview && id !== 'preview') counter(id, true).then((v) => showCount(like, v)).catch(() => showCount(like, shown ? shown + 1 : null));
+    });
+    const share = bar.querySelector('.share-button'), menu = bar.querySelector('.share-menu');
+    const close = () => { menu.hidden = true; share.setAttribute('aria-expanded', 'false'); };
+    share.addEventListener('click', async () => {
+      if (navigator.share && !finePointer) {
+        try { await navigator.share({ title, url: pageURL() }); return; } catch (error) { if (error && error.name === 'AbortError') return; }
+      }
+      menu.querySelectorAll('[data-share]').forEach((a) => { a.href = shareTargets.find(([name]) => name === a.dataset.share)[1](pageURL(), title); });
+      menu.hidden = !menu.hidden;
+      share.setAttribute('aria-expanded', String(!menu.hidden));
+    });
+    document.addEventListener('click', (event) => { if (!event.target.closest('.share')) close(); });
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape') close(); });
+  };
+  // Comments come from the post's public comment feed; writing one uses Blogger's own comment form.
+  const cleanComment = (html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const walk = (node) => [...node.childNodes].map((child) => {
+      if (child.nodeType === 3) return esc(child.textContent);
+      if (child.nodeType !== 1) return '';
+      const tag = child.tagName.toLowerCase();
+      if (['script', 'style', 'iframe', 'object', 'noscript', 'template'].includes(tag)) return '';
+      const inner = walk(child);
+      if (tag === 'br') return '<br/>';
+      if (['b', 'strong', 'i', 'em'].includes(tag)) return `<${tag}>${inner}</${tag}>`;
+      if (tag === 'a' && /^https?:/i.test(child.getAttribute('href') || '')) return `<a href="${esc(child.getAttribute('href'))}" rel="nofollow noopener noreferrer" target="_blank">${inner}</a>`;
+      return inner;
+    }).join('');
+    return walk(doc.body);
+  };
+  const blogIdFromHead = () => {
+    const link = document.querySelector('link[rel="service.post"], link[rel="EditURI"], link[href*="blogID="]');
+    return link ? (link.href.match(/feeds\/(\d+)\//) || link.href.match(/blogID=(\d+)/) || [])[1] : null;
+  };
+  const buildComments = async (page) => {
+    const id = page.dataset.postId;
+    if (!id || page.dataset.comments || document.querySelector('#comment-editor, .comment-form iframe, #comments[data-built]')) return;
+    page.dataset.comments = 'true';
+    let blogId = blogIdFromHead();
+    const [entries, post] = await Promise.all([
+      feed(`${id}/comments/default`, 'max-results=200').catch(() => []),
+      blogId ? null : fetchPost(id).catch(() => null),
+    ]);
+    if (!blogId) blogId = post && (post.id.$t.match(/blog-(\d+)/) || [])[1];
+    if (!blogId) return;
+    const list = entries.slice().sort((a, b) => new Date(a.published.$t) - new Date(b.published.$t)).map((c) => {
+      const reply = (c.link || []).some((l) => l.rel === 'related');
+      const name = c.author && c.author[0] ? c.author[0].name.$t : 'Anonymous';
+      return `<div class="comment${reply ? ' is-reply' : ''}"><div class="comment-head"><strong>${esc(name)}</strong><time class="micro muted">${entryDate(c)}</time></div><div class="comment-body">${cleanComment(c.content ? c.content.$t : '')}</div></div>`;
+    }).join('');
+    const origin = encodeURIComponent(location.origin);
+    const old = page.querySelector('.comments');
+    const section = document.createElement('section');
+    section.className = 'comments';
+    section.id = 'comments';
+    section.dataset.built = 'true';
+    section.innerHTML = `<h3>${entries.length ? `${entries.length} ${entries.length === 1 ? 'response' : 'responses'}.` : 'Leave a <em>response.</em>'}</h3>${list ? `<div class="comment-list">${list}</div>` : '<p class="muted comment-empty">Be the first to write something here.</p>'}<div class="comment-write"><h4 class="micro">Write a comment</h4><iframe class="comment-frame" title="Write a comment" loading="lazy" src="https://www.blogger.com/comment/frame/${blogId}?po=${id}&amp;hl=en&amp;saa=85391&amp;origin=${origin}&amp;skin=contempo"></iframe><a class="text-link" href="https://www.blogger.com/comment/fullpage/post/${blogId}/${id}" target="_blank" rel="noopener">Open the comment form in a new window <span class="arrow" aria-hidden="true">↗</span></a></div>`;
+    if (old) old.replaceWith(section); else page.append(section);
+  };
+  // Blogger's comment frame reports its height; let it grow instead of scrolling inside itself.
+  window.addEventListener('message', (event) => {
+    if (!/\.blogger\.com$/.test(new URL(event.origin || 'null', location.href).hostname || '')) return;
+    const data = typeof event.data === 'string' ? event.data : JSON.stringify(event.data || '');
+    const height = Number((data.match(/"?height"?\s*[:=]\s*"?(\d{2,4})/) || [])[1]);
+    document.querySelectorAll('.comment-frame').forEach((frame) => { if (height && frame.contentWindow === event.source) frame.style.height = height + 'px'; });
+  });
+  const enhanceReader = () => {
+    const page = q('.reading-page:not([hidden])');
+    if (!page || page.closest('[hidden]')) return;
+    buildActions(page);
+    if (!preview && window.fetch) buildComments(page).catch(() => {});
+  };
+  enhanceReader();
+  window.addEventListener('tyb:render', enhanceReader);
   if (document.body.dataset.preview !== 'true' && window.fetch) {
     // Release the held layout even if the feed cannot fill the page.
     const release = () => { const holder = document.getElementById('Blog1'); if (holder && !document.querySelector('[data-blog-rendered]')) holder.setAttribute('data-blog-rendered', 'none'); };
@@ -881,14 +1041,14 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
   });
   document.querySelectorAll('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
 })();
-</script><script>/* Generated line drawings: families of simple shapes whose centres, sizes and turns follow small formulas,
-   after Hamid Naderi Yeganeh's mathematical art. Canvas, crisp at any pixel density. No dependencies. */
+</script><script>/* Generated line drawings: thousands of circles, segments and arcs whose centres, sizes and angles follow the
+   formulas Hamid Naderi Yeganeh published in "Making Mathematical Art" (Scientific American), set in motion and in
+   colour. Canvas, crisp at any pixel density. No dependencies. */
 (() => {
   'use strict';
   const TAU = Math.PI * 2, PI = Math.PI;
-  const { sin, cos, pow, atan2, min, max, hypot } = Math;
+  const { sin, cos, pow, min, max, hypot } = Math;
   const sq = (v) => v * v;
-  const smooth = (v) => { const c = min(1, max(0, v)); return c * c * (3 - 2 * c); };
   const ease = (v) => 1 - pow(1 - v, 3);
   const media = (q) => window.matchMedia ? window.matchMedia(q) : { matches: false, addEventListener() {} };
   const motionOK = !media('(prefers-reduced-motion: reduce)').matches;
@@ -898,161 +1058,147 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
   const tone = (u, v) => {
     const i = min(portrait.h - 1, max(0, Math.floor(v * portrait.h))) * portrait.w + min(portrait.w - 1, max(0, Math.floor(u * portrait.w)));
     const d = parseInt(portrait.dark[i], 16) / 15;
-    return [colors.dark ? 1 - d : d, portrait.red[i] === '1' ? 1 : 0];
+    return [colors.dark ? 1 - d : d];
   };
 
-  // Each form: n shapes; at(s, t, m) gives [x, y, size, turn] inside a -1..1 square for s in 0..1.
-  // t is a slow clock that keeps the lines drifting; m is the eased pointer offset (-1..1).
-  // accent(s, t) marks the shapes drawn in yellow.
-  const lens = (s, t, m, lobes, beat, pull) => {
-    const a = lobes * PI * s + m.x * .35;
-    const w = 1 - (pull + m.y * .12) * sq(cos(beat * PI * s + t));
-    return [cos(a) * w, sin(a) * w];
-  };
-  const drift = (u, t, m, reach) => {
-    const ax = max(-1, min(1, cos(t * .25) * .35 + m.x * .9));
-    const ay = max(-1, min(1, sin(t * .25) * .35 + m.y * .9));
-    return [ax * reach, ay * reach];
-  };
+  // Each form draws n elements; for element k, s = k / n runs 0..1 exactly as in the published formulas.
+  // t is a slow clock that turns the inner terms so the figure keeps flowing; m is the eased pointer offset (-1..1).
+  // hue(s, t) picks one of the palette colours, so colour bands travel slowly along the figure.
+  const P = 8;
+  const bands = (s, t, k) => Math.floor(((s * k + t * .12) % 1 + 1) % 1 * P);
+  // The portrait stays in ink; a band a third as wide as the picture carries the palette across every line together.
+  const band = (w) => { const k = ((w % 1) + 1) % 1; return k < .36 ? Math.floor(k / .36 * P) : P; };
+  const circles = (N, a, b, c, d, pow6, bY) => ({ n: N, fit: .86, lw: .42,
+    el: (s, t, m) => {
+      const lift = c + m.y * .08, turn = a * PI * s + m.x * .3;
+      const kx = 1 - lift * sq(cos(b * PI * s + t)), ky = 1 - lift * sq(cos((bY || b) * PI * s + t));
+      return ['c', cos(turn) * kx, sin(turn) * ky, 1 / 200 + pow(sin(d * PI * s + t * .5), pow6) / 10];
+    },
+    hue: (s, t) => bands(s, t, a / 2) });
   const FORMS = {
-    petals: { n: 900, shape: 'circle', lw: .45,
-      at: (s, t, m) => [...lens(s, t, m, 6, 16, .72), .02 + .11 * pow(sin(24 * PI * s), 6), 0],
-      accent: (s) => sq(sin(24 * PI * s)) > .975 },
-    bloom: { n: 700, shape: 'circle', lw: .45,
-      at: (s, t, m) => [...lens(s, t, m, 4, 10, .6), .03 + .14 * pow(sin(16 * PI * s), 4), 0],
-      accent: (s) => sq(sin(16 * PI * s)) > .96 },
-    pixels: { n: 1800, shape: 'pixel',
-      at: (s, t, m) => [...lens(s, t, m, 6, 16, .72), 0, 0],
-      accent: (s) => sin(6 * PI * s) > .86 },
-    bottle: { n: 34, shape: 'circle', lw: .7,
-      at: (s, t, m) => {
-        const u = s * 34 / 33;
-        const r = u < .22 ? .15 : u < .56 ? .15 + .27 * smooth((u - .22) / .34) : .42 - .05 * sq(max(0, (u - .86) / .14));
-        return [(m.x * .14 + sin(t * .8 + u * 2.4) * .025) * u, -.78 + u * 1.28 + m.y * .03 * u, r, 0];
+    // 14,000 circles: X = cos(10πs)(1 − ½cos²(16πs)), R = 1/200 + sin⁴(52πs)/10
+    circles14: circles(14000, 10, 16, .5, 52, 4),
+    // 12,000 circles: X = cos(14πs)(1 − ¾cos²(32πs)), R = 1/200 + sin⁶(56πs)/10
+    circles12: circles(12000, 14, 32, .75, 56, 6),
+    // 10,000 circles: X = cos(14πs)(1 − ¾cos²(20πs)), Y = sin(14πs)(1 − ¾cos²(24πs))
+    circles10: circles(10000, 14, 20, .75, 54, 6, 24),
+    // 9,000 circles: X = cos(14πs)(1 − ¾cos²(36πs)), R = 1/200 + sin⁶(64πs)/10
+    circles9: circles(9000, 14, 36, .75, 64, 6),
+    // 8,000 segments from (A, B) to (C, D)
+    segments8: { n: 8000, fit: .5, lw: .32,
+      el: (s, t, m) => {
+        const u = sq(sin(12 * PI * s + t)) + sq(sin(18 * PI * s)), v = sq(sin(8 * PI * s)) + sq(sin(10 * PI * s + t));
+        const a = 14 * PI * s + m.x * .3;
+        return ['l', sin(a) * u, cos(a) * u, sin(a) * v, cos(a) * v];
       },
-      accent: (s) => s > .62 },
-    rings: { n: 150, shape: 'circle', lw: .55,
-      at: (s, t, m) => { const a = TAU * s + m.x * .4; return [.52 * cos(a), .52 * sin(a), .26 + .18 * sin(5 * a + t), 0]; },
-      accent: (s, t) => sin(5 * (TAU * s) + t) > .92 },
-    tunnel: { n: 22, shape: 'circle', lw: .7,
-      at: (s, t, m) => {
-        const u = s * 22 / 21, r = .95 - .8 * pow(u, .9), [dx, dy] = drift(u, t, m, (.95 - r) * .65);
-        return [dx, dy, r, 0];
+      hue: (s, t) => bands(s, t, 7) },
+    // 4,000 segments: the same bloom turned 14 and 30 times
+    segments4: { n: 4000, fit: .5, lw: .36,
+      el: (s, t, m) => {
+        const u = sq(sin(16 * PI * s + t)) + sq(sin(14 * PI * s)), a = 14 * PI * s + m.x * .3, b = 30 * PI * s + m.x * .3 + m.y * .2;
+        return ['l', sin(a) * u, cos(a) * u, sin(b) * u, cos(b) * u];
       },
-      accent: (s) => s > .84 },
-    lemniscate: { n: 240, shape: 'square', lw: .55,
-      at: (s, t, m) => {
-        const p = TAU * s, d = 1 + sq(sin(p));
-        return [.92 * cos(p) / d, 1.15 * sin(p) * cos(p) / d, .05 + .12 * sq(sin(3 * p + t)), 2 * p + m.x];
+      hue: (s, t) => bands(s, t, 7) },
+    // 8,000 arcs: centre (X, Y), radius S, from angle B through C to A
+    arcs8: { n: 8000, fit: .5, lw: .34,
+      el: (s, t, m) => {
+        const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
+        const k = 1 - cos(24 * PI * s) / 2 - pow(cos(q), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
+        return ['a', .75 * cos(2 * PI * s) * k, .75 * sin(2 * PI * s) * k, 1 / 8 + 5 / 8 * pow(sin(q), 4), c - open, c + open];
       },
-      accent: (s, t) => sq(sin(3 * TAU * s + t)) > .93 },
-    squareVortex: { n: 40, shape: 'square', lw: .65,
-      at: (s, t, m) => { const u = s * 40 / 39, r = .9 * (1 - .88 * u), [dx, dy] = drift(u, t, m, (.9 - r) * .35); return [dx, dy, r, u * 1.6 + t * .12 + m.x * .6]; },
-      accent: (s) => s > .82 },
-    hexVortex: { n: 44, shape: 'hexagon', lw: .65,
-      at: (s, t, m) => { const u = s * 44 / 43, r = .92 * (1 - .9 * u), [dx, dy] = drift(u, t, m, (.92 - r) * .38); return [dx, dy, r, u * 1.1 + t * .1 + m.x * .5]; },
-      accent: (s) => s > .84 },
-    hexRing: { n: 120, shape: 'hexagon', lw: .55,
-      at: (s, t, m) => { const a = TAU * s + m.x * .3, rho = .5 + .08 * sin(3 * a + t); return [rho * cos(a), rho * sin(a), .28 + .1 * sin(6 * a), 2 * a]; },
-      accent: (s) => sin(6 * TAU * s) > .93 },
-    pentagons: { n: 700, shape: 'pentagon', lw: .45,
-      at: (s, t, m) => [...lens(s, t, m, 10, 6, .55), .018 + .075 * pow(sin(30 * PI * s), 4), 10 * PI * s],
-      accent: (s) => pow(sin(30 * PI * s), 4) > .82 },
-    ellipses: { n: 240, shape: 'ellipse', lw: .55,
-      at: (s, t, m) => {
-        const p = TAU * s, q = 3 * p + t * .35;
-        return [.66 * sin(q), .66 * sin(2 * p), .2, atan2(2 * cos(2 * p), 3 * cos(q)) + m.x * .5];
+      hue: (s, t) => bands(s, t, 4) },
+    // 7,000 arcs
+    arcs7: { n: 7000, fit: .46, lw: .34,
+      el: (s, t, m) => {
+        const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
+        const k = 1 - cos(q) / 2 - pow(cos(40 * PI * s), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
+        return ['a', .875 * cos(2 * PI * s) * k, .875 * sin(2 * PI * s) * k, 1 / 8 + .75 * pow(sin(q), 4), c - open, c + open];
       },
-      accent: (s) => Math.floor(s * 24) % 5 === 0 },
-    pixelKnot: { n: 1800, shape: 'pixel',
-      at: (s, t, m) => { const p = TAU * s; return [.85 * sin(3 * p + t * .3 + m.x * .4), .85 * sin(4 * p + m.y * .4), 0, 0]; },
-      accent: (s) => Math.floor(s * 12) % 4 === 0 },
+      hue: (s, t) => bands(s, t, 4) },
     // A line portrait from a 68x110 darkness map of the author's photo (src/portrait.json).
-    // Rhythm: the waves breathe and a slow pulse travels down the face. The pointer, anywhere on the page, steers them.
-    portraitLines: { n: 1, lw: .5,
-      custom: (f, groups) => {
-        const rows = 104, gap = f.h / rows, step = max(.7, f.w / 300), shown = Math.ceil(rows * ease(f.drawn));
-        const breath = .78 + .22 * sin(f.t * 6), tilt = f.m.y * 7, steer = f.m.x * 2.5;
-        for (let j = 0; j < shown; j++) {
-          const v = (j + .5) / rows, y0 = v * f.h, pulse = .75 + .5 * pow(max(0, sin(v * 5 - f.t * 5)), 3);
-          let phase = j * 1.3 + v * tilt, last = -1;
-          for (let x = 0; x <= f.w; x += step) {
-            const [tone0, g] = tone(x / f.w, v), d = pow(tone0, 1.25);
-            phase += (.1 + d * 1.1) * step / .8;
-            const y = y0 + sin(phase + f.t * 3 + steer) * d * gap * .95 * breath * pulse;
-            if (g !== last) { groups[g].moveTo(x, y); last = g; } else groups[g].lineTo(x, y);
-          }
+    // The waves breathe and a band of colour sweeps across every line at once. The pointer, anywhere on the page, steers them.
+    portraitLines: { lw: .55, custom: (f, groups) => {
+      const rows = 104, gap = f.h / rows, step = max(.7, f.w / 300), shown = Math.ceil(rows * ease(f.drawn));
+      const breath = .78 + .22 * sin(f.t * 6), tilt = f.m.y * 7, steer = f.m.x * 2.5, sweep = f.t * 1.6 + f.m.x * .5;
+      for (let j = 0; j < shown; j++) {
+        const v = (j + .5) / rows, y0 = v * f.h, pulse = .75 + .5 * pow(max(0, sin(v * 5 - f.t * 5)), 3);
+        let phase = j * 1.3 + v * tilt, last = -1, px = 0, py = y0;
+        for (let x = 0; x <= f.w; x += step) {
+          const u = x / f.w, [tone0] = tone(u, v), d = pow(tone0, 1.25);
+          phase += (.1 + d * 1.1) * step / .8;
+          const y = y0 + sin(phase + f.t * 3 + steer) * d * gap * .95 * breath * pulse;
+          const g = band(u * .8 + v * .45 - sweep);
+          if (last < 0) groups[g].moveTo(x, y);
+          else { if (g !== last) groups[g].moveTo(px, py); groups[g].lineTo(x, y); }
+          last = g; px = x; py = y;
         }
-      } },
-    portraitRings: { n: 1, lw: .6,
-      custom: (f, groups) => {
-        const step = f.w / 48, rowStep = step * .866, rows = Math.ceil(f.h / rowStep), shown = Math.ceil(rows * ease(f.drawn));
-        const ox = f.w * (.5 + f.m.x * .4), oy = f.h * (.5 + f.m.y * .4), wave = TAU / (f.w * .35);
-        for (let row = 0; row < shown; row++) {
-          const y = step / 2 + row * rowStep;
-          for (let x = row % 2 ? step / 2 : 0; x < f.w; x += step) {
-            const [tone0, g] = tone(x / f.w, y / f.h);
-            const r = pow(tone0, 1.2) * step * .62 * (.84 + .16 * sin(f.t * 6 - hypot(x - ox, y - oy) * wave));
-            if (r < .35) continue;
-            groups[g].moveTo(x + r, y);
-            groups[g].arc(x, y, r, 0, TAU);
-          }
+      }
+    } },
+    portraitRings: { lw: .6, custom: (f, groups) => {
+      const step = f.w / 48, rowStep = step * .866, rows = Math.ceil(f.h / rowStep), shown = Math.ceil(rows * ease(f.drawn));
+      const ox = f.w * (.5 + f.m.x * .4), oy = f.h * (.5 + f.m.y * .4), wave = TAU / (f.w * .35);
+      for (let row = 0; row < shown; row++) {
+        const y = step / 2 + row * rowStep;
+        for (let x = row % 2 ? step / 2 : 0; x < f.w; x += step) {
+          const [tone0] = tone(x / f.w, y / f.h), dist = hypot(x - ox, y - oy);
+          const r = pow(tone0, 1.2) * step * .62 * (.84 + .16 * sin(f.t * 6 - dist * wave));
+          if (r < .35) continue;
+          const g = band(dist / f.w * .9 - f.t * 1.6);
+          groups[g].moveTo(x + r, y);
+          groups[g].arc(x, y, r, 0, TAU);
         }
-      } },
+      }
+    } },
   };
   const FIGURES = {
-    opening: ['petals', 'bottle', 'pixels'],
-    bottle: ['bottle', 'petals'],
-    poetry: ['bloom', 'rings', 'tunnel'],
-    stories: ['lemniscate', 'squareVortex'],
-    essays: ['hexVortex', 'hexRing'],
-    selected: ['pentagons', 'bottle'],
-    video: ['ellipses', 'pixelKnot'],
+    opening: ['circles14', 'segments8', 'arcs8', 'circles12'],
+    poetry: ['circles9', 'circles14'],
+    stories: ['circles12', 'arcs7'],
+    essays: ['segments4', 'segments8'],
+    selected: ['arcs7', 'circles10'],
+    video: ['circles10', 'arcs8'],
     portrait: ['portraitLines', 'portraitRings'],
   };
 
-  const polygon = (ctx, sides, x, y, r, turn) => {
-    for (let k = 0; k <= sides; k++) {
-      const a = turn + k * TAU / sides - PI / 2;
-      if (k) ctx.lineTo(x + r * cos(a), y + r * sin(a)); else ctx.moveTo(x + r * cos(a), y + r * sin(a));
-    }
+  // Eight colours that sit on white without shouting, and brighter ones for the dark page.
+  const PALETTES = {
+    light: ['#2f6f6a', '#7a9a3a', '#c9a227', '#b5562e', '#8e3b62', '#6a4c93', '#3d5a80', '#2a9d8f'],
+    dark: ['#56e0cf', '#b5d86a', '#ffd166', '#f08a5d', '#e07ab8', '#b28dff', '#8fb3ff', '#5fd3c6'],
   };
-  const trace = (ctx, shape, x, y, r, turn) => {
-    if (shape === 'circle') { ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, TAU); }
-    else if (shape === 'square') polygon(ctx, 4, x, y, r, turn + PI / 4);
-    else if (shape === 'pentagon') polygon(ctx, 5, x, y, r, turn);
-    else if (shape === 'hexagon') polygon(ctx, 6, x, y, r, turn);
-    else if (shape === 'ellipse') { ctx.moveTo(x + r * cos(turn), y + r * sin(turn)); ctx.ellipse(x, y, r, r * .36, turn, 0, TAU); }
-  };
-
-  let colors = { ink: '#080808', accent: '#e8b400', dark: false };
+  let colors = { ink: '#080808', dark: false, palette: PALETTES.light };
   const readColors = () => {
-    const style = getComputedStyle(document.documentElement);
-    const ink = style.getPropertyValue('--ink').trim() || colors.ink;
-    colors = { ink, accent: style.getPropertyValue('--accent').trim() || colors.accent, dark: parseInt(ink.replace('#', '').slice(0, 2), 16) > 128 };
+    const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || colors.ink;
+    const dark = parseInt(ink.replace('#', '').slice(0, 2), 16) > 128;
+    colors = { ink, dark, palette: dark ? PALETTES.dark : PALETTES.light };
   };
 
+  // Fewer elements on small frames: the same formula with a smaller n keeps its shape, only lighter.
+  const budget = (form, f) => form.custom ? 1 : min(form.n, Math.round(form.n * min(1, max(.22, min(f.w, f.h) / 620))));
   const paint = (f, formName, alpha) => {
     const form = FORMS[formName];
     const { ctx, w, h } = f;
-    const scale = min(w, h) / 2 * .8, cx = w / 2, cy = h / 2;
-    const count = Math.ceil(form.n * ease(f.drawn));
-    const cell = max(1.5, scale / 90);
-    const groups = [new Path2D(), new Path2D()];
+    const groups = Array.from({ length: P + 1 }, () => new Path2D());
     if (form.custom) form.custom(f, groups);
-    else for (let i = 0; i < count; i++) {
-      const s = i / form.n;
-      const [x, y, r, turn] = form.at(s, f.t, f.m);
-      const g = form.accent(s, f.t) ? 1 : 0;
-      const px = cx + x * scale, py = cy + y * scale;
-      if (form.shape === 'pixel') groups[g].rect(Math.round(px / cell) * cell, Math.round(py / cell) * cell, cell * .82, cell * .82);
-      else trace(groups[g], form.shape, px, py, max(.5, r * scale), turn);
+    else {
+      const n = budget(form, f), count = Math.ceil(n * ease(f.drawn));
+      const scale = min(w, h) / 2 * form.fit, cx = w / 2, cy = h / 2;
+      for (let k = 0; k < count; k++) {
+        const s = k / n, e = form.el(s, f.t, f.m), path = groups[form.hue(s, f.t)];
+        if (e[0] === 'c') { const x = cx + e[1] * scale, y = cy - e[2] * scale, r = max(.4, e[3] * scale); path.moveTo(x + r, y); path.arc(x, y, r, 0, TAU); }
+        else if (e[0] === 'l') { path.moveTo(cx + e[1] * scale, cy - e[2] * scale); path.lineTo(cx + e[3] * scale, cy - e[4] * scale); }
+        else {
+          // Canvas angles run clockwise with y down; mirror the arc so it matches the formula's orientation.
+          const x = cx + e[1] * scale, y = cy - e[2] * scale, r = e[3] * scale;
+          path.moveTo(x + r * cos(-e[5]), y + r * sin(-e[5]));
+          path.arc(x, y, r, -e[5], -e[4]);
+        }
+      }
     }
-    ctx.globalAlpha = alpha;
+    ctx.globalAlpha = alpha * (form.custom ? 1 : colors.dark ? .9 : .82);
     groups.forEach((path, g) => {
-      const color = g ? colors.accent : colors.ink;
-      if (form.shape === 'pixel') { ctx.fillStyle = color; ctx.fill(path); }
-      else { ctx.strokeStyle = color; ctx.lineWidth = (form.lw || .5) * (g ? 1.3 : 1); ctx.stroke(path); }
+      ctx.strokeStyle = g < P ? colors.palette[g] : colors.ink;
+      ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1);
+      ctx.stroke(path);
     });
     ctx.globalAlpha = 1;
   };
@@ -1086,10 +1232,11 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
           goal = { x: max(-1, min(1, (pointer.x - box.left - box.width / 2) / (box.width * .75))), y: max(-1, min(1, (pointer.y - box.top - box.height / 2) / (box.height * .75))) };
         }
         f.m = { x: f.m.x + (goal.x - f.m.x) * .05, y: f.m.y + (goal.y - f.m.y) * .05 };
-        changed = true;
         again = true;
+        // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
+        if (time - (f.painted || 0) > 31) changed = true;
       }
-      if (changed) render(f);
+      if (changed) { f.painted = time; render(f); }
       if (f.drawn < 1 || f.morph < 1) again = true;
     });
     if (again) raf = requestAnimationFrame(tick);
