@@ -241,7 +241,14 @@
   const esc = (value) => String(value).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // Always ask Blogger whether the feed changed, so edits in the dashboard are never hidden behind the browser cache.
   const feed = (kind, query) => fetch(`/feeds/${kind}?alt=json&${query}`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.feed.entry || []);
-  const plain = (html) => new DOMParser().parseFromString(html, 'text/html').documentElement.textContent.replace(/\s+/g, ' ').trim();
+  const plain = (html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    doc.querySelectorAll('style, script, noscript, template').forEach((el) => el.remove());
+    // Summaries of posts that carry their own styles can start with CSS or code; drop it so excerpts stay prose.
+    let text = doc.documentElement.textContent.replace(/\/\*[\s\S]*?\*\//g, ' ');
+    for (let i = 0; i < 3; i++) text = text.replace(/[^{}]*\{[^{}]*\}/g, ' ');
+    return text.replace(/\(function\s*\([\s\S]*$/, ' ').replace(/\s+/g, ' ').trim();
+  };
   const entryLink = (e) => (e.link.find((l) => l.rel === 'alternate') || {}).href || '/';
   const entryDate = (e) => new Date(e.published.$t).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   const store = {
@@ -299,6 +306,13 @@
     if (/^\/(\d{4}\/\d{2}\/[^/]+|p\/[^/]+)\.html$/.test(path)) {
       const renderPost = (e) => {
         holder.innerHTML = `<div class="reader-toolbar"><a href="/">← All writing</a></div><article class="reading-page" data-blog-rendered="true" data-post-id="${esc(postId(e) || '')}"><div class="micro muted">${esc(e.category ? e.category[0].term : 'The Yellow Bottle')}</div><h1 class="article-title">${esc(e.title.$t)}</h1><div class="article-byline"><span>${esc(e.author ? e.author[0].name.$t : '')}</span><time>${entryDate(e)}</time></div><div class="article-body post-body">${e.content.$t}</div><div class="article-end"><a href="/">← All writing</a></div></article>`;
+        // Posts may carry their own small scripts (animated poems); innerHTML never runs them, so re-create each one.
+        holder.querySelectorAll('.article-body script').forEach((old) => {
+          const script = document.createElement('script');
+          [...old.attributes].forEach((a) => script.setAttribute(a.name, a.value));
+          script.textContent = old.textContent;
+          old.replaceWith(script);
+        });
         window.dispatchEvent(new Event('tyb:render'));
       };
       const isPage = path.startsWith('/p/');
@@ -356,10 +370,21 @@
     store.set('summaries', summaries);
     const byId = fill(summaries);
     const missing = [...new Set(slots.map((slot) => slot.closest('[data-post-id]')?.dataset.postId).filter((id) => id && !byId.has(id)))].slice(0, 30);
-    if (!missing.length) return;
+    if (!missing.length) { repairExcerpts(); return; }
     const extra = (await Promise.all(missing.map((id) => fetch(`/feeds/posts/summary/${id}?alt=json`, { cache: 'no-cache' }).then((r) => r.json()).then((d) => d.entry).catch(() => null)))).filter(Boolean);
     fill(summaries.concat(extra));
+    repairExcerpts();
   };
+  // A post whose summary was only styles or code gets its excerpt from the post itself.
+  const repairExcerpts = () => {
+    document.querySelectorAll('.post-row[data-post-id], .lead[data-post-id]').forEach((row) => {
+      const slot = row.querySelector('[data-fill^="excerpt"]') || row.querySelector('p');
+      if (!slot || slot.textContent.trim() || slot.dataset.repairing || !row.dataset.postId) return;
+      slot.dataset.repairing = 'true';
+      fetchPost(row.dataset.postId).then((e) => { slot.textContent = plain(e.content ? e.content.$t : '').slice(0, slot.dataset.fill === 'excerpt-long' ? 220 : 150); }).catch(() => {});
+    });
+  };
+  if (document.body.dataset.preview !== 'true') window.addEventListener('tyb:render', () => setTimeout(repairExcerpts, 1500));
   const restoreArchive = async () => {
     const holder = document.querySelector('#index-overlay .index-list');
     if (!holder || holder.querySelector('[data-blog-rendered] li, .archive-items li')) return;
@@ -460,7 +485,15 @@
   };
   const buildComments = async (page) => {
     const id = page.dataset.postId;
-    if (!id || page.dataset.comments || document.querySelector('#comment-editor, .comment-form iframe, #comments[data-built]')) return;
+    if (!id || page.dataset.comments) return;
+    const native = document.querySelector('#comment-editor, .comment-form iframe');
+    if (native) {
+      // Blogger's own form stays; add a way out for readers whose browser blocks Google sign-in inside it.
+      const blog = blogIdFromHead();
+      if (blog && !document.querySelector('.comment-fallback')) native.insertAdjacentHTML('afterend', `<p class="comment-fallback micro muted">Trouble signing in? <a href="https://www.blogger.com/comment/fullpage/post/${blog}/${id}" target="_blank" rel="noopener">Comment on Blogger ↗</a></p>`);
+      return;
+    }
+    if (document.querySelector('#comments[data-built]')) return;
     page.dataset.comments = 'true';
     let blogId = blogIdFromHead();
     const [entries, post] = await Promise.all([
@@ -474,27 +507,71 @@
       const name = c.author && c.author[0] ? c.author[0].name.$t : 'Anonymous';
       return `<div class="comment${reply ? ' is-reply' : ''}"><div class="comment-head"><strong>${esc(name)}</strong><time class="micro muted">${entryDate(c)}</time></div><div class="comment-body">${cleanComment(c.content ? c.content.$t : '')}</div></div>`;
     }).join('');
-    const origin = encodeURIComponent(location.origin);
     const old = page.querySelector('.comments');
     const section = document.createElement('section');
     section.className = 'comments';
     section.id = 'comments';
     section.dataset.built = 'true';
-    section.innerHTML = `<h3>${entries.length ? `${entries.length} ${entries.length === 1 ? 'response' : 'responses'}.` : 'Leave a <em>response.</em>'}</h3>${list ? `<div class="comment-list">${list}</div>` : '<p class="muted comment-empty">Be the first to write something here.</p>'}<div class="comment-write"><h4 class="micro">Write a comment</h4><iframe class="comment-frame" title="Write a comment" loading="lazy" src="https://www.blogger.com/comment/frame/${blogId}?po=${id}&amp;hl=en&amp;saa=85391&amp;origin=${origin}&amp;skin=contempo"></iframe><a class="text-link" href="https://www.blogger.com/comment/fullpage/post/${blogId}/${id}" target="_blank" rel="noopener">Open the comment form in a new window <span class="arrow" aria-hidden="true">↗</span></a></div>`;
+    section.innerHTML = `<h3>${entries.length ? `${entries.length} ${entries.length === 1 ? 'response' : 'responses'}.` : 'Leave a <em>response.</em>'}</h3>${list ? `<div class="comment-list">${list}</div>` : '<p class="muted comment-empty">Be the first to write something here.</p>'}<div class="comment-write"><a class="comment-open" data-comment-popup="true" href="https://www.blogger.com/comment/fullpage/post/${blogId}/${id}" target="_blank" rel="noopener">Write a comment <span aria-hidden="true">↗</span></a><p class="micro muted">Opens Blogger’s comment form, where you can sign in with Google or comment by name.</p></div>`;
     if (old) old.replaceWith(section); else page.append(section);
+    // Google sign-in cannot run inside an embedded frame, so the form opens in its own window; when it closes, the list refreshes.
+    section.querySelector('[data-comment-popup]').addEventListener('click', (event) => {
+      const win = window.open(event.currentTarget.href, 'tyb-comment', 'width=560,height=720');
+      if (!win) return;
+      event.preventDefault();
+      const timer = setInterval(() => {
+        if (!win.closed) return;
+        clearInterval(timer);
+        delete page.dataset.comments;
+        section.removeAttribute('data-built');
+        buildComments(page).catch(() => {});
+      }, 800);
+    });
   };
-  // Blogger's comment frame reports its height; let it grow instead of scrolling inside itself.
-  window.addEventListener('message', (event) => {
-    if (!/\.blogger\.com$/.test(new URL(event.origin || 'null', location.href).hostname || '')) return;
-    const data = typeof event.data === 'string' ? event.data : JSON.stringify(event.data || '');
-    const height = Number((data.match(/"?height"?\s*[:=]\s*"?(\d{2,4})/) || [])[1]);
-    document.querySelectorAll('.comment-frame').forEach((frame) => { if (height && frame.contentWindow === event.source) frame.style.height = height + 'px'; });
-  });
+  // After the post: a few other pieces, preferably from the same chapter, beside a small line drawing.
+  const buildMore = async (page) => {
+    const id = page.dataset.postId;
+    if (!id || page.querySelector('.read-more')) return;
+    const slot = document.createElement('aside');
+    slot.className = 'read-more';
+    slot.setAttribute('aria-labelledby', 'read-more-title');
+    (page.querySelector('.article-end') || page.lastElementChild).after(slot);
+    let list = store.get('summaries');
+    if (!list) { list = (await feed('posts/summary', 'max-results=150')).map(slim); store.set('summaries', list); }
+    const labels = [...page.querySelectorAll('.article-labels a')].map((a) => a.textContent.trim());
+    const first = page.querySelector('.micro.muted')?.textContent.trim();
+    if (first) labels.push(first);
+    const chapter = labels.map(categoryOf).find(Boolean);
+    const others = list.filter((e) => postId(e) !== id);
+    const near = chapter ? others.filter((e) => (e.category || []).some((c) => categoryOf(c.term) === chapter)) : [];
+    const picks = [...near.slice(0, 3), ...others.filter((e) => !near.slice(0, 3).includes(e))].slice(0, 4);
+    if (!picks.length) { slot.remove(); return; }
+    slot.innerHTML = `<div class="read-more-art figure-frame" data-figure="more"></div><div><h2 class="micro" id="read-more-title">Read more</h2><ul>${picks.map((e) => `<li><a href="${esc(entryLink(e))}"><span class="read-more-title">${esc(e.title.$t || 'Untitled')}</span><time class="micro muted">${entryDate(e)}</time></a></li>`).join('')}</ul></div>`;
+    language();
+    if (window.TYB_FIGURE) window.TYB_FIGURE(slot.querySelector('.figure-frame'));
+  };
+  // Inline colours pasted into posts are chosen for a white page; on the dark page, lift the dark ones so they stay readable.
+  const luminance = (rgb) => { const [r, g, b] = rgb.match(/\d+(\.\d+)?/g).map(Number); return (r * .299 + g * .587 + b * .114) / 255; };
+  const fixInk = () => {
+    const dark = effectiveTheme() === 'dark';
+    document.querySelectorAll('.article-body [style*="color"]').forEach((el) => {
+      if (el.dataset.ink !== undefined) { el.style.color = el.dataset.ink; delete el.dataset.ink; }
+      if (!dark || !el.style.color) return;
+      const shown = getComputedStyle(el).color;
+      if (luminance(shown) > .45) return;
+      el.dataset.ink = el.style.color;
+      const [r, g, b] = shown.match(/\d+/g).map(Number);
+      el.style.color = `rgb(${[r, g, b].map((v) => Math.round(v + (235 - v) * .72)).join(',')})`;
+    });
+  };
+  new MutationObserver(fixInk).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  if (systemDark && systemDark.addEventListener) systemDark.addEventListener('change', fixInk);
   const enhanceReader = () => {
     const page = q('.reading-page:not([hidden])');
     if (!page || page.closest('[hidden]')) return;
     buildActions(page);
-    if (!preview && window.fetch) buildComments(page).catch(() => {});
+    fixInk();
+    if (!preview && window.fetch) { buildMore(page).catch(() => {}); buildComments(page).catch(() => {}); }
   };
   enhanceReader();
   window.addEventListener('tyb:render', enhanceReader);

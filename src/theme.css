@@ -304,8 +304,18 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 .comment-empty { margin-bottom: 10px; }
 .comment-write { margin-top: 35px; }
 .comment-write h4 { margin-bottom: 14px; }
-.comment-frame { display: block; width: 100%; height: 320px; border: 1px solid var(--line); background: #fff; }
-.comment-write .text-link { margin-top: 16px; font-size: 11px; }
+.comment-open { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 22px; border: 1px solid var(--ink); border-radius: 44px; font-size: 13px; transition: background .25s, color .25s; }
+.comment-open:hover, .comment-open:focus-visible { background: var(--ink); color: var(--paper); }
+.comment-write p { margin-top: 12px; font-size: 10px; }
+.read-more { display: grid; grid-template-columns: 120px minmax(0,1fr); gap: 28px; align-items: center; margin-top: 45px; padding-bottom: 10px; }
+.read-more-art { width: 120px; }
+.read-more h2 { margin-bottom: 10px; }
+.read-more ul { list-style: none; margin: 0; padding: 0; }
+.read-more li + li { border-top: 1px solid var(--line); }
+.read-more a { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; padding: 11px 0; font-size: 15px; transition: color .25s; }
+.read-more a:hover, .read-more a:focus-visible { color: var(--quiet); }
+.read-more time { flex-shrink: 0; font-size: 9px; }
+@media (max-width: 560px) { .read-more { grid-template-columns: 1fr; gap: 14px; } .read-more-art { width: 96px; } }
 .comments { margin-top: 55px; font-size: 14px; }
 .comments h3 { font-size: 26px; font-weight: 500; letter-spacing: -.04em; margin: 0 0 25px; }
 .comments .comment { padding: 25px 0; border-bottom: 1px solid var(--line); }
@@ -406,7 +416,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 @media print {
-  .site-header, .hero, .edition-strip, .overlay, .reader-toolbar, .article-end, .post-actions, .comments, .about, .footer, .progress, .article-labels { display: none !important; }
+  .site-header, .hero, .edition-strip, .overlay, .reader-toolbar, .article-end, .post-actions, .read-more, .comments, .about, .footer, .progress, .article-labels { display: none !important; }
   .wrap { margin: 0; }
   .reading-page { margin: 0 auto; max-width: 100%; }
   .article-title { font-size: 30pt; }
