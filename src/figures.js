@@ -25,7 +25,7 @@
   const bands = (s, t, k) => Math.floor(((s * k + t * .12) % 1 + 1) % 1 * P);
   // The portrait stays in ink; a band a third as wide as the picture carries the palette across every line together.
   const band = (w) => { const k = ((w % 1) + 1) % 1; return k < .36 ? Math.floor(k / .36 * P) : P; };
-  const circles = (N, a, b, c, d, pow6, bY) => ({ n: N, fit: .86, lw: .42,
+  const circles = (N, a, b, c, d, pow6, bY) => ({ n: N, fit: .86, lw: .5,
     el: (s, t, m) => {
       const lift = c + m.y * .08, turn = a * PI * s + m.x * .3;
       const kx = 1 - lift * sq(cos(b * PI * s + t)), ky = 1 - lift * sq(cos((bY || b) * PI * s + t));
@@ -42,7 +42,7 @@
     // 9,000 circles: X = cos(14πs)(1 − ¾cos²(36πs)), R = 1/200 + sin⁶(64πs)/10
     circles9: circles(9000, 14, 36, .75, 64, 6),
     // 8,000 segments from (A, B) to (C, D)
-    segments8: { n: 8000, fit: .5, lw: .32,
+    segments8: { n: 8000, fit: .5, lw: .42,
       el: (s, t, m) => {
         const u = sq(sin(12 * PI * s + t)) + sq(sin(18 * PI * s)), v = sq(sin(8 * PI * s)) + sq(sin(10 * PI * s + t));
         const a = 14 * PI * s + m.x * .3;
@@ -50,14 +50,14 @@
       },
       hue: (s, t) => bands(s, t, 7) },
     // 4,000 segments: the same bloom turned 14 and 30 times
-    segments4: { n: 4000, fit: .5, lw: .36,
+    segments4: { n: 4000, fit: .5, lw: .45,
       el: (s, t, m) => {
         const u = sq(sin(16 * PI * s + t)) + sq(sin(14 * PI * s)), a = 14 * PI * s + m.x * .3, b = 30 * PI * s + m.x * .3 + m.y * .2;
         return ['l', sin(a) * u, cos(a) * u, sin(b) * u, cos(b) * u];
       },
       hue: (s, t) => bands(s, t, 7) },
     // 8,000 arcs: centre (X, Y), radius S, from angle B through C to A
-    arcs8: { n: 8000, fit: .5, lw: .34,
+    arcs8: { n: 8000, fit: .5, lw: .42,
       el: (s, t, m) => {
         const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
         const k = 1 - cos(24 * PI * s) / 2 - pow(cos(q), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
@@ -65,13 +65,17 @@
       },
       hue: (s, t) => bands(s, t, 4) },
     // 7,000 arcs
-    arcs7: { n: 7000, fit: .46, lw: .34,
+    arcs7: { n: 7000, fit: .46, lw: .42,
       el: (s, t, m) => {
         const q = 32 * PI * s + t, c = -86 * PI * s + m.x * .5, open = PI / 20 + 7 * PI / 8 * pow(cos(q), 4);
         const k = 1 - cos(q) / 2 - pow(cos(40 * PI * s), 3) / 4 + pow(cos(48 * PI * s), 3) / 4;
         return ['a', .875 * cos(2 * PI * s) * k, .875 * sin(2 * PI * s) * k, 1 / 8 + .75 * pow(sin(q), 4), c - open, c + open];
       },
       hue: (s, t) => bands(s, t, 4) },
+    // Layered compositions: an outer wreath of circles holding a smaller figure at its centre.
+    crown: { layers: [['circles14', 1], ['arcs8', .5]] },
+    lattice: { layers: [['circles12', 1], ['segments8', .55]] },
+    orbit: { layers: [['circles9', 1], ['circles10', .5], ['segments4', .26]] },
     // A line portrait from a 68x110 darkness map of the author's photo (src/portrait.json).
     // The waves breathe and a band of colour sweeps across every line at once. The pointer, anywhere on the page, steers them.
     portraitLines: { lw: .55, custom: (f, groups) => {
@@ -108,7 +112,7 @@
     } },
   };
   const FIGURES = {
-    opening: ['circles14', 'segments8', 'arcs8', 'circles12'],
+    opening: ['crown', 'lattice', 'orbit', 'arcs8'],
     poetry: ['circles9', 'circles14'],
     stories: ['circles12', 'arcs7'],
     essays: ['segments4', 'segments8'],
@@ -117,10 +121,10 @@
     portrait: ['portraitLines', 'portraitRings'],
   };
 
-  // Eight colours that sit on white without shouting, and brighter ones for the dark page.
+  // Eight saturated colours, with a brighter set for the dark page.
   const PALETTES = {
-    light: ['#2f6f6a', '#7a9a3a', '#c9a227', '#b5562e', '#8e3b62', '#6a4c93', '#3d5a80', '#2a9d8f'],
-    dark: ['#56e0cf', '#b5d86a', '#ffd166', '#f08a5d', '#e07ab8', '#b28dff', '#8fb3ff', '#5fd3c6'],
+    light: ['#0b7a70', '#4f8a0b', '#d89a00', '#d9480f', '#c2185b', '#7b1fa2', '#1e4fd8', '#0288b8'],
+    dark: ['#00d1b8', '#8fe000', '#ffc400', '#ff6a1a', '#ff2e7e', '#b84dff', '#3d7bff', '#00b8f0'],
   };
   let colors = { ink: '#080808', dark: false, palette: PALETTES.light };
   const readColors = () => {
@@ -129,16 +133,17 @@
     colors = { ink, dark, palette: dark ? PALETTES.dark : PALETTES.light };
   };
 
-  // Fewer elements on small frames: the same formula with a smaller n keeps its shape, only lighter.
-  const budget = (form, f) => form.custom ? 1 : min(form.n, Math.round(form.n * min(1, max(.22, min(f.w, f.h) / 620))));
-  const paint = (f, formName, alpha) => {
+  // About a third of the published count, so each line stays visibly apart instead of merging into a solid shape.
+  const budget = (form, f) => form.custom ? 1 : Math.round(form.n * .34 * min(1, max(.45, min(f.w, f.h) / 620)));
+  const paint = (f, formName, alpha, zoom = 1) => {
     const form = FORMS[formName];
+    if (form.layers) { form.layers.forEach(([name, k]) => paint(f, name, alpha, k)); return; }
     const { ctx, w, h } = f;
     const groups = Array.from({ length: P + 1 }, () => new Path2D());
     if (form.custom) form.custom(f, groups);
     else {
-      const n = budget(form, f), count = Math.ceil(n * ease(f.drawn));
-      const scale = min(w, h) / 2 * form.fit, cx = w / 2, cy = h / 2;
+      const n = Math.round(budget(form, f) * (zoom < 1 ? .6 : 1)), count = Math.ceil(n * ease(f.drawn));
+      const scale = min(w, h) / 2 * form.fit * zoom, cx = w / 2, cy = h / 2;
       for (let k = 0; k < count; k++) {
         const s = k / n, e = form.el(s, f.t, f.m), path = groups[form.hue(s, f.t)];
         if (e[0] === 'c') { const x = cx + e[1] * scale, y = cy - e[2] * scale, r = max(.4, e[3] * scale); path.moveTo(x + r, y); path.arc(x, y, r, 0, TAU); }
@@ -151,7 +156,7 @@
         }
       }
     }
-    ctx.globalAlpha = alpha * (form.custom ? 1 : colors.dark ? .9 : .82);
+    ctx.globalAlpha = alpha;
     groups.forEach((path, g) => {
       ctx.strokeStyle = g < P ? colors.palette[g] : colors.ink;
       ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1);

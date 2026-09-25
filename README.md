@@ -25,10 +25,10 @@ If Blogger offers a separate mobile theme, choose the desktop/custom theme for m
 - If Blogger ever returns an empty post list or index, the page rebuilds it from the blog's own public feed, so writing is never missing.
 - Edits made in the Blogger dashboard always show. A remembered copy of a post opens instantly, but the live version is fetched each time and replaces the copy when the post has changed. Lists and excerpts are refreshed in the same way.
 - Every post ends with a like, a share button and the comments:
-  - **Like:** a burst of coloured lines, not a heart, with a shared counter. Each browser counts once. The count is kept by the free [CounterAPI](https://counterapi.dev) service (namespace `the-yellow-bottle`). If that service is unreachable, the like still animates and the number is simply hidden. Point `window.TYB_LIKES_API` at another compatible counter to change it.
+  - **Like:** a burst of coloured lines, not a heart, with a shared counter. Blogger has no like counter of its own, so this count is separate from Blogger. Each browser counts once. The count is kept by the free [CounterAPI](https://counterapi.dev) service (namespace `the-yellow-bottle`). If that service is unreachable, the like still animates and the number is simply hidden. Point `window.TYB_LIKES_API` at another compatible counter to change it.
   - **Share:** a black button with a white line icon. It opens the phone's own share sheet, or on a computer a menu for WhatsApp, Facebook, X, Telegram, email and copy link.
   - **Comments:** listed from the post's Blogger comment feed, with Blogger's own comment form (sign-in, moderation and notifications all stay in Blogger). A link opens the same form in a new window. When Blogger renders its native comment form, that form is used instead.
-- Full-screen menu and search, keyboard focus containment, Escape to close.
+- Full-screen menu and search, keyboard focus containment, Escape to close. Search shows results as you type: titles, labels and excerpts of every post are matched instantly (English or Malayalam, partial words included), then Blogger's own full-text search adds deeper matches.
 - Native Blogger posts, permalinks, labels, pagination, static pages, monthly archive, and comments.
 - Post images remain in their original colours. The interface is monochrome in both themes; only the artwork and the like carry colour.
 - Native post/search/archive rendering works without JavaScript. JavaScript adds the overlays, artwork, theme toggle, reading-size preference, copy link, and progress indicator.
