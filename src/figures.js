@@ -73,6 +73,18 @@
       },
       hue: (s, t) => bands(s, t, 4) },
     // Layered compositions: an outer wreath of circles holding a smaller figure at its centre.
+    // 15,000 moving circles, after Hamid Naderi Yeganeh's animation of the same name: a four-fold curve wound 21 times,
+    // with a fast 13-fold epicycle that curls the chain of circles into loops. Every term turns with time.
+    moving15: { n: 15000, keep: .75, fit: .98, lw: .5, cycle: true,
+      el: (s, t, m) => {
+        const T = t * 2.2, phi = 21 * TAU * s + m.x * .3, psi = TAU * s;
+        const rho = .22 + .62 * (.5 - .5 * cos(2 * psi)), a = .1 * rho * cos(3 * psi + T);
+        const e = .055 + .03 * sin(5 * psi - T * .6) + m.y * .012;
+        const x = rho * cos(phi) + a * cos(-3 * phi) + e * cos(13 * phi + T);
+        const y = rho * sin(phi) + a * sin(-3 * phi) + e * sin(13 * phi + T);
+        return ['c', x, y, .006 + .03 * pow(Math.abs(sin(2 * phi + 2 * psi + T * .5)), 4)];
+      },
+      hue: (s, t) => { const phi = 21 * TAU * s; return Math.floor((((1.5 * (.5 - .5 * cos(2 * TAU * s)) + .18 * cos(4 * phi) - t * .25) % 1) + 1) % 1 * P); } },
     crown: { layers: [['circles14', 1], ['arcs8', .5]] },
     lattice: { layers: [['circles12', 1], ['segments8', .55]] },
     orbit: { layers: [['circles9', 1], ['circles10', .5], ['segments4', .26]] },
@@ -112,7 +124,7 @@
     } },
   };
   const FIGURES = {
-    opening: ['crown', 'lattice', 'orbit', 'arcs8'],
+    opening: ['moving15', 'crown', 'lattice', 'orbit'],
     poetry: ['circles9', 'circles14'],
     stories: ['circles12', 'arcs7'],
     essays: ['segments4', 'segments8'],
@@ -132,6 +144,21 @@
       essays: ['#EB807D', '#F748DB'], selected: ['#F748DB', '#956BCF', '#2F42E8'], video: ['#3ED900', '#0FA077', '#f2f2f2'], portrait: ['#E131BD', '#956BCF'],
     },
   };
+  // The moving circles pass slowly through one colour set after another, blending as they go.
+  const CYCLE = [
+    ['#2438c8', '#d2322a', '#9a5ae0', '#141450'], ['#22b21e', '#f08a1c', '#8a1a12', '#e8c21a'], ['#1a2bd6', '#101018', '#5566ee', '#2c2c44'],
+    ['#0FA077', '#E131BD', '#2F42E8', '#BA9F0D'], ['#F748DB', '#956BCF', '#500140', '#EB807D'], ['#3ED900', '#14353F', '#0FA077', '#BA9F0D'],
+  ];
+  const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const mixed = (a, b, k) => `rgb(${a.map((v, i) => Math.round(v + (b[i] - v) * k)).join(',')})`;
+  const cycleColors = (t, dark) => {
+    const pos = t * .35, i = Math.floor(pos) % CYCLE.length, k = smoothstep(pos % 1);
+    return Array.from({ length: P }, (_, g) => {
+      const pick = (set) => { let c = rgb(set[g % set.length]); if (dark && c[0] * .3 + c[1] * .59 + c[2] * .11 < 90) c = c.map((v) => v + (235 - v) * .55); return c; };
+      return mixed(pick(CYCLE[i]), pick(CYCLE[(i + 1) % CYCLE.length]), k);
+    });
+  };
+  const smoothstep = (v) => { const k = Math.min(1, Math.max(0, (v - .7) / .3)); return k * k * (3 - 2 * k); };
   let colors = { ink: '#080808', dark: false, sets: PALETTES.light };
   const readColors = () => {
     const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || colors.ink;
@@ -163,9 +190,10 @@
       }
     }
     ctx.globalAlpha = alpha;
+    const cycled = form.cycle ? cycleColors(f.t, colors.dark) : null;
     groups.forEach((path, g) => {
       const pal = colors.sets[f.palette] || colors.sets.opening;
-      ctx.strokeStyle = g < P ? pal[Math.floor(g * pal.length / P)] : colors.ink;
+      ctx.strokeStyle = form.cycle ? cycled[g] : g < P ? pal[Math.floor(g * pal.length / P)] : colors.ink;
       ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1);
       ctx.stroke(path);
     });
