@@ -266,14 +266,15 @@
   }), { threshold: .02 }) : null;
   if (!sizer || !watcher || !window.Path2D) return;
 
+  // data-figure names a set of forms; data-form shows one form alone (used on the line-art page), in data-palette colours.
   const start = (el) => {
-    const forms = FIGURES[el.dataset.figure];
+    const forms = el.dataset.form ? (FORMS[el.dataset.form] ? [el.dataset.form] : null) : FIGURES[el.dataset.figure];
     if (!forms || el.classList.contains('is-live') || (el.dataset.figure === 'portrait' && !portrait)) return;
     const canvas = document.createElement('canvas');
     canvas.setAttribute('aria-hidden', 'true');
     el.replaceChildren(canvas);
     el.classList.add('is-live');
-    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.figure, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
+    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     frames.push(f);
     (el.closest('[data-art]') || el).addEventListener('click', () => {
       f.previous = f.forms[f.index];
@@ -285,7 +286,9 @@
     sizer.observe(el);
     watcher.observe(el);
   };
-  document.querySelectorAll('.figure-frame[data-figure]').forEach(start);
+  const scan = () => document.querySelectorAll('.figure-frame[data-figure], .figure-frame[data-form]').forEach(start);
+  scan();
+  window.addEventListener('tyb:render', scan);
   // Figures added later (the read-more drawing under a post) start through this hook.
   window.TYB_FIGURE = start;
 
