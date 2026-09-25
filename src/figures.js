@@ -131,17 +131,18 @@
     selected: ['arcs7', 'circles10'],
     video: ['circles10', 'arcs8'],
     portrait: ['portraitLines', 'portraitRings'],
+    more: ['segments4', 'segments8'],
   };
 
   // Two- and three-colour sets from the owner's palette. The deepest tones (#500140, #14353F) give way to ink on the dark page.
   const PALETTES = {
     light: {
       opening: ['#0FA077', '#14353F', '#BA9F0D'], poetry: ['#E131BD', '#500140'], stories: ['#2F42E8', '#956BCF', '#14353F'],
-      essays: ['#EB807D', '#500140'], selected: ['#F748DB', '#956BCF', '#2F42E8'], video: ['#3ED900', '#0FA077', '#14353F'], portrait: ['#E131BD', '#2F42E8'],
+      essays: ['#EB807D', '#500140'], selected: ['#F748DB', '#956BCF', '#2F42E8'], video: ['#3ED900', '#0FA077', '#14353F'], portrait: ['#E131BD', '#2F42E8'], more: ['#2F42E8', '#956BCF', '#EB807D'],
     },
     dark: {
       opening: ['#0FA077', '#f2f2f2', '#BA9F0D'], poetry: ['#E131BD', '#f2f2f2'], stories: ['#2F42E8', '#956BCF', '#f2f2f2'],
-      essays: ['#EB807D', '#F748DB'], selected: ['#F748DB', '#956BCF', '#2F42E8'], video: ['#3ED900', '#0FA077', '#f2f2f2'], portrait: ['#E131BD', '#956BCF'],
+      essays: ['#EB807D', '#F748DB'], selected: ['#F748DB', '#956BCF', '#2F42E8'], video: ['#3ED900', '#0FA077', '#f2f2f2'], portrait: ['#E131BD', '#956BCF'], more: ['#8fa0ff', '#956BCF', '#EB807D'],
     },
   };
   // The moving circles pass slowly through one colour set after another, blending as they go.
@@ -257,9 +258,9 @@
   }), { threshold: .02 }) : null;
   if (!sizer || !watcher || !window.Path2D) return;
 
-  document.querySelectorAll('.figure-frame[data-figure]').forEach((el) => {
+  const start = (el) => {
     const forms = FIGURES[el.dataset.figure];
-    if (!forms || (el.dataset.figure === 'portrait' && !portrait)) return;
+    if (!forms || el.classList.contains('is-live') || (el.dataset.figure === 'portrait' && !portrait)) return;
     const canvas = document.createElement('canvas');
     canvas.setAttribute('aria-hidden', 'true');
     el.replaceChildren(canvas);
@@ -275,7 +276,10 @@
     });
     sizer.observe(el);
     watcher.observe(el);
-  });
+  };
+  document.querySelectorAll('.figure-frame[data-figure]').forEach(start);
+  // Figures added later (the read-more drawing under a post) start through this hook.
+  window.TYB_FIGURE = start;
 
   readColors();
   new MutationObserver(() => { readColors(); frames.forEach((f) => { f.dirty = true; }); wake(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
