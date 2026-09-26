@@ -137,10 +137,8 @@ figure, h1, h2, h3, p { margin: 0; }
 .hero-title .prefix { display: block; font: italic 400 clamp(31px,3.6vw,51px)/1 var(--serif); letter-spacing: -.05em; margin: 0 0 17px 6px; }
 .hero-title .word { display: block; }
 .hero-title .word + .word { margin-top: 14px; }
-.hero-art { align-self: center; position: relative; grid-row: 2; grid-column: 2; margin: -10px -10px 0 0; }
+.hero-art { align-self: end; justify-self: center; position: relative; grid-row: 2; grid-column: 2; margin: 0; }
 .hero-emblem { width: 100%; max-height: 270px; overflow: visible; }
-.art-play { padding: 0; width: 100%; display: block; }
-.art-play:focus-visible { outline-offset: 10px; }
 .hero-bottom { grid-column: 1/-1; display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; margin-top: 32px; }
 .hero-description { font-size: 17px; line-height: 1.55; max-width: 305px; letter-spacing: -.025em; }
 .round-link { width: 54px; height: 54px; border-radius: 50%; border: 1px solid var(--ink); display: grid; place-items: center; font: 24px Arial, sans-serif; transition: background .25s, color .25s; flex-shrink: 0; }
@@ -148,10 +146,24 @@ figure, h1, h2, h3, p { margin: 0; }
 .figure-frame { position: relative; display: block; width: 100%; aspect-ratio: 1; }
 .figure-frame canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .figure-frame.is-live { cursor: pointer; }
-.hero-motto { margin-top: 10px; text-align: center; font: italic 400 15px/1.3 var(--serif); color: var(--quiet); letter-spacing: .01em; }
-.hero-figure canvas { -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); mask-composite: intersect; }
-.hero-figure { aspect-ratio: 1; width: min(100%, calc(var(--fit) - 190px)); margin-inline: auto; }
-.hero-figure .hero-emblem { width: 100%; height: 100%; }
+.hero-motto { text-align: center; font: italic 400 15px/1.3 var(--serif); color: var(--quiet); letter-spacing: .01em; }
+/* The opening drawing fills the whole opening behind the words and the chapter tabs, which sit on dark glass. */
+.hero { position: relative; --glass: color-mix(in srgb, var(--paper) 58%, transparent); }
+.hero-backdrop { position: absolute; inset: 0; z-index: 0; width: auto; aspect-ratio: auto; transition: opacity .6s ease; }
+.hero:has(.panel-opening:not(.is-active)) .hero-backdrop { opacity: 0; }
+.hero > .panel { z-index: 1; }
+.hero-main { pointer-events: none; }
+.hero-main a, .hero-main button { pointer-events: auto; }
+.hero-title, .hero-topline .micro, .hero-description, .hero-aside, .hero-motto, .panel-opening ~ .panel > .panel-tab, .panel-opening > .panel-tab { -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1); background: var(--glass); }
+.hero-title { justify-self: start; margin-left: -18px; padding: 16px 28px 24px 18px; border-radius: 4px; }
+.hero-topline .micro, .hero-aside, .hero-motto { padding: 5px 9px; border-radius: 3px; margin: -5px -9px; }
+.hero-description { padding: 8px 12px; margin: -8px -12px; border-radius: 3px; }
+.hero .round-link { background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+.panel:not(.is-active) > .panel-tab:hover { background: var(--ink); }
+.art-play { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.art-play:focus-visible { position: static; width: auto; height: auto; clip-path: none; padding: 6px 10px; background: var(--glass); }
+.hero-backdrop canvas { -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent), linear-gradient(transparent, #000 5%, #000 95%, transparent); mask-composite: intersect; }
+.hero-backdrop .hero-emblem { position: absolute; left: 50%; top: 50%; translate: -50% -50%; width: 60%; height: 60%; }
 .chapter-body { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,.9fr); grid-template-rows: auto minmax(0,1fr); padding: 31px 0 0 28px; column-gap: clamp(24px,4vw,64px); }
 .chapter-top { grid-column: 1/-1; display: flex; justify-content: space-between; gap: 20px; padding-right: 35px; }
 .chapter-figure { align-self: center; justify-self: center; width: min(100%, 580px, calc(var(--fit) - 130px)); margin: 12px 0; }
@@ -385,8 +397,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
   .hero-main { grid-column: 1/-1; width: auto; grid-template-columns: minmax(0,1fr); padding: 26px 0 30px; gap: 15px; }
   .hero-title { font-size: clamp(64px, min(16vw, 9.5svh), 126px); padding: 10px 0 14px; }
   .hero-title .prefix { font-size: 34px; }
-  .hero-art { grid-row: 3; grid-column: 1; justify-self: center; width: min(100%, 440px, 30svh); margin: -6px 0 0; }
-  .hero-figure { width: 100%; }
+  .hero-art { grid-row: 3; grid-column: 1; justify-self: end; align-self: end; min-height: 30svh; display: flex; align-items: flex-end; margin: 0; }
   .hero-bottom { margin-top: 13px; gap: 20px; }
   .hero-description { font-size: 14px; max-width: 250px; }
   .hero-aside { display: none; }
@@ -468,18 +479,19 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 </header>
 <main id="main-content" class="wrap" tabindex="-1">
 <section id="home-view"><div id="opening"><section class="hero" aria-labelledby="hero-title" data-panels="true">
-  <div class="panel is-active" style="--p:0">
-    <a class="panel-tab" href="#opening-panel" aria-controls="opening-panel" data-panel-tab="true"><span class="micro">00</span><svg class="rail-shape rail-mark" viewBox="0 0 24 44" aria-hidden="true"><path d="M12.00,4.00 C12.78,4.00 13.58,4.05 14.33,4.15 C15.08,4.26 15.83,4.41 16.50,4.61 C17.17,4.82 17.81,5.07 18.36,5.37 C18.91,5.67 19.41,6.02 19.79,6.41 C20.18,6.80 20.49,7.24 20.69,7.72 C20.89,8.20 21.00,8.72 21.00,9.27 C21.00,9.83 20.89,10.42 20.69,11.04 C20.49,11.66 20.18,12.32 19.79,13.00 C19.41,13.68 18.91,14.39 18.36,15.11 C17.81,15.84 17.17,16.58 16.50,17.34 C15.83,18.10 15.08,18.87 14.33,19.65 C13.58,20.43 12.78,21.22 12.00,22.00 C11.22,22.78 10.42,23.57 9.67,24.35 C8.92,25.13 8.17,25.90 7.50,26.66 C6.83,27.42 6.19,28.16 5.64,28.89 C5.09,29.61 4.59,30.32 4.21,31.00 C3.82,31.68 3.51,32.34 3.31,32.96 C3.11,33.58 3.00,34.17 3.00,34.73 C3.00,35.28 3.11,35.80 3.31,36.28 C3.51,36.76 3.82,37.20 4.21,37.59 C4.59,37.98 5.09,38.33 5.64,38.63 C6.19,38.93 6.83,39.18 7.50,39.39 C8.17,39.59 8.92,39.74 9.67,39.85 C10.42,39.95 11.22,40.00 12.00,40.00 C12.78,40.00 13.58,39.95 14.33,39.85 C15.08,39.74 15.83,39.59 16.50,39.39 C17.17,39.18 17.81,38.93 18.36,38.63 C18.91,38.33 19.41,37.98 19.79,37.59 C20.18,37.20 20.49,36.76 20.69,36.28 C20.89,35.80 21.00,35.28 21.00,34.73 C21.00,34.17 20.89,33.58 20.69,32.96 C20.49,32.34 20.18,31.68 19.79,31.00 C19.41,30.32 18.91,29.61 18.36,28.89 C17.81,28.16 17.17,27.42 16.50,26.66 C15.83,25.90 15.08,25.13 14.33,24.35 C13.58,23.57 12.78,22.78 12.00,22.00 C11.22,21.22 10.42,20.43 9.67,19.65 C8.92,18.87 8.17,18.10 7.50,17.34 C6.83,16.58 6.19,15.84 5.64,15.11 C5.09,14.39 4.59,13.68 4.21,13.00 C3.82,12.32 3.51,11.66 3.31,11.04 C3.11,10.42 3.00,9.83 3.00,9.27 C3.00,8.72 3.11,8.20 3.31,7.72 C3.51,7.24 3.82,6.80 4.21,6.41 C4.59,6.02 5.09,5.67 5.64,5.37 C6.19,5.07 6.83,4.82 7.50,4.61 C8.17,4.41 8.92,4.26 9.67,4.15 C10.42,4.05 11.22,4.00 12.00,4.00 Z" fill="currentColor"/></svg><span class="chapter-name">Opening</span></a>
-    <div class="panel-body hero-main" id="opening-panel">
-      <div class="hero-topline"><span class="micro"><span class="dot" aria-hidden="true"></span> A personal journal / Since 2009</span><span class="micro">Vol. 01 — An ongoing collection</span></div>
-      <h1 class="hero-title reveal-in" id="hero-title"><span class="prefix">The</span><span class="word">Yellow</span><span class="word">Bottle.</span></h1>
-      <div class="hero-art"><button class="art-play" data-art="true" aria-label="Change the drawing"><span class="figure-frame hero-figure" data-figure="opening"><svg xmlns="http://www.w3.org/2000/svg" class="hero-emblem" viewBox="0 0 240 300" fill="none" aria-hidden="true">
+  <div class="hero-backdrop figure-frame" data-figure="opening" data-ox="0.64" data-trigger=".art-play" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" class="hero-emblem" viewBox="0 0 240 300" fill="none" aria-hidden="true">
   <g class="emblem-loop"><path d="M120.00,42.00 C123.13,42.00 126.30,42.14 129.38,42.41 C132.46,42.68 135.53,43.10 138.47,43.64 C141.41,44.19 144.29,44.87 147.00,45.68 C149.71,46.49 152.32,47.44 154.71,48.51 C157.10,49.59 159.36,50.79 161.37,52.12 C163.38,53.44 165.20,54.90 166.77,56.47 C168.33,58.04 169.67,59.73 170.74,61.53 C171.81,63.33 172.64,65.25 173.18,67.27 C173.72,69.28 174.00,71.41 174.00,73.63 C174.00,75.85 173.72,78.18 173.18,80.58 C172.64,82.98 171.81,85.48 170.74,88.05 C169.67,90.62 168.33,93.28 166.77,96.00 C165.20,98.72 163.38,101.51 161.37,104.36 C159.36,107.20 157.10,110.11 154.71,113.06 C152.32,116.01 149.71,119.02 147.00,122.05 C144.29,125.08 141.41,128.16 138.47,131.25 C135.53,134.34 132.46,137.46 129.38,140.59 C126.30,143.71 123.13,146.86 120.00,150.00 C116.87,153.14 113.70,156.29 110.62,159.41 C107.54,162.54 104.47,165.66 101.53,168.75 C98.59,171.84 95.71,174.92 93.00,177.95 C90.29,180.98 87.68,183.99 85.29,186.94 C82.90,189.89 80.64,192.80 78.63,195.64 C76.62,198.49 74.80,201.28 73.23,204.00 C71.67,206.72 70.33,209.38 69.26,211.95 C68.19,214.52 67.36,217.02 66.82,219.42 C66.28,221.82 66.00,224.15 66.00,226.37 C66.00,228.59 66.28,230.72 66.82,232.73 C67.36,234.75 68.19,236.67 69.26,238.47 C70.33,240.27 71.67,241.96 73.23,243.53 C74.80,245.10 76.62,246.56 78.63,247.88 C80.64,249.21 82.90,250.41 85.29,251.49 C87.68,252.56 90.29,253.51 93.00,254.32 C95.71,255.13 98.59,255.81 101.53,256.36 C104.47,256.90 107.54,257.32 110.62,257.59 C113.70,257.86 116.87,258.00 120.00,258.00 C123.13,258.00 126.30,257.86 129.38,257.59 C132.46,257.32 135.53,256.90 138.47,256.36 C141.41,255.81 144.29,255.13 147.00,254.32 C149.71,253.51 152.32,252.56 154.71,251.49 C157.10,250.41 159.36,249.21 161.37,247.88 C163.38,246.56 165.20,245.10 166.77,243.53 C168.33,241.96 169.67,240.27 170.74,238.47 C171.81,236.67 172.64,234.75 173.18,232.73 C173.72,230.72 174.00,228.59 174.00,226.37 C174.00,224.15 173.72,221.82 173.18,219.42 C172.64,217.02 171.81,214.52 170.74,211.95 C169.67,209.38 168.33,206.72 166.77,204.00 C165.20,201.28 163.38,198.49 161.37,195.64 C159.36,192.80 157.10,189.89 154.71,186.94 C152.32,183.99 149.71,180.98 147.00,177.95 C144.29,174.92 141.41,171.84 138.47,168.75 C135.53,165.66 132.46,162.54 129.38,159.41 C126.30,156.29 123.13,153.14 120.00,150.00 C116.87,146.86 113.70,143.71 110.62,140.59 C107.54,137.46 104.47,134.34 101.53,131.25 C98.59,128.16 95.71,125.08 93.00,122.05 C90.29,119.02 87.68,116.01 85.29,113.06 C82.90,110.11 80.64,107.20 78.63,104.36 C76.62,101.51 74.80,98.72 73.23,96.00 C71.67,93.28 70.33,90.62 69.26,88.05 C68.19,85.48 67.36,82.98 66.82,80.58 C66.28,78.18 66.00,75.85 66.00,73.63 C66.00,71.41 66.28,69.28 66.82,67.27 C67.36,65.25 68.19,63.33 69.26,61.53 C70.33,59.73 71.67,58.04 73.23,56.47 C74.80,54.90 76.62,53.44 78.63,52.12 C80.64,50.79 82.90,49.59 85.29,48.51 C87.68,47.44 90.29,46.49 93.00,45.68 C95.71,44.87 98.59,44.19 101.53,43.64 C104.47,43.10 107.54,42.68 110.62,42.41 C113.70,42.14 116.87,42.00 120.00,42.00 Z" class="draw" pathLength="1" stroke="currentColor" stroke-width="1.6"/></g>
   <g class="orbit"><ellipse class="draw" pathLength="1" cx="120" cy="150" rx="106" ry="42" stroke="currentColor" stroke-width="1" transform="rotate(-28 120 150)"/><ellipse class="draw" pathLength="1" cx="120" cy="150" rx="42" ry="106" stroke="currentColor" stroke-width=".8" transform="rotate(-28 120 150)"/></g>
   <g class="emblem-nodes"><circle cx="120" cy="150" r="4" fill="currentColor"/><circle cx="174" cy="73.63" r="3" stroke="currentColor" stroke-width="1"/><circle cx="66" cy="73.63" r="3" stroke="currentColor" stroke-width="1"/><circle cx="174" cy="226.37" r="3" stroke="currentColor" stroke-width="1"/><circle cx="66" cy="226.37" r="3" stroke="currentColor" stroke-width="1"/></g>
   <path class="draw" pathLength="1" d="M35 282H205" stroke="currentColor" stroke-width="1"/>
 </svg>
-</span></button><p class="hero-motto">Blathering of an insane soul.</p></div>
+</div>
+  <div class="panel panel-opening is-active" style="--p:0">
+    <a class="panel-tab" href="#opening-panel" aria-controls="opening-panel" data-panel-tab="true"><span class="micro">00</span><svg class="rail-shape rail-mark" viewBox="0 0 24 44" aria-hidden="true"><path d="M12.00,4.00 C12.78,4.00 13.58,4.05 14.33,4.15 C15.08,4.26 15.83,4.41 16.50,4.61 C17.17,4.82 17.81,5.07 18.36,5.37 C18.91,5.67 19.41,6.02 19.79,6.41 C20.18,6.80 20.49,7.24 20.69,7.72 C20.89,8.20 21.00,8.72 21.00,9.27 C21.00,9.83 20.89,10.42 20.69,11.04 C20.49,11.66 20.18,12.32 19.79,13.00 C19.41,13.68 18.91,14.39 18.36,15.11 C17.81,15.84 17.17,16.58 16.50,17.34 C15.83,18.10 15.08,18.87 14.33,19.65 C13.58,20.43 12.78,21.22 12.00,22.00 C11.22,22.78 10.42,23.57 9.67,24.35 C8.92,25.13 8.17,25.90 7.50,26.66 C6.83,27.42 6.19,28.16 5.64,28.89 C5.09,29.61 4.59,30.32 4.21,31.00 C3.82,31.68 3.51,32.34 3.31,32.96 C3.11,33.58 3.00,34.17 3.00,34.73 C3.00,35.28 3.11,35.80 3.31,36.28 C3.51,36.76 3.82,37.20 4.21,37.59 C4.59,37.98 5.09,38.33 5.64,38.63 C6.19,38.93 6.83,39.18 7.50,39.39 C8.17,39.59 8.92,39.74 9.67,39.85 C10.42,39.95 11.22,40.00 12.00,40.00 C12.78,40.00 13.58,39.95 14.33,39.85 C15.08,39.74 15.83,39.59 16.50,39.39 C17.17,39.18 17.81,38.93 18.36,38.63 C18.91,38.33 19.41,37.98 19.79,37.59 C20.18,37.20 20.49,36.76 20.69,36.28 C20.89,35.80 21.00,35.28 21.00,34.73 C21.00,34.17 20.89,33.58 20.69,32.96 C20.49,32.34 20.18,31.68 19.79,31.00 C19.41,30.32 18.91,29.61 18.36,28.89 C17.81,28.16 17.17,27.42 16.50,26.66 C15.83,25.90 15.08,25.13 14.33,24.35 C13.58,23.57 12.78,22.78 12.00,22.00 C11.22,21.22 10.42,20.43 9.67,19.65 C8.92,18.87 8.17,18.10 7.50,17.34 C6.83,16.58 6.19,15.84 5.64,15.11 C5.09,14.39 4.59,13.68 4.21,13.00 C3.82,12.32 3.51,11.66 3.31,11.04 C3.11,10.42 3.00,9.83 3.00,9.27 C3.00,8.72 3.11,8.20 3.31,7.72 C3.51,7.24 3.82,6.80 4.21,6.41 C4.59,6.02 5.09,5.67 5.64,5.37 C6.19,5.07 6.83,4.82 7.50,4.61 C8.17,4.41 8.92,4.26 9.67,4.15 C10.42,4.05 11.22,4.00 12.00,4.00 Z" fill="currentColor"/></svg><span class="chapter-name">Opening</span></a>
+    <div class="panel-body hero-main" id="opening-panel">
+      <div class="hero-topline"><span class="micro"><span class="dot" aria-hidden="true"></span> A personal journal / Since 2009</span><span class="micro">Vol. 01 — An ongoing collection</span></div>
+      <h1 class="hero-title reveal-in" id="hero-title"><span class="prefix">The</span><span class="word">Yellow</span><span class="word">Bottle.</span></h1>
+      <div class="hero-art"><button class="art-play" type="button">Change the drawing</button><p class="hero-motto">Blathering of an insane soul.</p></div>
       <div class="hero-bottom"><p class="hero-description">Poems, stories, and things<br/>I didn’t say out loud.</p><span class="micro muted hero-aside">A little ink.<br/>A little infinity.</span><a class="round-link" href="#writing" aria-label="Explore the writing">↓</a></div>
     </div>
   </div>
@@ -1382,7 +1394,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     if (form.custom) form.custom(f, groups);
     else {
       const n = Math.round(budget(form, f) * (zoom < 1 ? .6 : 1)), count = Math.ceil(n * ease(f.drawn));
-      const scale = min(w, h) / 2 * form.fit * zoom, cx = w / 2, cy = h / 2;
+      const scale = min(w, h) / 2 * form.fit * zoom, cx = w * (f.wide ? f.ox : .5), cy = h / 2;
       for (let k = 0; k < count; k++) {
         const s = k / n, e = form.el(s, f.t, f.m), path = groups[form.hue(s, f.t)];
         if (e[0] === 'c') { const x = cx + e[1] * scale, y = cy - e[2] * scale, r = max(.4, e[3] * scale); path.moveTo(x + r, y); path.arc(x, y, r, 0, TAU); }
@@ -1411,7 +1423,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     ctx.clearRect(0, 0, f.w, f.h);
     if (f.zoom > 1) {
       // Zoom about a focus point that stays put on screen.
-      const z = f.zoom, fx = f.fx * f.w / 2, fy = f.fy * f.h / 2;
+      const z = f.zoom, reach = min(f.w, f.h) / 2 * .85, fx = (f.wide ? (f.ox - .5) * f.w : 0) + Math.cos(f.fa) * f.fr * reach, fy = Math.sin(f.fa) * f.fr * reach;
       ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (f.w / 2 - (f.w / 2 + fx) * z + fx), dpr * (f.h / 2 - (f.h / 2 + fy) * z + fy));
     }
     const now = f.forms[f.index];
@@ -1419,7 +1431,8 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     else paint(f, now, 1);
   };
 
-  const aim = (f) => { const a = Math.random() * TAU, r = .2 + Math.random() * .3; f.fx = Math.cos(a) * r; f.fy = Math.sin(a) * r; };
+  // A new place to zoom toward: anywhere across the drawing, from near its centre to its outer edge.
+  const aim = (f) => { f.fa = Math.random() * TAU; f.fr = .15 + Math.random() * .85; };
   const frames = [];
   let raf = 0, last = 0, pointer = null;
   const tick = (time) => {
@@ -1429,6 +1442,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     let again = false;
     frames.forEach((f) => {
       if (!f.visible || !f.w) return;
+      if (f.el.classList.contains('hero-backdrop') && !document.querySelector('.panel-opening.is-active')) return;
       let changed = f.dirty;
       f.dirty = false;
       if (f.drawn < 1) { f.drawn = min(1, f.drawn + dt / 2.4); changed = true; }
@@ -1446,7 +1460,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
           const before = Math.floor(f.zt / 26);
           f.zt += dt;
           if (Math.floor(f.zt / 26) !== before) aim(f);
-          f.zoom = 1 + 1.7 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
+          f.zoom = 1 + 2.4 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
         }
         again = true;
         // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
@@ -1463,7 +1477,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     const f = frames.find((item) => item.el === entry.target);
     const box = entry.contentRect;
     f.dpr = min(window.devicePixelRatio || 1, 3);
-    f.w = box.width; f.h = box.height;
+    f.w = box.width; f.h = box.height; f.wide = f.w > f.h * 1.3;
     f.canvas.width = Math.round(box.width * f.dpr);
     f.canvas.height = Math.round(box.height * f.dpr);
     f.dirty = true;
@@ -1484,10 +1498,12 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     canvas.setAttribute('aria-hidden', 'true');
     el.replaceChildren(canvas);
     el.classList.add('is-live');
-    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
+    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, ox: Number(el.dataset.ox) || .5, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     if (el.dataset.figure === 'opening' && motionOK) { f.zooms = true; f.zt = 0; aim(f); }
     frames.push(f);
-    (el.closest('[data-art]') || el).addEventListener('click', () => {
+    const triggers = [el.closest('[data-art]') || el];
+    if (el.dataset.trigger) triggers.push(...document.querySelectorAll(el.dataset.trigger));
+    triggers.forEach((trigger) => trigger.addEventListener('click', () => {
       f.previous = f.forms[f.index];
       f.index = (f.index + 1) % f.forms.length;
       if (f.zooms) {
@@ -1500,7 +1516,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
       f.morph = motionOK ? 0 : 1;
       f.dirty = true;
       wake();
-    });
+    }));
     sizer.observe(el);
     watcher.observe(el);
   };

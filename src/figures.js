@@ -185,7 +185,7 @@
     if (form.custom) form.custom(f, groups);
     else {
       const n = Math.round(budget(form, f) * (zoom < 1 ? .6 : 1)), count = Math.ceil(n * ease(f.drawn));
-      const scale = min(w, h) / 2 * form.fit * zoom, cx = w / 2, cy = h / 2;
+      const scale = min(w, h) / 2 * form.fit * zoom, cx = w * (f.wide ? f.ox : .5), cy = h / 2;
       for (let k = 0; k < count; k++) {
         const s = k / n, e = form.el(s, f.t, f.m), path = groups[form.hue(s, f.t)];
         if (e[0] === 'c') { const x = cx + e[1] * scale, y = cy - e[2] * scale, r = max(.4, e[3] * scale); path.moveTo(x + r, y); path.arc(x, y, r, 0, TAU); }
@@ -214,7 +214,7 @@
     ctx.clearRect(0, 0, f.w, f.h);
     if (f.zoom > 1) {
       // Zoom about a focus point that stays put on screen.
-      const z = f.zoom, fx = f.fx * f.w / 2, fy = f.fy * f.h / 2;
+      const z = f.zoom, reach = min(f.w, f.h) / 2 * .85, fx = (f.wide ? (f.ox - .5) * f.w : 0) + Math.cos(f.fa) * f.fr * reach, fy = Math.sin(f.fa) * f.fr * reach;
       ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (f.w / 2 - (f.w / 2 + fx) * z + fx), dpr * (f.h / 2 - (f.h / 2 + fy) * z + fy));
     }
     const now = f.forms[f.index];
@@ -222,7 +222,8 @@
     else paint(f, now, 1);
   };
 
-  const aim = (f) => { const a = Math.random() * TAU, r = .2 + Math.random() * .3; f.fx = Math.cos(a) * r; f.fy = Math.sin(a) * r; };
+  // A new place to zoom toward: anywhere across the drawing, from near its centre to its outer edge.
+  const aim = (f) => { f.fa = Math.random() * TAU; f.fr = .15 + Math.random() * .85; };
   const frames = [];
   let raf = 0, last = 0, pointer = null;
   const tick = (time) => {
@@ -232,6 +233,7 @@
     let again = false;
     frames.forEach((f) => {
       if (!f.visible || !f.w) return;
+      if (f.el.classList.contains('hero-backdrop') && !document.querySelector('.panel-opening.is-active')) return;
       let changed = f.dirty;
       f.dirty = false;
       if (f.drawn < 1) { f.drawn = min(1, f.drawn + dt / 2.4); changed = true; }
@@ -249,7 +251,7 @@
           const before = Math.floor(f.zt / 26);
           f.zt += dt;
           if (Math.floor(f.zt / 26) !== before) aim(f);
-          f.zoom = 1 + 1.7 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
+          f.zoom = 1 + 2.4 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
         }
         again = true;
         // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
@@ -266,7 +268,7 @@
     const f = frames.find((item) => item.el === entry.target);
     const box = entry.contentRect;
     f.dpr = min(window.devicePixelRatio || 1, 3);
-    f.w = box.width; f.h = box.height;
+    f.w = box.width; f.h = box.height; f.wide = f.w > f.h * 1.3;
     f.canvas.width = Math.round(box.width * f.dpr);
     f.canvas.height = Math.round(box.height * f.dpr);
     f.dirty = true;
@@ -287,10 +289,12 @@
     canvas.setAttribute('aria-hidden', 'true');
     el.replaceChildren(canvas);
     el.classList.add('is-live');
-    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
+    const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, ox: Number(el.dataset.ox) || .5, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     if (el.dataset.figure === 'opening' && motionOK) { f.zooms = true; f.zt = 0; aim(f); }
     frames.push(f);
-    (el.closest('[data-art]') || el).addEventListener('click', () => {
+    const triggers = [el.closest('[data-art]') || el];
+    if (el.dataset.trigger) triggers.push(...document.querySelectorAll(el.dataset.trigger));
+    triggers.forEach((trigger) => trigger.addEventListener('click', () => {
       f.previous = f.forms[f.index];
       f.index = (f.index + 1) % f.forms.length;
       if (f.zooms) {
@@ -303,7 +307,7 @@
       f.morph = motionOK ? 0 : 1;
       f.dirty = true;
       wake();
-    });
+    }));
     sizer.observe(el);
     watcher.observe(el);
   };
