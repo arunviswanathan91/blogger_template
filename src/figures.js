@@ -199,11 +199,11 @@
       }
     }
     ctx.globalAlpha = alpha;
-    const cycled = form.cycle ? cycleColors(f.t, colors.dark) : null;
+    const cycled = form.cycle ? cycleColors(f.t + (f.shift || 0), colors.dark) : null;
     groups.forEach((path, g) => {
       const pal = colors.sets[f.palette] || colors.sets.opening;
       ctx.strokeStyle = form.cycle ? cycled[g] : g < P ? pal[Math.floor(g * pal.length / P)] : colors.ink;
-      ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1);
+      ctx.lineWidth = (form.lw || .5) * (form.custom && g < P ? 1.7 : 1) / Math.sqrt(f.zoom || 1);
       ctx.stroke(path);
     });
     ctx.globalAlpha = 1;
@@ -212,11 +212,17 @@
     const { ctx, dpr } = f;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, f.w, f.h);
+    if (f.zoom > 1) {
+      // Zoom about a focus point that stays put on screen.
+      const z = f.zoom, fx = f.fx * f.w / 2, fy = f.fy * f.h / 2;
+      ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (f.w / 2 - (f.w / 2 + fx) * z + fx), dpr * (f.h / 2 - (f.h / 2 + fy) * z + fy));
+    }
     const now = f.forms[f.index];
     if (f.morph < 1 && f.previous) { paint(f, f.previous, 1 - ease(f.morph)); paint(f, now, ease(f.morph)); }
     else paint(f, now, 1);
   };
 
+  const aim = (f) => { const a = Math.random() * TAU, r = .2 + Math.random() * .3; f.fx = Math.cos(a) * r; f.fy = Math.sin(a) * r; };
   const frames = [];
   let raf = 0, last = 0, pointer = null;
   const tick = (time) => {
@@ -238,6 +244,13 @@
           goal = { x: max(-1, min(1, (pointer.x - box.left - box.width / 2) / (box.width * .75))), y: max(-1, min(1, (pointer.y - box.top - box.height / 2) / (box.height * .75))) };
         }
         f.m = { x: f.m.x + (goal.x - f.m.x) * .05, y: f.m.y + (goal.y - f.m.y) * .05 };
+        if (f.zooms) {
+          // The opening drifts all the way in toward a detail and back out, about every 26 seconds, each time to a new spot.
+          const before = Math.floor(f.zt / 26);
+          f.zt += dt;
+          if (Math.floor(f.zt / 26) !== before) aim(f);
+          f.zoom = 1 + 1.7 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
+        }
         again = true;
         // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
         if (time - (f.painted || 0) > 31) changed = true;
@@ -275,10 +288,18 @@
     el.replaceChildren(canvas);
     el.classList.add('is-live');
     const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
+    if (el.dataset.figure === 'opening' && motionOK) { f.zooms = true; f.zt = 0; aim(f); }
     frames.push(f);
     (el.closest('[data-art]') || el).addEventListener('click', () => {
       f.previous = f.forms[f.index];
       f.index = (f.index + 1) % f.forms.length;
+      if (f.zooms) {
+        // Each new drawing starts its own zoom and takes a random colour set.
+        f.zt = 0; aim(f);
+        const sets = Object.keys(PALETTES.light).filter((k) => k !== f.palette);
+        f.palette = sets[Math.floor(Math.random() * sets.length)];
+        f.shift = Math.random() * 20;
+      }
       f.morph = motionOK ? 0 : 1;
       f.dirty = true;
       wake();
