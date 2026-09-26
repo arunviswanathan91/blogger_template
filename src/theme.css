@@ -124,13 +124,15 @@ figure, h1, h2, h3, p { margin: 0; }
 .figure-frame.is-live { cursor: pointer; }
 .hero-motto { text-align: center; font: italic 400 15px/1.3 var(--serif); color: var(--quiet); letter-spacing: .01em; }
 /* The opening drawing fills the whole opening behind the words and the chapter tabs, which sit on dark glass. */
-.hero { position: relative; --glass: color-mix(in srgb, var(--paper) 58%, transparent); }
+.hero { position: relative; --glass: color-mix(in srgb, var(--paper) 66%, transparent); }
 .hero-backdrop { position: absolute; inset: 0; z-index: 0; width: auto; aspect-ratio: auto; transition: opacity .6s ease; }
 .hero:has(.panel-opening:not(.is-active)) .hero-backdrop { opacity: 0; }
 .hero > .panel { z-index: 1; }
 .hero-main { pointer-events: none; }
 .hero-main a, .hero-main button { pointer-events: auto; }
-.hero-title, .hero-topline .micro, .hero-description, .hero-aside, .hero-motto, .panel-opening ~ .panel > .panel-tab, .panel-opening > .panel-tab { -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1); background: var(--glass); }
+.hero-title, .hero-topline .micro, .hero-description, .hero-aside, .hero-motto, .panel-opening ~ .panel > .panel-tab, .panel-opening > .panel-tab { -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); background: var(--glass); transform: translateZ(0); }
+.hero-backdrop { contain: strict; }
+.hero-backdrop canvas { will-change: contents; }
 .hero-title { justify-self: start; margin-left: -18px; padding: 16px 28px 24px 18px; border-radius: 4px; }
 .hero-topline .micro, .hero-aside, .hero-motto { padding: 5px 9px; border-radius: 3px; margin: -5px -9px; }
 .hero-description { padding: 8px 12px; margin: -8px -12px; border-radius: 3px; }

@@ -184,15 +184,24 @@
     const groups = Array.from({ length: P + 1 }, () => new Path2D());
     if (form.custom) form.custom(f, groups);
     else {
-      const n = Math.round(budget(form, f) * (zoom < 1 ? .6 : 1)), count = Math.ceil(n * ease(f.drawn));
+      const n = Math.round(budget(form, f) * (zoom < 1 ? .6 : 1) * (f.lite || 1)), count = Math.ceil(n * ease(f.drawn));
+      const v = f.view;
       const scale = min(w, h) / 2 * form.fit * zoom, cx = w * (f.wide ? f.ox : .5), cy = h / 2;
       for (let k = 0; k < count; k++) {
         const s = k / n, e = form.el(s, f.t, f.m), path = groups[form.hue(s, f.t)];
-        if (e[0] === 'c') { const x = cx + e[1] * scale, y = cy - e[2] * scale, r = max(.4, e[3] * scale); path.moveTo(x + r, y); path.arc(x, y, r, 0, TAU); }
-        else if (e[0] === 'l') { path.moveTo(cx + e[1] * scale, cy - e[2] * scale); path.lineTo(cx + e[3] * scale, cy - e[4] * scale); }
+        if (e[0] === 'c') {
+          const x = cx + e[1] * scale, y = cy - e[2] * scale, r = max(.4, e[3] * scale);
+          if (v && (x + r < v[0] || x - r > v[2] || y + r < v[1] || y - r > v[3])) continue;
+          path.moveTo(x + r, y); path.arc(x, y, r, 0, TAU);
+        } else if (e[0] === 'l') {
+          const x1 = cx + e[1] * scale, y1 = cy - e[2] * scale, x2 = cx + e[3] * scale, y2 = cy - e[4] * scale;
+          if (v && (max(x1, x2) < v[0] || min(x1, x2) > v[2] || max(y1, y2) < v[1] || min(y1, y2) > v[3])) continue;
+          path.moveTo(x1, y1); path.lineTo(x2, y2);
+        }
         else {
           // Canvas angles run clockwise with y down; mirror the arc so it matches the formula's orientation.
           const x = cx + e[1] * scale, y = cy - e[2] * scale, r = e[3] * scale;
+          if (v && (x + r < v[0] || x - r > v[2] || y + r < v[1] || y - r > v[3])) continue;
           path.moveTo(x + r * cos(-e[5]), y + r * sin(-e[5]));
           path.arc(x, y, r, -e[5], -e[4]);
         }
@@ -215,8 +224,11 @@
     if (f.zoom > 1) {
       // Zoom about a focus point that stays put on screen.
       const z = f.zoom, reach = min(f.w, f.h) / 2 * .85, fx = (f.wide ? (f.ox - .5) * f.w : 0) + Math.cos(f.fa) * f.fr * reach, fy = Math.sin(f.fa) * f.fr * reach;
-      ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * (f.w / 2 - (f.w / 2 + fx) * z + fx), dpr * (f.h / 2 - (f.h / 2 + fy) * z + fy));
-    }
+      const tx = f.w / 2 - (f.w / 2 + fx) * z + fx, ty = f.h / 2 - (f.h / 2 + fy) * z + fy;
+      ctx.setTransform(dpr * z, 0, 0, dpr * z, dpr * tx, dpr * ty);
+      // While zoomed, only elements inside the visible window are traced; the rest would be clipped anyway.
+      f.view = [-tx / z, -ty / z, (f.w - tx) / z, (f.h - ty) / z];
+    } else f.view = null;
     const now = f.forms[f.index];
     if (f.morph < 1 && f.previous) { paint(f, f.previous, 1 - ease(f.morph)); paint(f, now, ease(f.morph)); }
     else paint(f, now, 1);
@@ -255,9 +267,10 @@
         }
         again = true;
         // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
-        if (time - (f.painted || 0) > 31) changed = true;
+        // Paint every frame when drawing is cheap (smooth zoom); fall back to ~30 fps when it is heavy.
+        if (time - (f.painted || 0) > ((f.cost || 0) < 9 ? 0 : 31)) changed = true;
       }
-      if (changed) { f.painted = time; render(f); }
+      if (changed) { f.painted = time; const t0 = performance.now(); render(f); f.cost = (f.cost || 0) * .8 + (performance.now() - t0) * .2; }
       if (f.drawn < 1 || f.morph < 1) again = true;
     });
     if (again) raf = requestAnimationFrame(tick);
@@ -267,7 +280,8 @@
   const sizer = 'ResizeObserver' in window ? new ResizeObserver((entries) => entries.forEach((entry) => {
     const f = frames.find((item) => item.el === entry.target);
     const box = entry.contentRect;
-    f.dpr = min(window.devicePixelRatio || 1, 3);
+    // The full-bleed opening redraws every frame over a large area, so it renders at a lighter pixel density.
+    f.dpr = min(window.devicePixelRatio || 1, f.el.classList.contains('hero-backdrop') ? 1.5 : 3);
     f.w = box.width; f.h = box.height; f.wide = f.w > f.h * 1.3;
     f.canvas.width = Math.round(box.width * f.dpr);
     f.canvas.height = Math.round(box.height * f.dpr);
@@ -291,6 +305,7 @@
     el.classList.add('is-live');
     const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, ox: Number(el.dataset.ox) || .5, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     if (el.dataset.figure === 'opening' && motionOK) { f.zooms = true; f.zt = 0; aim(f); }
+    if (el.classList.contains('hero-backdrop')) f.lite = .6;
     frames.push(f);
     const triggers = [el.closest('[data-art]') || el];
     if (el.dataset.trigger) triggers.push(...document.querySelectorAll(el.dataset.trigger));
