@@ -165,9 +165,17 @@ figure, h1, h2, h3, p { margin: 0; }
 /* Reader stickers on posts (src/stickers.js): a dock that follows the reader and opens on hover. */
 .reading-page.has-stickers { position: relative; }
 .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.sticker { pointer-events: auto; cursor: default; }
+.sticker:focus-visible { outline: 1px solid var(--c); outline-offset: 3px; }
+.sticker-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; translate: -50% 0; display: none; padding: 3px 8px; white-space: nowrap; font: 500 11px/1.4 var(--sans); color: var(--paper); background: var(--ink); border-radius: 3px; }
+.sticker-x { position: absolute; top: -9px; right: -11px; width: 22px; height: 22px; display: none; place-items: center; padding: 0; border-radius: 50%; font: 15px/1 Arial, sans-serif; color: var(--paper); background: var(--ink); border: 1px solid var(--paper); cursor: pointer; }
+.sticker.is-active .sticker-tip, .sticker:focus-within .sticker-tip { display: block; }
+.sticker.is-active .sticker-x, .sticker:focus-within .sticker-x { display: grid; }
+@media (hover: hover) { .sticker:hover .sticker-tip { display: block; } .sticker:hover .sticker-x { display: grid; } }
+@media (hover: none) { .sticker-x { width: 28px; height: 28px; top: -13px; right: -15px; } }
 .sticker { position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; display: grid; place-items: center; border-radius: 50%; color: var(--c); background: color-mix(in srgb, var(--paper) 78%, transparent); border: 1.5px solid color-mix(in srgb, var(--c) 85%, transparent); animation: sticker-in .5s var(--ease-out) both; }
 .sticker svg { width: 15px; height: 15px; }
-.sticker.is-mine { pointer-events: auto; cursor: pointer; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent); }
+.sticker.is-mine { box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent); }
 @keyframes sticker-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
 body.is-placing .reading-page { cursor: crosshair; }
 .sticker-dock { position: fixed; right: 24px; bottom: 24px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
@@ -175,9 +183,12 @@ body.is-placing .reading-page { cursor: crosshair; }
 .sticker-toggle { position: relative; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--ink); background: color-mix(in srgb, var(--paper) 85%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background .25s, color .25s; }
 .sticker-toggle svg { width: 20px; height: 20px; }
 .sticker-count { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--ink); color: var(--paper); font: 600 10px/18px var(--sans); text-align: center; }
-.sticker-dock:hover .sticker-toggle, .sticker-dock.is-open .sticker-toggle, .sticker-toggle:focus-visible { background: var(--ink); color: var(--paper); }
+.sticker-dock.is-open .sticker-toggle, .sticker-toggle:focus-visible { background: var(--ink); color: var(--paper); }
+@media (hover: hover) { .sticker-dock:hover:not(.is-shut) .sticker-toggle { background: var(--ink); color: var(--paper); } .sticker-dock:hover:not(.is-shut) .sticker-tray { display: block; } }
 .sticker-tray { order: -1; display: none; box-sizing: border-box; width: min(250px, calc(100vw - 28px)); padding: 14px; background: var(--paper); border: 1px solid var(--ink); }
-.sticker-dock:hover .sticker-tray, .sticker-dock.is-open .sticker-tray, .sticker-dock:focus-within .sticker-tray { display: block; }
+.sticker-dock.is-open .sticker-tray { display: block; }
+.sticker-name input { box-sizing: border-box; width: 100%; height: 34px; margin: 2px 0 8px; padding: 0 10px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); font: 13px var(--sans); }
+.sticker-name input:focus { outline: none; border-color: var(--ink); }
 .sticker-kinds { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin: 10px 0 8px; }
 .sticker-kinds button { width: 100%; min-width: 0; padding: 0; aspect-ratio: 1; display: grid; place-items: center; color: var(--c); border: 1px solid var(--line); border-radius: 50%; transition: background .25s, border-color .25s; }
 .sticker-kinds button svg { width: 18px; height: 18px; }
@@ -1692,12 +1703,12 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
           from: [{ collectionId: 'stickers' }], where: { fieldFilter: { field: { fieldPath: 'post' }, op: 'EQUAL', value: { stringValue: post } } }, limit: 300,
         } }) });
         if (!r.ok) throw new Error('read');
-        return (await r.json()).filter((row) => row.document).map(({ document: doc }) => ({ id: doc.name.split('/').pop(), uid: doc.fields.uid?.stringValue, post: doc.fields.post?.stringValue, kind: doc.fields.kind?.stringValue, x: num(doc.fields.x), y: num(doc.fields.y) }));
+        return (await r.json()).filter((row) => row.document).map(({ document: doc }) => ({ id: doc.name.split('/').pop(), uid: doc.fields.uid?.stringValue, post: doc.fields.post?.stringValue, name: doc.fields.name?.stringValue || '', kind: doc.fields.kind?.stringValue, x: num(doc.fields.x), y: num(doc.fields.y) }));
       },
       put: async (s) => {
         const a = await token();
         const r = await fetch(`${base}:commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }, body: JSON.stringify({ writes: [{
-          update: { name: docName(s.id), fields: { uid: { stringValue: a.uid }, post: { stringValue: s.post }, kind: { stringValue: s.kind }, x: { doubleValue: s.x }, y: { doubleValue: s.y } } },
+          update: { name: docName(s.id), fields: Object.assign({ uid: { stringValue: a.uid }, post: { stringValue: s.post }, kind: { stringValue: s.kind }, x: { doubleValue: s.x }, y: { doubleValue: s.y } }, s.name ? { name: { stringValue: s.name } } : {}) },
           updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
         }] }) });
         if (!r.ok) throw new Error(r.status === 403 ? 'wait' : 'write');
@@ -1743,9 +1754,17 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     // The dock: minimised to a small round button that stays in view; it opens on hover or tap.
     const dock = document.createElement('div');
     dock.className = 'sticker-dock';
-    dock.innerHTML = `<button type="button" class="sticker-toggle" aria-expanded="false" aria-label="Leave a sticker">${KINDS.spark.svg}<span class="sticker-count"></span></button><div class="sticker-tray"><p class="micro">Leave a sticker</p><div class="sticker-kinds">${Object.entries(KINDS).map(([k, v]) => `<button type="button" data-kind="${k}" style="--c:${v.color}" aria-label="${v.label}">${v.svg}</button>`).join('')}</div><p class="sticker-note micro muted" aria-live="polite">Pick one, then tap anywhere on the post.</p></div>`;
+    dock.innerHTML = `<button type="button" class="sticker-toggle" aria-expanded="false" aria-label="Leave a sticker">${KINDS.spark.svg}<span class="sticker-count"></span></button><div class="sticker-tray"><p class="micro">Leave a sticker</p><div class="sticker-kinds">${Object.entries(KINDS).map(([k, v]) => `<button type="button" data-kind="${k}" style="--c:${v.color}" aria-label="${v.label}">${v.svg}</button>`).join('')}</div><label class="sticker-name"><span class="sr-only">Your name, optional</span><input type="text" maxlength="10" autocomplete="nickname" spellcheck="false" placeholder="Your name (optional)"/></label><p class="sticker-note micro muted" aria-live="polite">Pick one, then tap anywhere on the post.</p></div>`;
     document.body.append(dock);
-    const toggle = dock.querySelector('.sticker-toggle');
+    const toggle = dock.querySelector('.sticker-toggle'), nameField = dock.querySelector('.sticker-name input');
+    // A name is optional: one word of letters (any script), at most ten.
+    const cleanName = (value) => Array.from(((value || '').match(/[\p{L}\p{M}]+/u) || [''])[0]).slice(0, 10).join('');
+    try { nameField.value = cleanName(localStorage.getItem('tyb-sticker-name')); } catch { /* optional */ }
+    nameField.addEventListener('input', () => {
+      const clean = cleanName(nameField.value);
+      if (clean !== nameField.value) nameField.value = clean;
+      try { localStorage.setItem('tyb-sticker-name', clean); } catch { /* optional */ }
+    });
     let all = [], me = store.known ? store.known() : 'me', picking = null;
     const mine = () => all.filter((s) => s.uid === me);
     const body = page.querySelector('.article-body') || page;
@@ -1762,21 +1781,36 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
         return { left, top: r.top - pageBox.top - 3 };
       };
       layer.replaceChildren(...all.filter((s) => KINDS[s.kind] && s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1).map((s) => ({ s, at: place(s) })).filter((o) => o.at).map(({ s, at }) => {
-        const own = s.uid === me, el = document.createElement(own ? 'button' : 'span');
+        // Hover (or tap, on touch screens) shows who left it; your own also shows a small × to remove it.
+        const own = s.uid === me, el = document.createElement('span');
         el.className = 'sticker' + (own ? ' is-mine' : '');
         el.style.left = at.left + 'px';
         el.style.top = at.top + 'px';
         el.style.setProperty('--c', KINDS[s.kind].color);
+        el.tabIndex = 0;
+        el.setAttribute('role', 'button');
+        el.setAttribute('aria-label', `${KINDS[s.kind].label} sticker${s.name ? ' from ' + s.name : ''}${own ? ' (yours)' : ''}`);
         el.innerHTML = KINDS[s.kind].svg;
+        const label = cleanName(s.name) || (own ? 'You' : '');
+        if (label) { const tip = document.createElement('span'); tip.className = 'sticker-tip'; tip.textContent = label; el.append(tip); }
         if (own) {
-          el.type = 'button';
-          el.setAttribute('aria-label', 'Remove your ' + KINDS[s.kind].label.toLowerCase() + ' sticker');
-          el.title = 'Your sticker: tap to remove';
-          el.addEventListener('click', async (event) => {
+          const x = document.createElement('button');
+          x.type = 'button';
+          x.className = 'sticker-x';
+          x.setAttribute('aria-label', 'Remove your sticker');
+          x.textContent = '×';
+          x.addEventListener('click', async (event) => {
             event.stopPropagation();
             try { await store.remove(s.id); all = all.filter((o) => o.id !== s.id); draw(); note(dock, 'Removed.'); } catch { note(dock, 'Could not remove it just now.'); }
           });
+          el.append(x);
         }
+        el.addEventListener('click', (event) => {
+          event.stopPropagation();
+          const on = !el.classList.contains('is-active');
+          layer.querySelectorAll('.sticker.is-active').forEach((o) => o.classList.remove('is-active'));
+          el.classList.toggle('is-active', on);
+        });
         return el;
       }));
       const left = Math.max(0, LIMIT - mine().length);
@@ -1785,9 +1819,20 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     };
     const refresh = async () => { try { all = await store.list(post); draw(); } catch { /* keep what is shown */ } };
     const stop = () => { picking = null; document.body.classList.remove('is-placing'); dock.querySelectorAll('[data-kind]').forEach((b) => b.removeAttribute('aria-pressed')); };
-    toggle.addEventListener('click', () => { const open = !dock.classList.contains('is-open'); dock.classList.toggle('is-open', open); toggle.setAttribute('aria-expanded', String(open)); if (!open) stop(); });
+    // The small button toggles the tray on every device. On a desktop the tray also opens on hover; tapping the
+    // button while it is open closes it, and it stays closed until the pointer leaves the dock.
+    const hoverable = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+    toggle.addEventListener('click', () => {
+      const shown = dock.classList.contains('is-open') || (hoverable && dock.matches(':hover') && !dock.classList.contains('is-shut'));
+      dock.classList.toggle('is-open', !shown);
+      dock.classList.toggle('is-shut', shown);
+      toggle.setAttribute('aria-expanded', String(!shown));
+      if (shown) { stop(); toggle.blur(); }
+    });
+    dock.addEventListener('mouseleave', () => dock.classList.remove('is-shut'));
+    document.addEventListener('click', (event) => { if (!event.target.closest('.sticker')) layer.querySelectorAll('.sticker.is-active').forEach((o) => o.classList.remove('is-active')); });
     dock.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => {
-      if (mine().length >= LIMIT) { note(dock, 'You have placed all three here. Tap one of yours to remove it.'); return; }
+      if (mine().length >= LIMIT) { note(dock, 'You have placed all three here. Press × on one of yours to remove it.'); return; }
       stop();
       picking = b.dataset.kind;
       b.setAttribute('aria-pressed', 'true');
@@ -1813,8 +1858,9 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
         me = await store.uid();
         const used = new Set(mine().map((s) => s.id));
         const slot = [0, 1, 2].map((n) => `${me}_${post}_${n}`).find((id) => !used.has(id));
-        if (!slot) { note(dock, 'You have placed all three here. Tap one of yours to remove it.'); return; }
-        const sticker = { id: slot, uid: me, post, kind, x, y };
+        if (!slot) { note(dock, 'You have placed all three here. Press × on one of yours to remove it.'); return; }
+        const name = cleanName(nameField.value);
+        const sticker = Object.assign({ id: slot, uid: me, post, kind, x, y }, name ? { name } : {});
         await store.put(sticker);
         all = all.filter((o) => o.id !== slot).concat(sticker);
         draw();

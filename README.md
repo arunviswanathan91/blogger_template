@@ -92,7 +92,8 @@ service cloud.firestore {
     match /stickers/{id} {
       allow read: if true;
       allow create, update: if request.auth != null
-        && request.resource.data.keys().hasOnly(['uid', 'post', 'kind', 'x', 'y', 't'])
+        && request.resource.data.keys().hasOnly(['uid', 'post', 'kind', 'x', 'y', 't', 'name'])
+        && (!('name' in request.resource.data) || (request.resource.data.name is string && request.resource.data.name.matches('[\\p{L}\\p{M}]{1,10}')))
         && request.resource.data.post is string && request.resource.data.post.matches('[0-9]{1,30}')
         && id.matches(request.auth.uid + '_' + request.resource.data.post + '_[0-2]')
         && request.resource.data.uid == request.auth.uid
