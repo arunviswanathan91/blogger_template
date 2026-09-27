@@ -238,6 +238,41 @@
     const now = f.forms[f.index];
     if (f.morph < 1 && f.previous) { paint(f, f.previous, 1 - ease(f.morph)); paint(f, now, ease(f.morph)); }
     else paint(f, now, 1);
+    if (f.glass) frost(f);
+  };
+  // Glass drawn inside the canvas: the patch under each label is blurred and tinted here, in the same frame as the
+  // drawing. A CSS backdrop-filter over a canvas that repaints every frame had to re-sample it on its own schedule,
+  // which flickered and stalled where the zoomed lines passed behind the title and the chapter tabs.
+  const frost = (f) => {
+    const { ctx, dpr, canvas } = f, box = f.el.getBoundingClientRect();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const tint = colors.dark ? 'rgba(10,10,10,.62)' : 'rgba(255,255,255,.66)';
+    f.glass().forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (!r.width || r.right < box.left || r.left > box.right) return;
+      const x = r.left - box.left, y = r.top - box.top, w = r.width, h = r.height, pad = 14;
+      const round = el.classList.contains('round-link') ? w / 2 : 4;
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, round);
+      ctx.clip();
+      // Cheap frosting: shrink the patch to one eighth and stretch it back with smoothing (a soft blur without a filter pass).
+      const sx = max(0, x - pad), sy = max(0, y - pad), sw = min(f.w - sx, w + pad * 2), sh = min(f.h - sy, h + pad * 2);
+      if (sw > 0 && sh > 0) {
+        const tw = Math.ceil(sw / 8), th = Math.ceil(sh / 8), tmp = f.tmp || (f.tmp = document.createElement('canvas'));
+        if (tmp.width < tw || tmp.height < th) { tmp.width = max(tmp.width, tw); tmp.height = max(tmp.height, th); }
+        const t = tmp.getContext('2d');
+        t.imageSmoothingEnabled = true; t.imageSmoothingQuality = 'high';
+        t.clearRect(0, 0, tw, th);
+        t.drawImage(canvas, sx * dpr, sy * dpr, sw * dpr, sh * dpr, 0, 0, tw, th);
+        ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+        ctx.clearRect(x, y, w, h);
+        ctx.drawImage(tmp, 0, 0, tw, th, sx, sy, sw, sh);
+      }
+      ctx.fillStyle = tint;
+      ctx.fillRect(x, y, w, h);
+      ctx.restore();
+    });
   };
 
   // A new place to zoom toward: anywhere across the drawing, from near its centre to its outer edge.
@@ -313,7 +348,15 @@
     el.classList.add('is-live');
     const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, ox: Number(el.dataset.ox) || .5, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     if (el.dataset.figure === 'opening' && motionOK) { f.zooms = true; f.zt = 0; aim(f); }
-    if (el.classList.contains('hero-backdrop')) f.lite = .6;
+    if (el.classList.contains('hero-backdrop')) {
+      f.lite = .6;
+      const hero = el.closest('.hero');
+      if (hero && CanvasRenderingContext2D.prototype.roundRect) {
+        const panes = hero.querySelectorAll('.hero-title, .hero-topline .micro, .hero-description, .hero-aside, .hero-motto, .round-link, .panel > .panel-tab');
+        f.glass = () => panes;
+        hero.classList.add('canvas-glass');
+      }
+    }
     frames.push(f);
     const triggers = [el.closest('[data-art]') || el];
     if (el.dataset.trigger) triggers.push(...document.querySelectorAll(el.dataset.trigger));
