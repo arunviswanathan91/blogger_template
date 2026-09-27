@@ -362,6 +362,7 @@
     const triggers = [el.closest('[data-art]') || el];
     if (el.dataset.trigger) triggers.push(...document.querySelectorAll(el.dataset.trigger));
     triggers.forEach((trigger) => trigger.addEventListener('click', () => {
+      if (el.closest('.hero.is-placing')) return;  // a sticker is being placed, not a new drawing asked for
       f.previous = f.forms[f.index];
       f.index = (f.index + 1) % f.forms.length;
       if (f.zooms) {
