@@ -83,7 +83,7 @@ Local XML validation is not Blogger’s server-side import validation. See `docs
 
 ## Reader stickers
 
-Readers can leave up to three small line-drawn stickers on the opening drawing; everyone sees them (`src/stickers.js`). They are stored in the Firebase project `blog-stickers` (Firestore, anonymous sign-in) through its REST API, so no Firebase library is loaded. The web config in `scripts/build.py` is public by design; these Firestore rules do the guarding:
+On every post a small round sticker button follows the reader down the page; hovering (or tapping) opens six line-drawn stickers, and a reader can pin one anywhere on the post. Everyone sees them. Each reader may keep three per post and remove their own (`src/stickers.js`). They are stored in the Firebase project `blog-stickers` (Firestore, anonymous sign-in) through its REST API, so no Firebase library is loaded. The web config in `scripts/build.py` is public by design; these Firestore rules do the guarding:
 
 ```
 rules_version = '2';
@@ -92,8 +92,9 @@ service cloud.firestore {
     match /stickers/{id} {
       allow read: if true;
       allow create, update: if request.auth != null
-        && id.matches(request.auth.uid + '_[0-2]')
-        && request.resource.data.keys().hasOnly(['uid', 'kind', 'x', 'y', 't'])
+        && request.resource.data.keys().hasOnly(['uid', 'post', 'kind', 'x', 'y', 't'])
+        && request.resource.data.post is string && request.resource.data.post.matches('[0-9]{1,30}')
+        && id.matches(request.auth.uid + '_' + request.resource.data.post + '_[0-2]')
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.kind in ['star', 'heart', 'spark', 'moon', 'leaf', 'eye']
         && request.resource.data.x is number && request.resource.data.x >= 0 && request.resource.data.x <= 1

@@ -167,27 +167,29 @@ figure, h1, h2, h3, p { margin: 0; }
 .hero-topline .micro, .hero-aside, .hero-motto { padding: 5px 9px; border-radius: 3px; margin: -5px -9px; }
 .hero-description { padding: 8px 12px; margin: -8px -12px; border-radius: 3px; }
 .hero .round-link { background: var(--glass); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
-/* Reader stickers on the opening drawing (src/stickers.js). */
-.sticker-layer { position: absolute; inset: 0; z-index: 2; pointer-events: none; transition: opacity .2s ease; }
-.hero:has(.panel-opening:not(.is-active)) .sticker-layer { opacity: 0; visibility: hidden; }
-.sticker { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; display: grid; place-items: center; border-radius: 50%; color: var(--c); background: color-mix(in srgb, var(--paper) 70%, transparent); border: 1.5px solid color-mix(in srgb, var(--c) 85%, transparent); animation: sticker-in .5s var(--ease-out) both; }
+/* Reader stickers on posts (src/stickers.js): a dock that follows the reader and opens on hover. */
+.reading-page.has-stickers { position: relative; }
+.sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.sticker { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; display: grid; place-items: center; border-radius: 50%; color: var(--c); background: color-mix(in srgb, var(--paper) 78%, transparent); border: 1.5px solid color-mix(in srgb, var(--c) 85%, transparent); animation: sticker-in .5s var(--ease-out) both; }
 .sticker svg { width: 17px; height: 17px; }
 .sticker.is-mine { pointer-events: auto; cursor: pointer; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent); }
 @keyframes sticker-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
-.hero.is-placing, .hero.is-placing .hero-backdrop { cursor: crosshair; }
-.sticker-control { position: relative; pointer-events: auto; margin-left: auto; }
-.sticker-control * { pointer-events: auto; }
-.sticker-toggle { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 11px; border: 1px solid var(--ink); border-radius: 36px; font: 500 11px/1 var(--sans); letter-spacing: .04em; background: var(--glass); transition: background .25s, color .25s; }
-.sticker-toggle svg { width: 15px; height: 15px; }
-.sticker-toggle:hover, .sticker-toggle:focus-visible, .sticker-toggle[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
-.sticker-tray { position: absolute; right: 0; bottom: calc(100% + 10px); width: 250px; padding: 14px; background: var(--paper); border: 1px solid var(--ink); z-index: 5; }
-.sticker-tray[hidden] { display: none; }
+body.is-placing .reading-page { cursor: crosshair; }
+.sticker-dock { position: fixed; right: 24px; bottom: 24px; z-index: 40; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.sticker-dock[hidden] { display: none; }
+.sticker-toggle { position: relative; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--ink); background: color-mix(in srgb, var(--paper) 85%, transparent); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); transition: background .25s, color .25s; }
+.sticker-toggle svg { width: 20px; height: 20px; }
+.sticker-count { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--ink); color: var(--paper); font: 600 10px/18px var(--sans); text-align: center; }
+.sticker-dock:hover .sticker-toggle, .sticker-dock.is-open .sticker-toggle, .sticker-toggle:focus-visible { background: var(--ink); color: var(--paper); }
+.sticker-tray { order: -1; display: none; width: 250px; padding: 14px; background: var(--paper); border: 1px solid var(--ink); }
+.sticker-dock:hover .sticker-tray, .sticker-dock.is-open .sticker-tray, .sticker-dock:focus-within .sticker-tray { display: block; }
 .sticker-kinds { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 10px 0 8px; }
 .sticker-kinds button { aspect-ratio: 1; display: grid; place-items: center; color: var(--c); border: 1px solid var(--line); border-radius: 50%; transition: background .25s, border-color .25s; }
 .sticker-kinds button svg { width: 18px; height: 18px; }
 .sticker-kinds button:hover, .sticker-kinds button[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
 .sticker-note { min-height: 1.4em; font-size: 9px; }
-@media (max-width: 760px) { .sticker-toggle span { font-size: 10px; } .sticker-tray { width: 230px; } }
+@media (max-width: 760px) { .sticker-dock { right: 14px; bottom: 14px; } .sticker-tray { width: 230px; } }
+@media print { .sticker-dock, .sticker-layer { display: none !important; } }
 /* When the drawing paints the glass itself (see figures.js), the CSS glass steps aside. */
 .hero.canvas-glass .hero-title, .hero.canvas-glass .hero-topline .micro, .hero.canvas-glass .hero-description, .hero.canvas-glass .hero-aside, .hero.canvas-glass .hero-motto, .hero.canvas-glass .round-link, .hero.canvas-glass .panel > .panel-tab { -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; transform: none; }
 .hero.canvas-glass .panel:not(.is-active) > .panel-tab:hover, .hero.canvas-glass .round-link:hover, .hero.canvas-glass .round-link:focus-visible { background: var(--ink); }
@@ -1933,15 +1935,14 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
 })();
 
 window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "projectId": "blog-stickers"};
-/* Stickers on the opening drawing, shared by every reader. Each reader may keep three.
+/* Stickers on posts, shared by every reader: a small dock follows the reader down the post and opens on hover;
+   a sticker can be pinned anywhere on the page. Each reader may keep three per post.
    Storage is a small Firebase project (Firestore + anonymous sign-in) reached over its REST API, so no SDK is loaded.
    The Firestore rules (see README) enforce the limits; this file only draws and asks. */
 (() => {
   'use strict';
   const cfg = window.TYB_STICKERS;
-  const hero = document.querySelector('.hero');
-  const bottom = hero && hero.querySelector('.hero-bottom');
-  if (!cfg || !hero || !bottom || !window.fetch) return;
+  if (!cfg || !window.fetch) return;
 
   const LIMIT = 3;
   const line = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
@@ -1962,7 +1963,7 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
       const key = 'tyb-stickers-demo';
       return {
         uid: async () => 'me',
-        list: async () => read(key) || [],
+        list: async (post) => (read(key) || []).filter((o) => o.post === post),
         put: async (s) => { const all = (read(key) || []).filter((o) => o.id !== s.id); all.push(s); write(key, all); },
         remove: async (id) => write(key, (read(key) || []).filter((o) => o.id !== id)),
       };
@@ -1989,16 +1990,17 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
     return {
       uid: async () => (await token()).uid,
       known: () => auth && auth.uid,
-      list: async () => {
-        const r = await fetch(`${base}/stickers?pageSize=300`, { cache: 'no-store' });
+      list: async (post) => {
+        const r = await fetch(`${base}:runQuery`, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ structuredQuery: {
+          from: [{ collectionId: 'stickers' }], where: { fieldFilter: { field: { fieldPath: 'post' }, op: 'EQUAL', value: { stringValue: post } } }, limit: 300,
+        } }) });
         if (!r.ok) throw new Error('read');
-        const d = await r.json();
-        return (d.documents || []).map((doc) => ({ id: doc.name.split('/').pop(), uid: doc.fields.uid?.stringValue, kind: doc.fields.kind?.stringValue, x: num(doc.fields.x), y: num(doc.fields.y), t: doc.fields.t?.timestampValue || '' }));
+        return (await r.json()).filter((row) => row.document).map(({ document: doc }) => ({ id: doc.name.split('/').pop(), uid: doc.fields.uid?.stringValue, post: doc.fields.post?.stringValue, kind: doc.fields.kind?.stringValue, x: num(doc.fields.x), y: num(doc.fields.y) }));
       },
       put: async (s) => {
         const a = await token();
         const r = await fetch(`${base}:commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }, body: JSON.stringify({ writes: [{
-          update: { name: docName(s.id), fields: { uid: { stringValue: a.uid }, kind: { stringValue: s.kind }, x: { doubleValue: s.x }, y: { doubleValue: s.y } } },
+          update: { name: docName(s.id), fields: { uid: { stringValue: a.uid }, post: { stringValue: s.post }, kind: { stringValue: s.kind }, x: { doubleValue: s.x }, y: { doubleValue: s.y } } },
           updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
         }] }) });
         if (!r.ok) throw new Error(r.status === 403 ? 'wait' : 'write');
@@ -2011,79 +2013,94 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
     };
   })();
 
-  const layer = document.createElement('div');
-  layer.className = 'sticker-layer';
-  hero.append(layer);
-  const control = document.createElement('div');
-  control.className = 'sticker-control';
-  control.innerHTML = `<button type="button" class="sticker-toggle" aria-expanded="false">${KINDS.spark.svg}<span>Leave a sticker</span></button><div class="sticker-tray" hidden="hidden"><p class="micro">Pick one, then tap the drawing.</p><div class="sticker-kinds">${Object.entries(KINDS).map(([k, v]) => `<button type="button" data-kind="${k}" style="--c:${v.color}" aria-label="${v.label}">${v.svg}</button>`).join('')}</div><p class="sticker-note micro muted" aria-live="polite"></p></div>`;
-  bottom.querySelector('.hero-aside')?.after(control);
-  const toggle = control.querySelector('.sticker-toggle'), tray = control.querySelector('.sticker-tray'), note = control.querySelector('.sticker-note');
-
-  let all = [], me = store.known ? store.known() : 'me', picking = null;
-  const mine = () => all.filter((s) => s.uid === me);
-  const say = (text) => { note.textContent = text; };
-  const draw = () => {
-    layer.replaceChildren(...all.filter((s) => KINDS[s.kind] && s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1).map((s) => {
-      const el = document.createElement(s.uid === me ? 'button' : 'span');
-      el.className = 'sticker' + (s.uid === me ? ' is-mine' : '');
-      el.style.left = (s.x * 100) + '%';
-      el.style.top = (s.y * 100) + '%';
-      el.style.setProperty('--c', KINDS[s.kind].color);
-      el.innerHTML = KINDS[s.kind].svg;
-      if (s.uid === me) {
-        el.type = 'button';
-        el.setAttribute('aria-label', 'Remove your ' + KINDS[s.kind].label.toLowerCase() + ' sticker');
-        el.title = 'Your sticker: tap to remove';
-        el.addEventListener('click', async (event) => {
-          event.stopPropagation();
-          try { await store.remove(s.id); all = all.filter((o) => o.id !== s.id); draw(); say('Removed.'); } catch { say('Could not remove it just now.'); }
-        });
-      }
-      return el;
+  const note = (dock, text) => { dock.querySelector('.sticker-note').textContent = text; };
+  const attach = (page) => {
+    if (!page || page.dataset.stickers || page.closest('[hidden]')) return;
+    const post = page.dataset.postId || (document.body.dataset.preview === 'true' ? 'preview' : '');
+    if (!/^[0-9]+$/.test(post) && post !== 'preview') return;
+    page.dataset.stickers = 'true';
+    page.classList.add('has-stickers');
+    const layer = document.createElement('div');
+    layer.className = 'sticker-layer';
+    page.append(layer);
+    // The dock: minimised to a small round button that stays in view; it opens on hover or tap.
+    const dock = document.createElement('div');
+    dock.className = 'sticker-dock';
+    dock.innerHTML = `<button type="button" class="sticker-toggle" aria-expanded="false" aria-label="Leave a sticker">${KINDS.spark.svg}<span class="sticker-count"></span></button><div class="sticker-tray"><p class="micro">Leave a sticker</p><div class="sticker-kinds">${Object.entries(KINDS).map(([k, v]) => `<button type="button" data-kind="${k}" style="--c:${v.color}" aria-label="${v.label}">${v.svg}</button>`).join('')}</div><p class="sticker-note micro muted" aria-live="polite">Pick one, then tap anywhere on the post.</p></div>`;
+    document.body.append(dock);
+    const toggle = dock.querySelector('.sticker-toggle');
+    let all = [], me = store.known ? store.known() : 'me', picking = null;
+    const mine = () => all.filter((s) => s.uid === me);
+    const draw = () => {
+      layer.replaceChildren(...all.filter((s) => KINDS[s.kind] && s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1).map((s) => {
+        const own = s.uid === me, el = document.createElement(own ? 'button' : 'span');
+        el.className = 'sticker' + (own ? ' is-mine' : '');
+        el.style.left = (s.x * 100) + '%';
+        el.style.top = (s.y * 100) + '%';
+        el.style.setProperty('--c', KINDS[s.kind].color);
+        el.innerHTML = KINDS[s.kind].svg;
+        if (own) {
+          el.type = 'button';
+          el.setAttribute('aria-label', 'Remove your ' + KINDS[s.kind].label.toLowerCase() + ' sticker');
+          el.title = 'Your sticker: tap to remove';
+          el.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            try { await store.remove(s.id); all = all.filter((o) => o.id !== s.id); draw(); note(dock, 'Removed.'); } catch { note(dock, 'Could not remove it just now.'); }
+          });
+        }
+        return el;
+      }));
+      const left = Math.max(0, LIMIT - mine().length);
+      dock.querySelector('.sticker-count').textContent = left;
+      toggle.setAttribute('aria-label', `Leave a sticker (${left} left)`);
+    };
+    const refresh = async () => { try { all = await store.list(post); draw(); } catch { /* keep what is shown */ } };
+    const stop = () => { picking = null; document.body.classList.remove('is-placing'); dock.querySelectorAll('[data-kind]').forEach((b) => b.removeAttribute('aria-pressed')); };
+    toggle.addEventListener('click', () => { const open = !dock.classList.contains('is-open'); dock.classList.toggle('is-open', open); toggle.setAttribute('aria-expanded', String(open)); if (!open) stop(); });
+    dock.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => {
+      if (mine().length >= LIMIT) { note(dock, 'You have placed all three here. Tap one of yours to remove it.'); return; }
+      stop();
+      picking = b.dataset.kind;
+      b.setAttribute('aria-pressed', 'true');
+      document.body.classList.add('is-placing');
+      note(dock, 'Now tap anywhere on the post.');
     }));
-    toggle.querySelector('span').textContent = `Leave a sticker (${Math.max(0, LIMIT - mine().length)})`;
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && picking) { stop(); note(dock, 'Pick one, then tap anywhere on the post.'); } });
+    page.addEventListener('click', async (event) => {
+      if (!picking || event.target.closest('.sticker-dock, .sticker, .post-actions, .comments, .read-more, iframe')) return;
+      event.preventDefault();
+      const box = page.getBoundingClientRect();
+      const x = Math.round(((event.clientX - box.left) / box.width) * 1000) / 1000, y = Math.round(((event.clientY - box.top) / box.height) * 10000) / 10000;
+      const kind = picking;
+      stop();
+      try {
+        me = await store.uid();
+        const used = new Set(mine().map((s) => s.id));
+        const slot = [0, 1, 2].map((n) => `${me}_${post}_${n}`).find((id) => !used.has(id));
+        if (!slot) { note(dock, 'You have placed all three here. Tap one of yours to remove it.'); return; }
+        const sticker = { id: slot, uid: me, post, kind, x, y };
+        await store.put(sticker);
+        all = all.filter((o) => o.id !== slot).concat(sticker);
+        draw();
+        note(dock, mine().length >= LIMIT ? 'Pinned. That was your last one here.' : 'Pinned. Everyone can see it.');
+      } catch (error) {
+        note(dock, error.message === 'wait' ? 'Too quick. Try again in half a minute.' : 'Could not save it just now.');
+      }
+    }, true);
+    refresh();
+    setInterval(() => { if (!document.hidden && page.isConnected) refresh(); }, 25000);
+    // A post rebuilt by the page (after an edit in the dashboard) gets a fresh layer; drop this dock.
+    const gone = new MutationObserver(() => { if (!page.isConnected) { dock.remove(); gone.disconnect(); } });
+    gone.observe(document.body, { childList: true, subtree: true });
   };
-  const refresh = async () => { try { all = await store.list(); draw(); } catch { /* keep what is shown */ } };
-
-  const stop = () => { picking = null; hero.classList.remove('is-placing'); control.querySelectorAll('[data-kind]').forEach((b) => b.removeAttribute('aria-pressed')); };
-  toggle.addEventListener('click', () => {
-    tray.hidden = !tray.hidden;
-    toggle.setAttribute('aria-expanded', String(!tray.hidden));
-    if (tray.hidden) stop(); else say(mine().length >= LIMIT ? 'You have placed all three. Tap one of yours to remove it.' : '');
-  });
-  control.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => {
-    if (mine().length >= LIMIT) { say('You have placed all three. Tap one of yours to remove it.'); return; }
-    stop();
-    picking = b.dataset.kind;
-    b.setAttribute('aria-pressed', 'true');
-    hero.classList.add('is-placing');
-    say('Now tap anywhere on the drawing.');
-  }));
-  document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && picking) { stop(); say(''); } });
-  hero.addEventListener('click', async (event) => {
-    if (!picking || event.target.closest('.sticker-control, a, .panel-tab, .sticker')) return;
-    const box = hero.getBoundingClientRect();
-    const x = Math.round(((event.clientX - box.left) / box.width) * 1000) / 1000, y = Math.round(((event.clientY - box.top) / box.height) * 1000) / 1000;
-    const kind = picking;
-    stop();
-    try {
-      me = await store.uid();
-      const used = new Set(mine().map((s) => s.id));
-      const slot = [0, 1, 2].map((n) => `${me}_${n}`).find((id) => !used.has(id));
-      if (!slot) { say('You have placed all three. Tap one of yours to remove it.'); return; }
-      const sticker = { id: slot, uid: me, kind, x, y };
-      await store.put(sticker);
-      all = all.filter((o) => o.id !== slot).concat(sticker);
-      draw();
-      say(mine().length >= LIMIT ? 'Placed. That was your last one.' : 'Placed. Everyone can see it.');
-    } catch (error) {
-      say(error.message === 'wait' ? 'Too quick. Try again in half a minute.' : 'Could not save it just now.');
-    }
-  });
-
-  refresh();
-  setInterval(() => { if (!document.hidden && document.querySelector('.panel-opening.is-active')) refresh(); }, 25000);
+  const scan = () => {
+    document.querySelectorAll('.reading-page').forEach(attach);
+    // The design preview hides and shows its reading page; the dock follows it.
+    document.querySelectorAll('.sticker-dock').forEach((dock) => { dock.hidden = !document.querySelector('.reading-page.has-stickers:not([hidden])') || !!document.querySelector('.reading-page.has-stickers')?.closest('[hidden]'); });
+  };
+  scan();
+  window.addEventListener('tyb:render', scan);
+  window.addEventListener('hashchange', () => setTimeout(scan, 50));
 })();
 
 //]]></script></body></html>
