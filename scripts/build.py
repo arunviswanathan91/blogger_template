@@ -98,7 +98,7 @@ AI_HEAD = AI_NOTICE + '<meta name="robots" content="noai, noimageai"/><meta name
     'usageInfo': 'No permission is granted to use this content to train or fine-tune AI or machine-learning models. When quoting or referring to a post, credit Arun Viswanathan and TheYellow Bottle and link to the original post.'}, ensure_ascii=False) + '</script>'
 # Shared stickers on the opening drawing: a Firebase web config (public by design; the Firestore rules do the guarding).
 # 'recaptcha' is the reCAPTCHA Enterprise site key registered with Firebase App Check; leave it empty to run without App Check.
-STICKERS = {'apiKey': 'AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE', 'projectId': 'blog-stickers', 'appId': '1:59824059106:web:60b95e06845937dc6da4bb', 'recaptcha': '6LdUTtItAAAAAFwwEiuj3wkKHKR3gB2LjoQ2BhKv'}
+STICKERS = {'apiKey': 'AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE', 'projectId': 'blog-stickers', 'appId': '1:59824059106:web:60b95e06845937dc6da4bb', 'recaptcha': ''}
 RIGHTS_JS = 'window.TYB_RIGHTS = ' + json.dumps(RIGHTS, ensure_ascii=False) + ';\n'
 CATEGORY_JS = RIGHTS_JS + 'window.TYB_CATEGORIES = ' + json.dumps({key: {'ml': ml, 'labels': CATEGORY_LABELS[key], 'title': CATEGORY_TITLES[key], 'url': '/search/label/' + path} for key, ml, path in CATEGORIES}, ensure_ascii=False) + ';\n'
 PORTRAIT_JS = 'window.TYB_PORTRAIT = ' + json.dumps(json.loads((SRC / 'portrait.json').read_text()), separators=(',', ':')) + ';\n'
