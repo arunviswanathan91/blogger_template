@@ -170,6 +170,10 @@ body.is-placing .reading-page { cursor: crosshair; }
 .sticker-kinds button svg { width: 18px; height: 18px; }
 .sticker-kinds button:hover, .sticker-kinds button[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
 .sticker-note { min-height: 1.4em; font-size: 9px; }
+.sticker-legal { margin-top: 6px; font-size: 9px; color: var(--quiet); }
+.sticker-legal a { text-decoration: underline; }
+/* The reCAPTCHA badge is replaced by the notice inside the sticker tray, as Google allows. */
+.grecaptcha-badge { visibility: hidden; }
 @media (max-width: 760px) { .sticker-dock { right: 14px; bottom: 14px; } .sticker-tray { width: min(250px, calc(100vw - 28px)); } }
 @media print { .sticker-dock, .sticker-layer { display: none !important; } }
 /* When the drawing paints the glass itself (see figures.js), the CSS glass steps aside. */

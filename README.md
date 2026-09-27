@@ -119,3 +119,7 @@ service cloud.firestore {
 ```
 
 To clear stickers, delete documents in Firebase console → Firestore → `stickers`.
+
+### App Check (spam protection)
+
+Requests for stickers and likes carry a Firebase App Check token earned with reCAPTCHA Enterprise, so scripts outside a real browser on the blog are refused. It switches on when `recaptcha` in `STICKERS` (`scripts/build.py`) holds the reCAPTCHA Enterprise site key registered in Firebase → App Check, and is enforced from the App Check page for Cloud Firestore (and Authentication). The reCAPTCHA badge is hidden; the sticker tray shows the required notice instead.
