@@ -29,6 +29,8 @@
         list: async (post) => (read(key) || []).filter((o) => o.post === post),
         put: async (s) => { const all = (read(key) || []).filter((o) => o.id !== s.id); all.push(s); write(key, all); },
         remove: async (id) => write(key, (read(key) || []).filter((o) => o.id !== id)),
+        likes: async (post) => (read(key + ':likes:' + post) || 0),
+        like: async (post) => write(key + ':likes:' + post, (read(key + ':likes:' + post) || 0) + 1),
       };
     }
     const base = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents`;
@@ -67,6 +69,25 @@
           updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
         }] }) });
         if (!r.ok) throw new Error(r.status === 403 ? 'wait' : 'write');
+      },
+      // Likes: one document per reader per post; the count comes from Firestore's count query.
+      likes: async (post) => {
+        const r = await fetch(`${base}:runAggregationQuery`, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ structuredAggregationQuery: {
+          structuredQuery: { from: [{ collectionId: 'likes' }], where: { fieldFilter: { field: { fieldPath: 'post' }, op: 'EQUAL', value: { stringValue: post } } } },
+          aggregations: [{ alias: 'n', count: {} }],
+        } }) });
+        if (!r.ok) throw new Error('read');
+        const d = await r.json();
+        return Number(d[0]?.result?.aggregateFields?.n?.integerValue || 0);
+      },
+      like: async (post) => {
+        const a = await token();
+        const r = await fetch(`${base}:commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }, body: JSON.stringify({ writes: [{
+          update: { name: `projects/${cfg.projectId}/databases/(default)/documents/likes/${a.uid}_${post}`, fields: { uid: { stringValue: a.uid }, post: { stringValue: post } } },
+          updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
+          currentDocument: { exists: false },
+        }] }) });
+        if (!r.ok && r.status !== 403 && r.status !== 409 && r.status !== 400) throw new Error('write');
       },
       remove: async (id) => {
         const a = await token();
@@ -225,6 +246,18 @@
       }
     }, true);
     refresh();
+    // The like button under the post shows its count in the middle, kept in the same Firebase project.
+    const likeButton = page.querySelector('.like-button');
+    const showLikes = (n) => { const out = likeButton && likeButton.querySelector('.like-count'); if (out) { out.textContent = n > 0 ? n : ''; likeButton.setAttribute('aria-label', `Like this piece. ${n} ${n === 1 ? 'like' : 'likes'} so far`); } };
+    let likes = 0;
+    const countLikes = async () => { try { likes = await store.likes(post); showLikes(likes); } catch { /* keep what is shown */ } };
+    if (likeButton) countLikes();
+    window.addEventListener('tyb:like', async (event) => {
+      if (!page.isConnected || event.detail.button !== likeButton) return;
+      showLikes(likes + 1);
+      try { await store.like(post); } catch { /* the animation already answered the reader */ }
+      countLikes();
+    });
     // Reflow (new width, reading size, fonts arriving) moves the words; move the stickers with them.
     let queued = 0;
     const relayout = () => { cancelAnimationFrame(queued); queued = requestAnimationFrame(draw); };

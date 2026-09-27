@@ -363,7 +363,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 .article-end button, .article-end a { min-height: 44px; }
 .article-end a { display: flex; align-items: center; }
 .post-actions { display: flex; align-items: center; gap: 14px; margin-left: auto; }
-.like-button { display: inline-flex; align-items: center; gap: 4px; padding: 0 4px; }
+.like-button { position: relative; display: inline-flex; align-items: center; padding: 0 4px; }
 .like-button svg { width: 44px; height: 44px; overflow: visible; stroke-linecap: round; }
 .like-button line { stroke: currentColor; stroke-width: 1.3; transition: stroke .5s ease calc(var(--k) * 25ms), transform .5s var(--ease-out) calc(var(--k) * 25ms); transform-origin: 20px 20px; }
 .like-button .ray { stroke: var(--c); stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
@@ -372,7 +372,7 @@ body:has(#Blog1):not(:has([data-blog-rendered])) main { min-height: 100vh; }
 .like-button.is-bursting .rest { animation: rest-turn .9s var(--ease-out) both; }
 @keyframes ray { 0% { opacity: 1; stroke-dashoffset: 1; } 55% { opacity: 1; stroke-dashoffset: 0; } 100% { opacity: 0; stroke-dashoffset: -1; } }
 @keyframes rest-turn { 0% { transform: rotate(0) scale(1); } 40% { transform: rotate(15deg) scale(.7); } 100% { transform: rotate(30deg) scale(1); } }
-.like-count { min-width: 1ch; font-size: 11px; letter-spacing: .04em; }
+.like-count { position: absolute; left: 4px; top: 50%; width: 44px; translate: 0 -50%; text-align: center; font: 600 10px/1 var(--sans); letter-spacing: 0; pointer-events: none; }
 .share { position: relative; }
 .share-button { display: inline-flex; align-items: center; gap: 9px; height: 40px; padding: 0 18px 0 14px; border-radius: 40px; background: #0b0b0b; color: #fff; border: 1px solid var(--ink); font: 500 11px/1 var(--sans); letter-spacing: .06em; text-transform: uppercase; }
 .share-button svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
@@ -1334,7 +1334,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
   const burst = Array.from({ length: 12 }, (_, k) => {
     const a = k * Math.PI / 6, c = Math.cos(a), n = Math.sin(a), r = (v) => (20 + v).toFixed(2);
     const style = `--k:${k};--c:${likeColors[k % likeColors.length]}`;
-    return `<line class="rest" x1="${r(c * 5)}" y1="${r(n * 5)}" x2="${r(c * 9)}" y2="${r(n * 9)}" style="${style}"/><line class="ray" x1="${r(c * 11)}" y1="${r(n * 11)}" x2="${r(c * 18)}" y2="${r(n * 18)}" pathLength="1" style="${style}"/>`;
+    return `<line class="rest" x1="${r(c * 10)}" y1="${r(n * 10)}" x2="${r(c * 14)}" y2="${r(n * 14)}" style="${style}"/><line class="ray" x1="${r(c * 16)}" y1="${r(n * 16)}" x2="${r(c * 22)}" y2="${r(n * 22)}" pathLength="1" style="${style}"/>`;
   }).join('');
   const shareIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>';
   const shareTargets = [
@@ -1364,7 +1364,9 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     const end = page.querySelector('.article-end');
     if (end) { end.querySelector('[data-copy]')?.remove(); end.append(bar); } else page.append(bar);
     const like = bar.querySelector('.like-button');
-    if (!preview && id !== 'preview') counter(id, false).then((v) => showCount(like, v)).catch(() => showCount(like, null));
+    // With the Firebase app configured, likes are counted there (src/stickers.js); otherwise the public counter is used.
+    const remote = !preview && id !== 'preview' && !window.TYB_STICKERS;
+    if (remote) counter(id, false).then((v) => showCount(like, v)).catch(() => showCount(like, null));
     like.addEventListener('click', () => {
       like.classList.remove('is-bursting');
       void like.offsetWidth;
@@ -1374,7 +1376,8 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
       like.classList.add('is-liked');
       like.setAttribute('aria-pressed', 'true');
       const shown = Number(like.querySelector('.like-count').textContent);
-      if (!preview && id !== 'preview') counter(id, true).then((v) => showCount(like, v)).catch(() => showCount(like, shown ? shown + 1 : null));
+      if (remote) counter(id, true).then((v) => showCount(like, v)).catch(() => showCount(like, shown ? shown + 1 : null));
+      window.dispatchEvent(new CustomEvent('tyb:like', { detail: { id, button: like } }));
     });
     const share = bar.querySelector('.share-button'), menu = bar.querySelector('.share-menu');
     const close = () => { menu.hidden = true; share.setAttribute('aria-expanded', 'false'); };
@@ -1977,6 +1980,8 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
         list: async (post) => (read(key) || []).filter((o) => o.post === post),
         put: async (s) => { const all = (read(key) || []).filter((o) => o.id !== s.id); all.push(s); write(key, all); },
         remove: async (id) => write(key, (read(key) || []).filter((o) => o.id !== id)),
+        likes: async (post) => (read(key + ':likes:' + post) || 0),
+        like: async (post) => write(key + ':likes:' + post, (read(key + ':likes:' + post) || 0) + 1),
       };
     }
     const base = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents`;
@@ -2015,6 +2020,25 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
           updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
         }] }) });
         if (!r.ok) throw new Error(r.status === 403 ? 'wait' : 'write');
+      },
+      // Likes: one document per reader per post; the count comes from Firestore's count query.
+      likes: async (post) => {
+        const r = await fetch(`${base}:runAggregationQuery`, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ structuredAggregationQuery: {
+          structuredQuery: { from: [{ collectionId: 'likes' }], where: { fieldFilter: { field: { fieldPath: 'post' }, op: 'EQUAL', value: { stringValue: post } } } },
+          aggregations: [{ alias: 'n', count: {} }],
+        } }) });
+        if (!r.ok) throw new Error('read');
+        const d = await r.json();
+        return Number(d[0]?.result?.aggregateFields?.n?.integerValue || 0);
+      },
+      like: async (post) => {
+        const a = await token();
+        const r = await fetch(`${base}:commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }, body: JSON.stringify({ writes: [{
+          update: { name: `projects/${cfg.projectId}/databases/(default)/documents/likes/${a.uid}_${post}`, fields: { uid: { stringValue: a.uid }, post: { stringValue: post } } },
+          updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
+          currentDocument: { exists: false },
+        }] }) });
+        if (!r.ok && r.status !== 403 && r.status !== 409 && r.status !== 400) throw new Error('write');
       },
       remove: async (id) => {
         const a = await token();
@@ -2173,6 +2197,18 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
       }
     }, true);
     refresh();
+    // The like button under the post shows its count in the middle, kept in the same Firebase project.
+    const likeButton = page.querySelector('.like-button');
+    const showLikes = (n) => { const out = likeButton && likeButton.querySelector('.like-count'); if (out) { out.textContent = n > 0 ? n : ''; likeButton.setAttribute('aria-label', `Like this piece. ${n} ${n === 1 ? 'like' : 'likes'} so far`); } };
+    let likes = 0;
+    const countLikes = async () => { try { likes = await store.likes(post); showLikes(likes); } catch { /* keep what is shown */ } };
+    if (likeButton) countLikes();
+    window.addEventListener('tyb:like', async (event) => {
+      if (!page.isConnected || event.detail.button !== likeButton) return;
+      showLikes(likes + 1);
+      try { await store.like(post); } catch { /* the animation already answered the reader */ }
+      countLikes();
+    });
     // Reflow (new width, reading size, fonts arriving) moves the words; move the stickers with them.
     let queued = 0;
     const relayout = () => { cancelAnimationFrame(queued); queued = requestAnimationFrame(draw); };

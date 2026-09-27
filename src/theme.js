@@ -408,7 +408,7 @@
   const burst = Array.from({ length: 12 }, (_, k) => {
     const a = k * Math.PI / 6, c = Math.cos(a), n = Math.sin(a), r = (v) => (20 + v).toFixed(2);
     const style = `--k:${k};--c:${likeColors[k % likeColors.length]}`;
-    return `<line class="rest" x1="${r(c * 5)}" y1="${r(n * 5)}" x2="${r(c * 9)}" y2="${r(n * 9)}" style="${style}"/><line class="ray" x1="${r(c * 11)}" y1="${r(n * 11)}" x2="${r(c * 18)}" y2="${r(n * 18)}" pathLength="1" style="${style}"/>`;
+    return `<line class="rest" x1="${r(c * 10)}" y1="${r(n * 10)}" x2="${r(c * 14)}" y2="${r(n * 14)}" style="${style}"/><line class="ray" x1="${r(c * 16)}" y1="${r(n * 16)}" x2="${r(c * 22)}" y2="${r(n * 22)}" pathLength="1" style="${style}"/>`;
   }).join('');
   const shareIcon = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>';
   const shareTargets = [
@@ -438,7 +438,9 @@
     const end = page.querySelector('.article-end');
     if (end) { end.querySelector('[data-copy]')?.remove(); end.append(bar); } else page.append(bar);
     const like = bar.querySelector('.like-button');
-    if (!preview && id !== 'preview') counter(id, false).then((v) => showCount(like, v)).catch(() => showCount(like, null));
+    // With the Firebase app configured, likes are counted there (src/stickers.js); otherwise the public counter is used.
+    const remote = !preview && id !== 'preview' && !window.TYB_STICKERS;
+    if (remote) counter(id, false).then((v) => showCount(like, v)).catch(() => showCount(like, null));
     like.addEventListener('click', () => {
       like.classList.remove('is-bursting');
       void like.offsetWidth;
@@ -448,7 +450,8 @@
       like.classList.add('is-liked');
       like.setAttribute('aria-pressed', 'true');
       const shown = Number(like.querySelector('.like-count').textContent);
-      if (!preview && id !== 'preview') counter(id, true).then((v) => showCount(like, v)).catch(() => showCount(like, shown ? shown + 1 : null));
+      if (remote) counter(id, true).then((v) => showCount(like, v)).catch(() => showCount(like, shown ? shown + 1 : null));
+      window.dispatchEvent(new CustomEvent('tyb:like', { detail: { id, button: like } }));
     });
     const share = bar.querySelector('.share-button'), menu = bar.querySelector('.share-menu');
     const close = () => { menu.hidden = true; share.setAttribute('aria-expanded', 'false'); };
