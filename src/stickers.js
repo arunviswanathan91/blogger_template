@@ -248,13 +248,13 @@
     refresh();
     // The like button under the post shows its count in the middle, kept in the same Firebase project.
     const likeButton = page.querySelector('.like-button');
-    const showLikes = (n) => { const out = likeButton && likeButton.querySelector('.like-count'); if (out) { out.textContent = n > 0 ? n : ''; likeButton.setAttribute('aria-label', `Like this piece. ${n} ${n === 1 ? 'like' : 'likes'} so far`); } };
+    const showLikes = (n) => { const out = likeButton && likeButton.querySelector('.like-count'); if (out) { out.textContent = n; likeButton.setAttribute('aria-label', `Like this piece. ${n} ${n === 1 ? 'like' : 'likes'} so far`); } };
     let likes = 0;
     const countLikes = async () => { try { likes = await store.likes(post); showLikes(likes); } catch { /* keep what is shown */ } };
     if (likeButton) countLikes();
     window.addEventListener('tyb:like', async (event) => {
       if (!page.isConnected || event.detail.button !== likeButton) return;
-      showLikes(likes + 1);
+      if (!event.detail.already) showLikes(likes + 1);
       try { await store.like(post); } catch { /* the animation already answered the reader */ }
       countLikes();
     });

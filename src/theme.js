@@ -445,13 +445,16 @@
       like.classList.remove('is-bursting');
       void like.offsetWidth;
       like.classList.add('is-bursting');
-      if (liked(id)) return;
+      // Always tell the like store: a like remembered by this browser from the old counter may not be in Firebase yet
+      // (Firebase keeps one like per reader, so repeats are ignored there).
+      const already = liked(id);
+      window.dispatchEvent(new CustomEvent('tyb:like', { detail: { id, button: like, already } }));
+      if (already) return;
       try { localStorage.setItem('tyb-liked:' + id, '1'); } catch { /* A like still counts without memory. */ }
       like.classList.add('is-liked');
       like.setAttribute('aria-pressed', 'true');
       const shown = Number(like.querySelector('.like-count').textContent);
       if (remote) counter(id, true).then((v) => showCount(like, v)).catch(() => showCount(like, shown ? shown + 1 : null));
-      window.dispatchEvent(new CustomEvent('tyb:like', { detail: { id, button: like } }));
     });
     const share = bar.querySelector('.share-button'), menu = bar.querySelector('.share-menu');
     const close = () => { menu.hidden = true; share.setAttribute('aria-expanded', 'false'); };
