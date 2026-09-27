@@ -76,6 +76,26 @@
     };
   })();
 
+  // Stickers are anchored to the text, not to page coordinates, so they stay by the same word on every screen width.
+  // y = position of the nearest character within the post's text (0..1); x = sideways offset from that character,
+  // as a share of the text column's width (0.5 means directly on it).
+  const textNodes = (body) => {
+    const out = [], walk = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, { acceptNode: (n) => n.parentElement.closest('script, style, noscript') || !n.data.trim() ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+    let total = 0;
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) { out.push({ n, start: total }); total += n.data.length; }
+    return { nodes: out, total };
+  };
+  const caretAt = (x, y) => {
+    if (document.caretPositionFromPoint) { const c = document.caretPositionFromPoint(x, y); return c && { node: c.offsetNode, offset: c.offset }; }
+    if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); return r && { node: r.startContainer, offset: r.startOffset }; }
+    return null;
+  };
+  const charRect = (node, offset) => {
+    const range = document.createRange(), len = node.data.length;
+    const a = Math.min(Math.max(0, offset), Math.max(0, len - 1));
+    range.setStart(node, a); range.setEnd(node, Math.min(len, a + 1));
+    return range.getClientRects()[0] || range.getBoundingClientRect();
+  };
   const note = (dock, text) => { dock.querySelector('.sticker-note').textContent = text; };
   const attach = (page) => {
     if (!page || page.dataset.stickers || page.closest('[hidden]')) return;
@@ -94,12 +114,24 @@
     const toggle = dock.querySelector('.sticker-toggle');
     let all = [], me = store.known ? store.known() : 'me', picking = null;
     const mine = () => all.filter((s) => s.uid === me);
+    const body = page.querySelector('.article-body') || page;
     const draw = () => {
-      layer.replaceChildren(...all.filter((s) => KINDS[s.kind] && s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1).map((s) => {
+      const { nodes, total } = textNodes(body), pageBox = page.getBoundingClientRect(), bodyBox = body.getBoundingClientRect();
+      const place = (s) => {
+        if (!nodes.length) return null;
+        const at = Math.min(total - 1, Math.round(s.y * total));
+        const hit = nodes.find((item, i) => i === nodes.length - 1 || nodes[i + 1].start > at);
+        const r = charRect(hit.n, at - hit.start);
+        if (!r || (!r.width && !r.height)) return null;
+        // Sit on the top edge of the line, in the gap above the word, so the word itself stays readable.
+        const left = Math.min(pageBox.width - 12, Math.max(12, r.left - pageBox.left + (s.x - .5) * bodyBox.width));
+        return { left, top: r.top - pageBox.top - 3 };
+      };
+      layer.replaceChildren(...all.filter((s) => KINDS[s.kind] && s.x >= 0 && s.x <= 1 && s.y >= 0 && s.y <= 1).map((s) => ({ s, at: place(s) })).filter((o) => o.at).map(({ s, at }) => {
         const own = s.uid === me, el = document.createElement(own ? 'button' : 'span');
         el.className = 'sticker' + (own ? ' is-mine' : '');
-        el.style.left = (s.x * 100) + '%';
-        el.style.top = (s.y * 100) + '%';
+        el.style.left = at.left + 'px';
+        el.style.top = at.top + 'px';
         el.style.setProperty('--c', KINDS[s.kind].color);
         el.innerHTML = KINDS[s.kind].svg;
         if (own) {
@@ -132,8 +164,15 @@
     page.addEventListener('click', async (event) => {
       if (!picking || event.target.closest('.sticker-dock, .sticker, .post-actions, .comments, .read-more, iframe')) return;
       event.preventDefault();
-      const box = page.getBoundingClientRect();
-      const x = Math.round(((event.clientX - box.left) / box.width) * 1000) / 1000, y = Math.round(((event.clientY - box.top) / box.height) * 10000) / 10000;
+      // Find the character nearest the tap inside the text column, then remember how far to the side the tap was.
+      const bodyBox = body.getBoundingClientRect();
+      const cx = Math.min(bodyBox.right - 2, Math.max(bodyBox.left + 2, event.clientX)), cy = Math.min(bodyBox.bottom - 2, Math.max(bodyBox.top + 2, event.clientY));
+      const { nodes, total } = textNodes(body), caret = caretAt(cx, cy);
+      const hit = caret && nodes.find((item) => item.n === caret.node);
+      if (!hit || !total) { note(dock, 'Tap closer to the writing.'); return; }
+      const r = charRect(hit.n, caret.offset);
+      const y = Math.round(((hit.start + Math.min(caret.offset, hit.n.data.length - 1)) / total) * 1e6) / 1e6;
+      const x = Math.round(Math.min(1, Math.max(0, .5 + (event.clientX - r.left) / bodyBox.width)) * 1e4) / 1e4;
       const kind = picking;
       stop();
       try {
@@ -151,6 +190,11 @@
       }
     }, true);
     refresh();
+    // Reflow (new width, reading size, fonts arriving) moves the words; move the stickers with them.
+    let queued = 0;
+    const relayout = () => { cancelAnimationFrame(queued); queued = requestAnimationFrame(draw); };
+    if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(body);
+    if (document.fonts) document.fonts.ready.then(relayout);
     setInterval(() => { if (!document.hidden && page.isConnected) refresh(); }, 25000);
     // A post rebuilt by the page (after an edit in the dashboard) gets a fresh layer; drop this dock.
     const gone = new MutationObserver(() => { if (!page.isConnected) { dock.remove(); gone.disconnect(); } });

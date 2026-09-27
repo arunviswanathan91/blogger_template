@@ -141,8 +141,8 @@ figure, h1, h2, h3, p { margin: 0; }
 /* Reader stickers on posts (src/stickers.js): a dock that follows the reader and opens on hover. */
 .reading-page.has-stickers { position: relative; }
 .sticker-layer { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
-.sticker { position: absolute; width: 34px; height: 34px; margin: -17px 0 0 -17px; display: grid; place-items: center; border-radius: 50%; color: var(--c); background: color-mix(in srgb, var(--paper) 78%, transparent); border: 1.5px solid color-mix(in srgb, var(--c) 85%, transparent); animation: sticker-in .5s var(--ease-out) both; }
-.sticker svg { width: 17px; height: 17px; }
+.sticker { position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; display: grid; place-items: center; border-radius: 50%; color: var(--c); background: color-mix(in srgb, var(--paper) 78%, transparent); border: 1.5px solid color-mix(in srgb, var(--c) 85%, transparent); animation: sticker-in .5s var(--ease-out) both; }
+.sticker svg { width: 15px; height: 15px; }
 .sticker.is-mine { pointer-events: auto; cursor: pointer; box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 25%, transparent); }
 @keyframes sticker-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
 body.is-placing .reading-page { cursor: crosshair; }
@@ -152,14 +152,14 @@ body.is-placing .reading-page { cursor: crosshair; }
 .sticker-toggle svg { width: 20px; height: 20px; }
 .sticker-count { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--ink); color: var(--paper); font: 600 10px/18px var(--sans); text-align: center; }
 .sticker-dock:hover .sticker-toggle, .sticker-dock.is-open .sticker-toggle, .sticker-toggle:focus-visible { background: var(--ink); color: var(--paper); }
-.sticker-tray { order: -1; display: none; width: 250px; padding: 14px; background: var(--paper); border: 1px solid var(--ink); }
+.sticker-tray { order: -1; display: none; box-sizing: border-box; width: min(250px, calc(100vw - 28px)); padding: 14px; background: var(--paper); border: 1px solid var(--ink); }
 .sticker-dock:hover .sticker-tray, .sticker-dock.is-open .sticker-tray, .sticker-dock:focus-within .sticker-tray { display: block; }
-.sticker-kinds { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin: 10px 0 8px; }
-.sticker-kinds button { aspect-ratio: 1; display: grid; place-items: center; color: var(--c); border: 1px solid var(--line); border-radius: 50%; transition: background .25s, border-color .25s; }
+.sticker-kinds { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin: 10px 0 8px; }
+.sticker-kinds button { width: 100%; min-width: 0; padding: 0; aspect-ratio: 1; display: grid; place-items: center; color: var(--c); border: 1px solid var(--line); border-radius: 50%; transition: background .25s, border-color .25s; }
 .sticker-kinds button svg { width: 18px; height: 18px; }
 .sticker-kinds button:hover, .sticker-kinds button[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent); }
 .sticker-note { min-height: 1.4em; font-size: 9px; }
-@media (max-width: 760px) { .sticker-dock { right: 14px; bottom: 14px; } .sticker-tray { width: 230px; } }
+@media (max-width: 760px) { .sticker-dock { right: 14px; bottom: 14px; } .sticker-tray { width: min(250px, calc(100vw - 28px)); } }
 @media print { .sticker-dock, .sticker-layer { display: none !important; } }
 /* When the drawing paints the glass itself (see figures.js), the CSS glass steps aside. */
 .hero.canvas-glass .hero-title, .hero.canvas-glass .hero-topline .micro, .hero.canvas-glass .hero-description, .hero.canvas-glass .hero-aside, .hero.canvas-glass .hero-motto, .hero.canvas-glass .round-link, .hero.canvas-glass .panel > .panel-tab { -webkit-backdrop-filter: none; backdrop-filter: none; background: transparent; transform: none; }
