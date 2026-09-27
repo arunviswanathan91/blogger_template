@@ -1993,15 +1993,15 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
     }
     const base = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents`;
     const docName = (id) => `projects/${cfg.projectId}/databases/(default)/documents/stickers/${id}`;
-    // Firebase App Check: a reCAPTCHA v3 score proves the request comes from a real browser on the blog.
+    // Firebase App Check: a reCAPTCHA Enterprise score proves the request comes from a real browser on the blog.
     // It is used only once a reCAPTCHA site key is configured; the token is kept until shortly before it expires.
     const checkKey = 'tyb-sticker-check';
     let check = read(checkKey), recaptcha = null;
     const loadRecaptcha = () => recaptcha || (recaptcha = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(cfg.recaptcha);
+      script.src = 'https://www.google.com/recaptcha/enterprise.js?render=' + encodeURIComponent(cfg.recaptcha);
       script.async = true;
-      script.onload = () => window.grecaptcha.ready(resolve);
+      script.onload = () => window.grecaptcha.enterprise.ready(resolve);
       script.onerror = reject;
       document.head.append(script);
     }));
@@ -2009,8 +2009,8 @@ window.TYB_STICKERS = {"apiKey": "AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE", "pro
       if (!cfg.recaptcha || !cfg.appId) return null;
       if (check && check.exp > Date.now() + 120000) return check.token;
       await loadRecaptcha();
-      const proof = await window.grecaptcha.execute(cfg.recaptcha, { action: 'stickers' });
-      const r = await fetch(`https://firebaseappcheck.googleapis.com/v1/projects/${cfg.projectId}/apps/${cfg.appId}:exchangeRecaptchaV3Token?key=${cfg.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ recaptchaV3Token: proof }) });
+      const proof = await window.grecaptcha.enterprise.execute(cfg.recaptcha, { action: 'stickers' });
+      const r = await fetch(`https://firebaseappcheck.googleapis.com/v1/projects/${cfg.projectId}/apps/${cfg.appId}:exchangeRecaptchaEnterpriseToken?key=${cfg.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ recaptchaEnterpriseToken: proof }) });
       if (!r.ok) return null;
       const d = await r.json();
       check = { token: d.token, exp: Date.now() + parseInt(d.ttl, 10) * 1000 };
