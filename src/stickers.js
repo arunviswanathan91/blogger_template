@@ -35,16 +35,41 @@
     }
     const base = `https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/(default)/documents`;
     const docName = (id) => `projects/${cfg.projectId}/databases/(default)/documents/stickers/${id}`;
+    // Firebase App Check: a reCAPTCHA v3 score proves the request comes from a real browser on the blog.
+    // It is used only once a reCAPTCHA site key is configured; the token is kept until shortly before it expires.
+    const checkKey = 'tyb-sticker-check';
+    let check = read(checkKey), recaptcha = null;
+    const loadRecaptcha = () => recaptcha || (recaptcha = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://www.google.com/recaptcha/api.js?render=' + encodeURIComponent(cfg.recaptcha);
+      script.async = true;
+      script.onload = () => window.grecaptcha.ready(resolve);
+      script.onerror = reject;
+      document.head.append(script);
+    }));
+    const appCheck = async () => {
+      if (!cfg.recaptcha || !cfg.appId) return null;
+      if (check && check.exp > Date.now() + 120000) return check.token;
+      await loadRecaptcha();
+      const proof = await window.grecaptcha.execute(cfg.recaptcha, { action: 'stickers' });
+      const r = await fetch(`https://firebaseappcheck.googleapis.com/v1/projects/${cfg.projectId}/apps/${cfg.appId}:exchangeRecaptchaV3Token?key=${cfg.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ recaptchaV3Token: proof }) });
+      if (!r.ok) return null;
+      const d = await r.json();
+      check = { token: d.token, exp: Date.now() + parseInt(d.ttl, 10) * 1000 };
+      write(checkKey, check);
+      return check.token;
+    };
+    const withCheck = async (headers) => { const t = await appCheck().catch(() => null); return t ? Object.assign({ 'X-Firebase-AppCheck': t }, headers) : headers; };
     const authKey = 'tyb-sticker-auth';
     let auth = read(authKey);
     const token = async () => {
       if (auth && auth.exp > Date.now() + 60000) return auth;
       let r;
       if (auth && auth.refresh) {
-        r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${cfg.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(auth.refresh) });
+        r = await fetch(`https://securetoken.googleapis.com/v1/token?key=${cfg.apiKey}`, { method: 'POST', headers: await withCheck({ 'Content-Type': 'application/x-www-form-urlencoded' }), body: 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(auth.refresh) });
         if (r.ok) { const d = await r.json(); auth = { id: d.id_token, refresh: d.refresh_token, uid: d.user_id, exp: Date.now() + d.expires_in * 1000 }; write(authKey, auth); return auth; }
       }
-      r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${cfg.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"returnSecureToken":true}' });
+      r = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${cfg.apiKey}`, { method: 'POST', headers: await withCheck({ 'Content-Type': 'application/json' }), body: '{"returnSecureToken":true}' });
       if (!r.ok) throw new Error('sign-in');
       const d = await r.json();
       auth = { id: d.idToken, refresh: d.refreshToken, uid: d.localId, exp: Date.now() + d.expiresIn * 1000 };
@@ -56,7 +81,7 @@
       uid: async () => (await token()).uid,
       known: () => auth && auth.uid,
       list: async (post) => {
-        const r = await fetch(`${base}:runQuery`, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ structuredQuery: {
+        const r = await fetch(`${base}:runQuery`, { method: 'POST', cache: 'no-store', headers: await withCheck({ 'Content-Type': 'application/json' }), body: JSON.stringify({ structuredQuery: {
           from: [{ collectionId: 'stickers' }], where: { fieldFilter: { field: { fieldPath: 'post' }, op: 'EQUAL', value: { stringValue: post } } }, limit: 300,
         } }) });
         if (!r.ok) throw new Error('read');
@@ -64,7 +89,7 @@
       },
       put: async (s) => {
         const a = await token();
-        const r = await fetch(`${base}:commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }, body: JSON.stringify({ writes: [{
+        const r = await fetch(`${base}:commit`, { method: 'POST', headers: await withCheck({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }), body: JSON.stringify({ writes: [{
           update: { name: docName(s.id), fields: Object.assign({ uid: { stringValue: a.uid }, post: { stringValue: s.post }, kind: { stringValue: s.kind }, x: { doubleValue: s.x }, y: { doubleValue: s.y } }, s.name ? { name: { stringValue: s.name } } : {}) },
           updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
         }] }) });
@@ -72,7 +97,7 @@
       },
       // Likes: one document per reader per post; the count comes from Firestore's count query.
       likes: async (post) => {
-        const r = await fetch(`${base}:runAggregationQuery`, { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ structuredAggregationQuery: {
+        const r = await fetch(`${base}:runAggregationQuery`, { method: 'POST', cache: 'no-store', headers: await withCheck({ 'Content-Type': 'application/json' }), body: JSON.stringify({ structuredAggregationQuery: {
           structuredQuery: { from: [{ collectionId: 'likes' }], where: { fieldFilter: { field: { fieldPath: 'post' }, op: 'EQUAL', value: { stringValue: post } } } },
           aggregations: [{ alias: 'n', count: {} }],
         } }) });
@@ -82,7 +107,7 @@
       },
       like: async (post) => {
         const a = await token();
-        const r = await fetch(`${base}:commit`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }, body: JSON.stringify({ writes: [{
+        const r = await fetch(`${base}:commit`, { method: 'POST', headers: await withCheck({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + a.id }), body: JSON.stringify({ writes: [{
           update: { name: `projects/${cfg.projectId}/databases/(default)/documents/likes/${a.uid}_${post}`, fields: { uid: { stringValue: a.uid }, post: { stringValue: post } } },
           updateTransforms: [{ fieldPath: 't', setToServerValue: 'REQUEST_TIME' }],
           currentDocument: { exists: false },
@@ -91,7 +116,7 @@
       },
       remove: async (id) => {
         const a = await token();
-        const r = await fetch(`${base}/stickers/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + a.id } });
+        const r = await fetch(`${base}/stickers/${id}`, { method: 'DELETE', headers: await withCheck({ Authorization: 'Bearer ' + a.id }) });
         if (!r.ok) throw new Error('delete');
       },
     };
@@ -130,7 +155,7 @@
     // The dock: minimised to a small round button that stays in view; it opens on hover or tap.
     const dock = document.createElement('div');
     dock.className = 'sticker-dock';
-    dock.innerHTML = `<button type="button" class="sticker-toggle" aria-expanded="false" aria-label="Leave a sticker">${KINDS.spark.svg}<span class="sticker-count"></span></button><div class="sticker-tray"><p class="micro">Leave a sticker</p><div class="sticker-kinds">${Object.entries(KINDS).map(([k, v]) => `<button type="button" data-kind="${k}" style="--c:${v.color}" aria-label="${v.label}">${v.svg}</button>`).join('')}</div><label class="sticker-name"><span class="sr-only">Your name, optional</span><input type="text" maxlength="10" autocomplete="nickname" spellcheck="false" placeholder="Your name (optional)"/></label><p class="sticker-note micro muted" aria-live="polite">Pick one, then tap anywhere on the post.</p></div>`;
+    dock.innerHTML = `<button type="button" class="sticker-toggle" aria-expanded="false" aria-label="Leave a sticker">${KINDS.spark.svg}<span class="sticker-count"></span></button><div class="sticker-tray"><p class="micro">Leave a sticker</p><div class="sticker-kinds">${Object.entries(KINDS).map(([k, v]) => `<button type="button" data-kind="${k}" style="--c:${v.color}" aria-label="${v.label}">${v.svg}</button>`).join('')}</div><label class="sticker-name"><span class="sr-only">Your name, optional</span><input type="text" maxlength="10" autocomplete="nickname" spellcheck="false" placeholder="Your name (optional)"/></label><p class="sticker-note micro muted" aria-live="polite">Pick one, then tap anywhere on the post.</p>${cfg.recaptcha ? '<p class="sticker-legal">Protected by reCAPTCHA · <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Privacy</a> · <a href="https://policies.google.com/terms" target="_blank" rel="noopener">Terms</a></p>' : ''}</div>`;
     document.body.append(dock);
     const toggle = dock.querySelector('.sticker-toggle'), nameField = dock.querySelector('.sticker-name input');
     // A name is optional: one word of letters (any script), at most ten.
