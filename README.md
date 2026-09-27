@@ -89,6 +89,16 @@ On every post a small round sticker button follows the reader down the page; hov
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // One like per reader per post; likes cannot be changed or removed.
+    match /likes/{id} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid', 'post', 't'])
+        && request.resource.data.post is string && request.resource.data.post.matches('[0-9]{1,30}')
+        && id == request.auth.uid + '_' + request.resource.data.post
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.t == request.time;
+    }
     match /stickers/{id} {
       allow read: if true;
       allow create, update: if request.auth != null
