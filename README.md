@@ -80,3 +80,30 @@ The supplied references informed different aspects of the design; their assets a
 Blogger implementation references: [widget tags](https://support.google.com/blogger/answer/46995?hl=en), [data tags](https://support.google.com/blogger/answer/47270?hl=en), and [page elements](https://support.google.com/blogger/answer/46888?hl=en). Native comment includables were adapted from the user-supplied existing theme.
 
 Local XML validation is not Blogger’s server-side import validation. See `docs/validation.md` for the actual checks completed and remaining platform checks.
+
+## Reader stickers
+
+Readers can leave up to three small line-drawn stickers on the opening drawing; everyone sees them (`src/stickers.js`). They are stored in the Firebase project `blog-stickers` (Firestore, anonymous sign-in) through its REST API, so no Firebase library is loaded. The web config in `scripts/build.py` is public by design; these Firestore rules do the guarding:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /stickers/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && id.matches(request.auth.uid + '_[0-2]')
+        && request.resource.data.keys().hasOnly(['uid', 'kind', 'x', 'y', 't'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.kind in ['star', 'heart', 'spark', 'moon', 'leaf', 'eye']
+        && request.resource.data.x is number && request.resource.data.x >= 0 && request.resource.data.x <= 1
+        && request.resource.data.y is number && request.resource.data.y >= 0 && request.resource.data.y <= 1
+        && request.resource.data.t == request.time
+        && (resource == null || request.time > resource.data.t + duration.value(30, 's'));
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+  }
+}
+```
+
+To clear stickers, delete documents in Firebase console → Firestore → `stickers`.

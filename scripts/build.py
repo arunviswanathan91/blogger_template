@@ -96,6 +96,8 @@ AI_HEAD = AI_NOTICE + '<meta name="robots" content="noai, noimageai"/><meta name
     'author': {'@type': 'Person', 'name': 'Arun Viswanathan'}, 'copyrightHolder': {'@type': 'Person', 'name': 'Arun Viswanathan'},
     'copyrightYear': '2009', 'license': POLICY,
     'usageInfo': 'No permission is granted to use this content to train or fine-tune AI or machine-learning models. When quoting or referring to a post, credit Arun Viswanathan and TheYellow Bottle and link to the original post.'}, ensure_ascii=False) + '</script>'
+# Shared stickers on the opening drawing: a Firebase web config (public by design; the Firestore rules do the guarding).
+STICKERS = {'apiKey': 'AIzaSyCN8m9V6oFQoj6dUywEAqCy7HLBssTcEeE', 'projectId': 'blog-stickers'}
 RIGHTS_JS = 'window.TYB_RIGHTS = ' + json.dumps(RIGHTS, ensure_ascii=False) + ';\n'
 CATEGORY_JS = RIGHTS_JS + 'window.TYB_CATEGORIES = ' + json.dumps({key: {'ml': ml, 'labels': CATEGORY_LABELS[key], 'title': CATEGORY_TITLES[key], 'url': '/search/label/' + path} for key, ml, path in CATEGORIES}, ensure_ascii=False) + ';\n'
 PORTRAIT_JS = 'window.TYB_PORTRAIT = ' + json.dumps(json.loads((SRC / 'portrait.json').read_text()), separators=(',', ':')) + ';\n'
@@ -133,7 +135,7 @@ def preview():
     body = fill(read('frame.html'), values)
     return f'''<!doctype html>
 <html lang="en"><head><meta charset="utf-8"/><script>{THEME_INIT_JS}</script><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="description" content="The Yellow Bottle — a white and black editorial design preview. All article content is illustrative."/><title>The Yellow Bottle — Black &amp; White / Preview</title>{AI_HEAD}{FONT_HEAD}<style>{read('theme.css')}</style></head>
-<body data-preview="true" class="is-index is-home">{body}<script>{read('sample-posts.js')}</script><script>{CATEGORY_JS}{PORTRAIT_JS}{read('theme.js')}</script><script>{read('figures.js')}</script><script>{read('preview.js')}</script></body></html>'''
+<body data-preview="true" class="is-index is-home">{body}<script>{read('sample-posts.js')}</script><script>{CATEGORY_JS}{PORTRAIT_JS}{read('theme.js')}</script><script>{read('figures.js')}</script><script>window.TYB_STICKERS = {{"demo": true}};\n{read('stickers.js')}</script><script>{read('preview.js')}</script></body></html>'''
 
 def blogger():
     values = links(False)
@@ -152,6 +154,8 @@ def blogger():
 </head><body expr:class='data:view.isSingleItem ? "is-reader" : (data:view.isHomepage ? "is-index is-home" : "is-index")'>{body}<script type='text/javascript'>//<![CDATA[
 {CATEGORY_JS}{PORTRAIT_JS}{read('theme.js')}
 {read('figures.js')}
+window.TYB_STICKERS = {json.dumps(STICKERS)};
+{read('stickers.js')}
 //]]></script></body></html>'''
 
 if __name__ == '__main__':
