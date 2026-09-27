@@ -305,7 +305,7 @@
           const before = Math.floor(f.zt / 26);
           f.zt += dt;
           if (Math.floor(f.zt / 26) !== before) aim(f);
-          f.zoom = 1 + 2.4 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
+          f.zoom = 1 + 1.2 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
         }
         again = true;
         // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
