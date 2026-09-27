@@ -1649,7 +1649,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     } },
   };
   const FIGURES = {
-    opening: ['moving15', 'crown', 'lattice', 'orbit'],
+    opening: ['moving15', 'crown', 'circles14', 'lattice', 'arcs8', 'circles10', 'orbit', 'segments8', 'circles12', 'arcs7', 'circles9'],
     poetry: ['circles9', 'circles14'],
     stories: ['circles12', 'arcs7'],
     essays: ['segments4', 'segments8'],
@@ -1815,14 +1815,15 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
           const box = f.el.getBoundingClientRect();
           goal = { x: max(-1, min(1, (pointer.x - box.left - box.width / 2) / (box.width * .75))), y: max(-1, min(1, (pointer.y - box.top - box.height / 2) / (box.height * .75))) };
         }
-        const calm = 1 / (f.zoom || 1) ** 2;
+        // The zooming opening ignores the pointer: its motion is the zoom alone.
+        const calm = f.zooms ? 0 : 1 / (f.zoom || 1) ** 2;
         f.m = { x: f.m.x + (goal.x * calm - f.m.x) * .05, y: f.m.y + (goal.y * calm - f.m.y) * .05 };
         if (f.zooms) {
           // The opening drifts all the way in toward a detail and back out, about every 26 seconds, each time to a new spot.
           const before = Math.floor(f.zt / 26);
           f.zt += dt;
           if (Math.floor(f.zt / 26) !== before) aim(f);
-          f.zoom = 1 + 1.2 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
+          f.zoom = 1 + .8 * (.5 - .5 * Math.cos(TAU * f.zt / 26));
         }
         again = true;
         // Drifting alone needs no more than ~30 frames a second; the draw-in and morph stay at full rate.
@@ -1866,7 +1867,7 @@ window.TYB_PORTRAIT = {"w":68,"h":110,"dark":"998998887799ab9768987898789889aabb
     const f = { el, canvas, ctx: canvas.getContext('2d'), forms, palette: el.dataset.palette || el.dataset.figure, ox: Number(el.dataset.ox) || .5, index: Number(el.dataset.start) || 0, previous: null, morph: 1, drawn: 0, t: Math.random() * 6, m: { x: 0, y: 0 }, w: 0, h: 0, dpr: 1, visible: false, dirty: true };
     if (el.dataset.figure === 'opening' && motionOK) { f.zooms = true; f.zt = 0; aim(f); }
     if (el.classList.contains('hero-backdrop')) {
-      f.lite = .6;
+      f.lite = 1;
       const hero = el.closest('.hero');
       if (hero && CanvasRenderingContext2D.prototype.roundRect) {
         const panes = hero.querySelectorAll('.hero-title, .hero-topline .micro, .hero-description, .hero-aside, .hero-motto, .round-link, .panel > .panel-tab');
